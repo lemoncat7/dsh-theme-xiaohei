@@ -14,6 +14,7 @@
 - 所有角色位图随插件内联并一次预载，运行时只切换透明度，不发起图片请求；角色本体不漂浮、不缩放、不抖动。
 - 聚能、回答、工具、等待、完成和错误分别使用轻量局部光效，离开对应状态后动画立即停止。
 - 环境使用独立妖灵浮光，动画仅改变 `transform` 与 `opacity`。
+- 左侧栏使用分层半透明材质重新组织品牌区、主操作、工作区与底部工具，不新增无功能入口。
 - 支持减少动态、增强对比度、强制颜色和打印模式降级。
 - 插件加载后自动启用 `xiaohei-night`，卸载后由 DSH 主题服务恢复系统主题。
 
@@ -24,7 +25,7 @@
 安装本地构建包：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.3.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.5.tgz
 ```
 
 卸载：

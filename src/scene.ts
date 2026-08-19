@@ -45,6 +45,133 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   pointer-events: none;
 }
 
+/*
+ * DSH keeps the sidebar structure and behavior. Xiaohei only strengthens its
+ * native hierarchy, focus treatment, and translucent control material.
+ */
+#root [data-slot='sidebar'] > div {
+  background:
+    radial-gradient(130% 48% at 12% 90%, rgb(51 138 126 / 18%) 0%, transparent 68%),
+    linear-gradient(180deg, rgb(5 18 22 / 70%) 0%, rgb(6 20 23 / 62%) 58%, rgb(6 22 24 / 78%) 100%) !important;
+  border-right: 1px solid rgb(139 229 213 / 14%);
+  box-shadow: inset -1px 0 rgb(255 255 255 / 2%), 16px 0 36px rgb(1 9 10 / 14%);
+  backdrop-filter: blur(14px) saturate(108%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
+  min-height: 62px;
+  padding-inline: 14px;
+  border-bottom: 1px solid rgb(139 229 213 / 8%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child {
+  min-width: 30px;
+  min-height: 30px;
+  border-radius: 8px;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child:hover {
+  color: #E7F3F0;
+  background: rgb(101 209 190 / 10%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'] {
+  width: auto;
+  min-height: 40px;
+  margin: 10px 12px 12px;
+  padding-inline: 14px;
+  justify-content: flex-start;
+  gap: 10px;
+  border: 1px solid rgb(101 209 190 / 22%);
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgb(101 209 190 / 15%), rgb(101 209 190 / 9%)) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 5%);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']:hover {
+  border-color: rgb(123 224 206 / 36%);
+  background: linear-gradient(180deg, rgb(101 209 190 / 21%), rgb(101 209 190 / 13%)) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 7%), 0 6px 18px rgb(1 9 10 / 12%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div > div:first-child {
+  min-height: 38px;
+  margin-inline: 4px;
+  padding-inline: 8px;
+  border-radius: 9px;
+  background: rgb(3 14 17 / 18%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div > div:first-child > span:first-child {
+  color: #A9C3BD;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] button {
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 7px;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] button:hover {
+  color: #E7F3F0;
+  background: rgb(101 209 190 / 10%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='tree'] {
+  padding-top: 6px;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='tree'] > div:only-child:not([role]) {
+  margin: 2px 4px 0;
+  padding: 16px 14px 17px;
+  border: 1px solid rgb(139 229 213 / 9%);
+  border-radius: 11px;
+  color: #91AAA5;
+  background:
+    radial-gradient(circle at 88% 22%, rgb(101 209 190 / 10%), transparent 34%),
+    rgb(3 14 17 / 22%);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:last-child {
+  gap: 2px;
+  margin: 8px 12px 12px;
+  padding: 4px;
+  border: 1px solid rgb(139 229 213 / 10%);
+  border-radius: 12px;
+  background: rgb(3 14 17 / 34%);
+  box-shadow: inset 0 1px rgb(255 255 255 / 3%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.footer.action'] > button,
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.settings'] > button {
+  min-height: 36px;
+  padding-inline: 10px;
+  border-radius: 8px;
+  color: #B9D0CB;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.footer.action'] > button:hover,
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.settings'] > button:hover,
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.footer.action'] > button[aria-expanded='true'],
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.settings'] > button[aria-expanded='true'] {
+  color: #E7F3F0;
+  background: rgb(101 209 190 / 10%);
+}
+
+#root [data-slot='sidebar'] button:focus-visible {
+  outline: 2px solid #78DDCB;
+  outline-offset: 2px;
+}
+
 .xiaohei-scene__keyart {
   inset: -2.5%;
   width: 105%;
@@ -502,6 +629,13 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
   html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx > span {
     animation: none;
     will-change: auto;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  #root [data-slot='sidebar'] > div {
+    background: #07181B !important;
+    backdrop-filter: none;
   }
 }
 
