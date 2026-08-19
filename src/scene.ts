@@ -68,9 +68,9 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   right: -16vmax;
   bottom: -23vmax;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(117 228 208 / 31%) 0%, rgb(58 161 151 / 13%) 38%, transparent 70%);
+  background: radial-gradient(circle, rgb(117 228 208 / 42%) 0%, rgb(58 161 151 / 19%) 38%, transparent 70%);
   mix-blend-mode: screen;
-  opacity: 0.62;
+  opacity: 0.78;
   transform: scale(0.96);
   will-change: transform, opacity;
   animation: xiaohei-scene-aura 7.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
@@ -111,7 +111,26 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   width: clamp(12rem, 22vw, 21rem);
   aspect-ratio: 1;
   overflow: hidden;
-  filter: drop-shadow(0 1.25rem 2.8rem rgb(1 9 10 / 48%));
+  isolation: isolate;
+  filter:
+    drop-shadow(0 0.6rem 1.45rem rgb(83 218 193 / 35%))
+    drop-shadow(0 1.25rem 2.6rem rgb(1 9 10 / 30%));
+}
+
+.xiaohei-scene__mascot::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 4%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 55%,
+    rgb(150 255 232 / 48%) 0%,
+    rgb(74 203 181 / 32%) 37%,
+    rgb(29 123 118 / 12%) 56%,
+    transparent 73%
+  );
+  opacity: 0.94;
 }
 
 .xiaohei-scene__mascot-sheet {
@@ -125,6 +144,8 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   object-fit: fill;
   transform: translate3d(0, 0, 0);
   opacity: 0;
+  z-index: 1;
+  filter: brightness(1.42) contrast(0.76) saturate(1.12);
 }
 
 .xiaohei-scene__mascot-sheet--open {
@@ -147,6 +168,8 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   max-height: none;
   object-fit: fill;
   opacity: 0;
+  z-index: 1;
+  filter: brightness(1.42) contrast(0.76) saturate(1.12);
   transition: opacity 120ms ease-out;
 }
 
@@ -177,6 +200,7 @@ html[data-xiaohei-state='error'] .xiaohei-scene__mascot-state--error {
 
 .xiaohei-scene__energy-fx {
   inset: 0;
+  z-index: 2;
   opacity: 0;
   transition: opacity 120ms ease-out;
 }
@@ -190,6 +214,7 @@ html[data-xiaohei-state='error'] .xiaohei-scene__mascot-state--error {
 
 .xiaohei-scene__state-fx {
   inset: 0;
+  z-index: 2;
   opacity: 0;
   transition: opacity 120ms ease-out;
 }

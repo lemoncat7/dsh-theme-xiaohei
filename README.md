@@ -24,7 +24,7 @@
 安装本地构建包：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.2.0-alpha.1.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.2.0-alpha.4.tgz
 ```
 
 卸载：
