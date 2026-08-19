@@ -103,9 +103,6 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   aspect-ratio: 1;
   overflow: hidden;
   filter: drop-shadow(0 1.25rem 2.8rem rgb(1 9 10 / 48%));
-  transform-origin: 50% 88%;
-  will-change: transform;
-  animation: xiaohei-mascot-breathe 3.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .xiaohei-scene__mascot-sheet {
@@ -119,12 +116,15 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   object-fit: fill;
   transform: translate3d(0, 0, 0);
   opacity: 0;
-  will-change: opacity;
-  transition: opacity 140ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.xiaohei-scene__mascot-sheet--active {
+.xiaohei-scene__mascot-sheet--open {
   opacity: 1;
+}
+
+.xiaohei-scene__mascot-sheet--blink {
+  will-change: opacity;
+  animation: xiaohei-mascot-blink 5.2s step-end infinite;
 }
 
 @keyframes xiaohei-scene-aura {
@@ -147,9 +147,10 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   44% { transform: translate3d(0.45rem, -1.2rem, 0) scale(0.96); opacity: 0.7; }
 }
 
-@keyframes xiaohei-mascot-breathe {
-  0%, 100% { transform: translate3d(0, 0.15rem, 0) scale(0.992); }
-  50% { transform: translate3d(0, -0.2rem, 0) scale(1.008); }
+@keyframes xiaohei-mascot-blink {
+  0%, 91.9% { opacity: 0; }
+  92%, 94.5% { opacity: 1; }
+  94.6%, 100% { opacity: 0; }
 }
 
 @media (max-width: 768px) {
@@ -172,12 +173,10 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 @media (prefers-reduced-motion: reduce) {
   .xiaohei-scene__aura,
   .xiaohei-scene__spirit,
-  .xiaohei-scene__mascot {
+  .xiaohei-scene__mascot-sheet--blink {
     animation: none;
     will-change: auto;
   }
-
-  .xiaohei-scene__mascot-sheet { transition: none; }
 
   .xiaohei-scene__spirit { display: none; }
 }
@@ -207,8 +206,6 @@ const PARTS = [
 /** Number of top-level decorative parts installed into the ambient layer. */
 export const XIAOHEI_SCENE_PART_COUNT = PARTS.length
 
-const IDLE_FRAME_DURATIONS_MS = [500, 500, 500, 500, 500, 450, 130, 420] as const
-
 /**
  * Install the generated scene after plugin boot becomes idle. The theme tokens
  * apply immediately, while image decoding never extends DSH's loading screen.
@@ -220,7 +217,6 @@ export function installXiaoheiScene(
 
   let disposed = false
   let removeMountedScene = (): void => {}
-  let cancelMascotMotion = (): void => {}
 
   const mount = (): void => {
     if (disposed) return
@@ -250,35 +246,11 @@ export function installXiaoheiScene(
       if (className === 'xiaohei-scene__mascot') {
         const mascot = doc.createElement('div')
         mascot.className = className
-        const sheets = [createIdleSheet(doc, 0, true), createIdleSheet(doc, 1, false)] as const
-        mascot.append(...sheets)
+        mascot.append(
+          createIdleSheet(doc, 7, 'xiaohei-scene__mascot-sheet--open'),
+          createIdleSheet(doc, 6, 'xiaohei-scene__mascot-sheet--blink'),
+        )
         layer.append(mascot)
-
-        let currentFrame = 0
-        let visibleSheet = sheets[0]
-        let hiddenSheet = sheets[1]
-        let frameTimer: number | undefined
-
-        const advanceFrame = (): void => {
-          const nextFrame = (currentFrame + 1) % IDLE_FRAME_DURATIONS_MS.length
-          setIdleFrame(hiddenSheet, nextFrame)
-          hiddenSheet.classList.add('xiaohei-scene__mascot-sheet--active')
-          visibleSheet.classList.remove('xiaohei-scene__mascot-sheet--active')
-          ;[visibleSheet, hiddenSheet] = [hiddenSheet, visibleSheet]
-          currentFrame = nextFrame
-          frameTimer = win?.setTimeout(advanceFrame, IDLE_FRAME_DURATIONS_MS[currentFrame])
-        }
-
-        const reducesMotion = win !== null
-          && typeof win.matchMedia === 'function'
-          && win.matchMedia('(prefers-reduced-motion: reduce)').matches
-        if (win !== null && !reducesMotion) {
-          frameTimer = win.setTimeout(advanceFrame, IDLE_FRAME_DURATIONS_MS[0])
-        }
-
-        cancelMascotMotion = (): void => {
-          if (frameTimer !== undefined) win?.clearTimeout(frameTimer)
-        }
         continue
       }
 
@@ -289,7 +261,6 @@ export function installXiaoheiScene(
 
     doc.body.prepend(layer)
     removeMountedScene = () => {
-      cancelMascotMotion()
       layer.remove()
       style.remove()
     }
@@ -319,9 +290,9 @@ function cssEscape(value: string): string {
   return value.replaceAll('/', '\\/')
 }
 
-function createIdleSheet(doc: Document, frame: number, active: boolean): HTMLImageElement {
+function createIdleSheet(doc: Document, frame: number, modifier: string): HTMLImageElement {
   const sheet = doc.createElement('img')
-  sheet.className = `xiaohei-scene__mascot-sheet${active ? ' xiaohei-scene__mascot-sheet--active' : ''}`
+  sheet.className = `xiaohei-scene__mascot-sheet ${modifier}`
   sheet.alt = ''
   sheet.decoding = 'async'
   sheet.fetchPriority = 'low'
