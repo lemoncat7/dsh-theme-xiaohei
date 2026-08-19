@@ -6,6 +6,7 @@ import {
   installXiaoheiScene,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
+import { XIAOHEI_KEY_ART } from '../lib/generated-keyart.js'
 import { XIAOHEI_NIGHT_THEME, XIAOHEI_NIGHT_THEME_ID } from '../lib/theme.js'
 
 test('registers and activates Xiaohei Night exactly once', () => {
@@ -53,9 +54,13 @@ test('registers and activates Xiaohei Night exactly once', () => {
   ])
 })
 
-test('scene uses generated key art and compositor-safe motion', () => {
+test('scene uses asynchronously decoded key art and compositor-safe motion', () => {
   assert.equal(XIAOHEI_SCENE_PART_COUNT, 6)
-  assert.match(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
+  assert.match(XIAOHEI_KEY_ART, /^data:image\/webp;base64,/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
+  assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
+  assert.match(installXiaoheiScene.toString(), /decoding = ['"]async['"]/)
+  assert.match(installXiaoheiScene.toString(), /fetchPriority = ['"]low['"]/)
   assert.match(XIAOHEI_SCENE_CSS, /pointer-events:\s*none/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart/)
   assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion:\s*reduce/)

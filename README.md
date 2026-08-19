@@ -19,7 +19,7 @@ Agent 状态反馈将在主题基线确认后逐项加入。
 安装本地构建包：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.1.0-alpha.1.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.1.0-alpha.2.tgz
 ```
 
 卸载：

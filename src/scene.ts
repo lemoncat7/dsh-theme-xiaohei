@@ -30,7 +30,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   background: #081014;
 }
 
-#${cssEscape(XIAOHEI_SCENE_LAYER_ID)} span {
+#${cssEscape(XIAOHEI_SCENE_LAYER_ID)} > * {
   position: absolute;
   display: block;
   pointer-events: none;
@@ -38,14 +38,12 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 
 .xiaohei-scene__keyart {
   inset: -2.5%;
-  background-image: url("${XIAOHEI_KEY_ART}");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  opacity: 0.88;
-  transform: scale(1.025);
-  will-change: transform, opacity;
-  animation: xiaohei-scene-breathe 14s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
+  width: 105%;
+  height: 105%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.98;
 }
 
 .xiaohei-scene__veil {
@@ -98,11 +96,6 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   animation: xiaohei-spirit-three 7.7s cubic-bezier(0.37, 0, 0.63, 1) -4.1s infinite;
 }
 
-@keyframes xiaohei-scene-breathe {
-  from { transform: scale(1.025) translate3d(0, 0, 0); opacity: 0.84; }
-  to { transform: scale(1.045) translate3d(-0.3%, -0.2%, 0); opacity: 0.93; }
-}
-
 @keyframes xiaohei-scene-aura {
   from { transform: scale(0.94); opacity: 0.28; }
   to { transform: scale(1.04); opacity: 0.52; }
@@ -125,8 +118,8 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 
 @media (max-width: 768px) {
   .xiaohei-scene__keyart {
-    background-position: 68% center;
-    opacity: 0.68;
+    object-position: 68% center;
+    opacity: 0.82;
   }
 
   .xiaohei-scene__veil {
@@ -135,7 +128,6 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .xiaohei-scene__keyart,
   .xiaohei-scene__aura,
   .xiaohei-scene__spirit {
     animation: none;
@@ -169,35 +161,71 @@ const PARTS = [
 /** Number of top-level decorative parts installed into the ambient layer. */
 export const XIAOHEI_SCENE_PART_COUNT = PARTS.length
 
-/** Install the generated scene and return an exact cleanup. */
+/**
+ * Install the generated scene after plugin boot becomes idle. The theme tokens
+ * apply immediately, while image decoding never extends DSH's loading screen.
+ */
 export function installXiaoheiScene(
   doc: Document | undefined = typeof document === 'undefined' ? undefined : document,
 ): () => void {
   if (doc === undefined) return () => {}
 
-  doc.getElementById(XIAOHEI_SCENE_STYLE_ID)?.remove()
-  doc.getElementById(XIAOHEI_SCENE_LAYER_ID)?.remove()
+  let disposed = false
+  let removeMountedScene = (): void => {}
 
-  const style = doc.createElement('style')
-  style.id = XIAOHEI_SCENE_STYLE_ID
-  style.textContent = XIAOHEI_SCENE_CSS
-  doc.head.append(style)
+  const mount = (): void => {
+    if (disposed) return
 
-  const layer = doc.createElement('div')
-  layer.id = XIAOHEI_SCENE_LAYER_ID
-  layer.setAttribute('aria-hidden', 'true')
-  layer.setAttribute('data-xiaohei-scene', '')
-  for (const className of PARTS) {
-    const part = doc.createElement('span')
-    part.className = className
-    layer.append(part)
+    doc.getElementById(XIAOHEI_SCENE_STYLE_ID)?.remove()
+    doc.getElementById(XIAOHEI_SCENE_LAYER_ID)?.remove()
+
+    const style = doc.createElement('style')
+    style.id = XIAOHEI_SCENE_STYLE_ID
+    style.textContent = XIAOHEI_SCENE_CSS
+    doc.head.append(style)
+
+    const layer = doc.createElement('div')
+    layer.id = XIAOHEI_SCENE_LAYER_ID
+    layer.setAttribute('aria-hidden', 'true')
+    layer.setAttribute('data-xiaohei-scene', '')
+
+    const keyArt = doc.createElement('img')
+    keyArt.className = PARTS[0]
+    keyArt.alt = ''
+    keyArt.decoding = 'async'
+    keyArt.fetchPriority = 'low'
+    keyArt.src = XIAOHEI_KEY_ART
+    layer.append(keyArt)
+
+    for (const className of PARTS.slice(1)) {
+      const part = doc.createElement('span')
+      part.className = className
+      layer.append(part)
+    }
+
+    doc.body.prepend(layer)
+    removeMountedScene = () => {
+      layer.remove()
+      style.remove()
+    }
   }
 
-  doc.body.prepend(layer)
+  const win = doc.defaultView
+  let cancelSchedule = (): void => {}
+  if (win !== null && typeof win.requestIdleCallback === 'function') {
+    const idleId = win.requestIdleCallback(mount, { timeout: 800 })
+    cancelSchedule = () => win.cancelIdleCallback(idleId)
+  } else if (win !== null) {
+    const timeoutId = win.setTimeout(mount, 0)
+    cancelSchedule = () => win.clearTimeout(timeoutId)
+  } else {
+    mount()
+  }
 
   return () => {
-    layer.remove()
-    style.remove()
+    disposed = true
+    cancelSchedule()
+    removeMountedScene()
   }
 }
 
