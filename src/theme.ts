@@ -11,7 +11,7 @@ export const XIAOHEI_NIGHT_THEME = {
   id: XIAOHEI_NIGHT_THEME_ID,
   colorScheme: 'dark',
   tokens: {
-    '--dsw-alias-bg-base': 'rgb(8 16 20 / 42%)',
+    '--dsw-alias-bg-base': 'rgb(8 20 24 / 14%)',
     '--dsw-alias-bg-layer-1': 'rgb(11 24 27 / 70%)',
     '--dsw-alias-bg-layer-2': 'rgb(15 32 34 / 84%)',
     '--dsw-alias-bg-layer-3': 'rgb(20 42 42 / 92%)',
@@ -94,7 +94,7 @@ export const XIAOHEI_NIGHT_THEME = {
     '--dsw-specific-login-input': 'rgb(11 24 27 / 92%)',
     '--dsw-specific-menu': '#142A2A',
     '--dsw-specific-selector': '#193333',
-    '--dsw-specific-sidebar-fill': 'rgb(7 17 20 / 72%)',
+    '--dsw-specific-sidebar-fill': 'rgb(7 20 24 / 50%)',
     '--dsw-specific-sidebar-nav-item-active-accent': '#244A45',
     '--dsw-specific-sidebar-nav-item-active': '#193333',
     '--dsw-specific-sidebar-nav-item-hover': '#0F2022',

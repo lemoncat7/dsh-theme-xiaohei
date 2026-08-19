@@ -19,7 +19,7 @@ export const XIAOHEI_SCENE_LAYER_ID = 'dsh-theme-xiaohei/scene-layer'
  */
 export const XIAOHEI_SCENE_CSS = `
 body {
-  background: #081014;
+  background: #19424A;
 }
 
 body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
@@ -36,7 +36,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   isolation: isolate;
   pointer-events: none;
   user-select: none;
-  background: #081014;
+  background: #19424A;
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} > * {
@@ -53,13 +53,14 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   object-fit: cover;
   object-position: center;
   opacity: 0.98;
+  filter: brightness(1.82) contrast(0.9) saturate(1.12);
 }
 
 .xiaohei-scene__veil {
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(5 12 15 / 24%) 0%, rgb(5 12 15 / 7%) 44%, transparent 72%),
-    linear-gradient(180deg, rgb(4 10 13 / 7%) 0%, transparent 58%, rgb(4 10 13 / 18%) 100%);
+    radial-gradient(ellipse at 58% 48%, rgb(3 10 12 / 12%) 0%, rgb(3 10 12 / 5%) 34%, transparent 68%),
+    linear-gradient(180deg, transparent 68%, rgb(3 10 12 / 5%) 100%);
 }
 
 .xiaohei-scene__aura {
@@ -125,10 +126,10 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   border-radius: 50%;
   background: radial-gradient(
     circle at 50% 55%,
-    rgb(150 255 232 / 48%) 0%,
-    rgb(74 203 181 / 32%) 37%,
-    rgb(29 123 118 / 12%) 56%,
-    transparent 73%
+    rgb(190 255 242 / 68%) 0%,
+    rgb(90 228 202 / 48%) 38%,
+    rgb(34 144 132 / 18%) 58%,
+    transparent 74%
   );
   opacity: 0.94;
 }
@@ -145,7 +146,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   transform: translate3d(0, 0, 0);
   opacity: 0;
   z-index: 1;
-  filter: brightness(1.42) contrast(0.76) saturate(1.12);
+  filter: brightness(1.9) contrast(0.58) saturate(1.12);
 }
 
 .xiaohei-scene__mascot-sheet--open {
@@ -169,7 +170,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   object-fit: fill;
   opacity: 0;
   z-index: 1;
-  filter: brightness(1.42) contrast(0.76) saturate(1.12);
+  filter: brightness(1.9) contrast(0.58) saturate(1.12);
   transition: opacity 120ms ease-out;
 }
 
