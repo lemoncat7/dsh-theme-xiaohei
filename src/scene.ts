@@ -1,4 +1,4 @@
-import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART, XIAOHEI_THINKING } from './generated-keyart.js'
+import { XIAOHEI_ENERGY, XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from './generated-keyart.js'
 
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
 export const XIAOHEI_SCENE_STYLE_ID = 'dsh-theme-xiaohei/scene-style'
@@ -128,7 +128,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   animation: xiaohei-mascot-blink 5.2s step-end infinite;
 }
 
-.xiaohei-scene__mascot-thinking {
+.xiaohei-scene__mascot-energy {
   position: absolute;
   display: block;
   inset: 0;
@@ -141,6 +141,73 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   transition: opacity 120ms ease-out;
 }
 
+.xiaohei-scene__energy-fx,
+.xiaohei-scene__energy-fx > span {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.xiaohei-scene__energy-fx {
+  inset: 0;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.xiaohei-scene__energy-aura {
+  left: 33%;
+  top: 52%;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+
+.xiaohei-scene__energy-aura--outer {
+  width: 28%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(139 255 230 / 58%) 0%, rgb(72 238 208 / 28%) 35%, transparent 72%);
+}
+
+.xiaohei-scene__energy-aura--inner {
+  width: 18%;
+  aspect-ratio: 1;
+  border: 1px solid rgb(161 255 236 / 72%);
+  box-shadow: 0 0 0.8rem rgb(85 255 220 / 72%), inset 0 0 0.7rem rgb(105 255 226 / 52%);
+}
+
+.xiaohei-scene__energy-mote {
+  left: 33%;
+  top: 52%;
+  width: 0.34rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #A8FFEB;
+  box-shadow: 0 0 0.55rem rgb(91 255 219 / 92%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-aura--outer {
+  animation: xiaohei-energy-outer 1.5s ease-in-out infinite;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-aura--inner {
+  animation: xiaohei-energy-inner 1.5s ease-out infinite;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-mote--one {
+  animation: xiaohei-energy-mote-one 1.35s ease-in infinite;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-mote--two {
+  animation: xiaohei-energy-mote-two 1.35s ease-in -0.45s infinite;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-mote--three {
+  animation: xiaohei-energy-mote-three 1.35s ease-in -0.9s infinite;
+}
+
 html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-sheet--open {
   opacity: 0;
 }
@@ -150,7 +217,8 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-sheet--blink {
   animation: none;
 }
 
-html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-thinking {
+html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-energy,
+html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
   opacity: 1;
 }
 
@@ -180,6 +248,35 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-thinking {
   94.6%, 100% { opacity: 0; }
 }
 
+@keyframes xiaohei-energy-outer {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.82); opacity: 0.42; }
+  50% { transform: translate(-50%, -50%) scale(1.14); opacity: 0.9; }
+}
+
+@keyframes xiaohei-energy-inner {
+  from { transform: translate(-50%, -50%) scale(1.35); opacity: 0; }
+  34% { opacity: 0.88; }
+  to { transform: translate(-50%, -50%) scale(0.72); opacity: 0; }
+}
+
+@keyframes xiaohei-energy-mote-one {
+  from { transform: translate3d(-2.8rem, -2.1rem, 0) scale(0.55); opacity: 0; }
+  24% { opacity: 0.95; }
+  to { transform: translate3d(-0.1rem, -0.1rem, 0) scale(0.18); opacity: 0; }
+}
+
+@keyframes xiaohei-energy-mote-two {
+  from { transform: translate3d(3.1rem, -1.45rem, 0) scale(0.48); opacity: 0; }
+  24% { opacity: 0.86; }
+  to { transform: translate3d(0.1rem, -0.05rem, 0) scale(0.18); opacity: 0; }
+}
+
+@keyframes xiaohei-energy-mote-three {
+  from { transform: translate3d(-2.35rem, 2.55rem, 0) scale(0.52); opacity: 0; }
+  24% { opacity: 0.9; }
+  to { transform: translate3d(-0.08rem, 0.08rem, 0) scale(0.18); opacity: 0; }
+}
+
 @media (max-width: 768px) {
   .xiaohei-scene__keyart {
     object-position: 68% center;
@@ -200,12 +297,19 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-thinking {
 @media (prefers-reduced-motion: reduce) {
   .xiaohei-scene__aura,
   .xiaohei-scene__spirit,
-  .xiaohei-scene__mascot-sheet--blink {
+  .xiaohei-scene__mascot-sheet--blink,
+  .xiaohei-scene__energy-fx > span {
     animation: none;
     will-change: auto;
   }
 
   .xiaohei-scene__spirit { display: none; }
+  .xiaohei-scene__energy-mote { display: none; }
+
+  html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx > span {
+    animation: none;
+    will-change: auto;
+  }
 }
 
 @media (prefers-contrast: more) {
@@ -276,7 +380,8 @@ export function installXiaoheiScene(
         mascot.append(
           createIdleSheet(doc, 7, 'xiaohei-scene__mascot-sheet--open'),
           createIdleSheet(doc, 6, 'xiaohei-scene__mascot-sheet--blink'),
-          createThinkingImage(doc),
+          createEnergyImage(doc),
+          createEnergyEffects(doc),
         )
         layer.append(mascot)
         continue
@@ -335,12 +440,29 @@ function setIdleFrame(sheet: HTMLImageElement, frame: number): void {
   sheet.style.transform = `translate3d(${-column * 25}%, ${-row * 50}%, 0)`
 }
 
-function createThinkingImage(doc: Document): HTMLImageElement {
+function createEnergyImage(doc: Document): HTMLImageElement {
   const image = doc.createElement('img')
-  image.className = 'xiaohei-scene__mascot-thinking'
+  image.className = 'xiaohei-scene__mascot-energy'
   image.alt = ''
   image.decoding = 'async'
   image.fetchPriority = 'low'
-  image.src = XIAOHEI_THINKING
+  image.src = XIAOHEI_ENERGY
   return image
+}
+
+function createEnergyEffects(doc: Document): HTMLSpanElement {
+  const effects = doc.createElement('span')
+  effects.className = 'xiaohei-scene__energy-fx'
+  for (const className of [
+    'xiaohei-scene__energy-aura xiaohei-scene__energy-aura--outer',
+    'xiaohei-scene__energy-aura xiaohei-scene__energy-aura--inner',
+    'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--one',
+    'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--two',
+    'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--three',
+  ]) {
+    const part = doc.createElement('span')
+    part.className = className
+    effects.append(part)
+  }
+  return effects
 }

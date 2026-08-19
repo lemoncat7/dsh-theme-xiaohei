@@ -6,7 +6,7 @@ import {
   installXiaoheiScene,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
-import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART, XIAOHEI_THINKING } from '../lib/generated-keyart.js'
+import { XIAOHEI_ENERGY, XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from '../lib/generated-keyart.js'
 import { bindXiaoheiSessionState, XIAOHEI_STATE_ATTRIBUTE } from '../lib/state.js'
 import { XIAOHEI_NIGHT_THEME, XIAOHEI_NIGHT_THEME_ID } from '../lib/theme.js'
 
@@ -61,10 +61,12 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.equal(XIAOHEI_SCENE_PART_COUNT, 7)
   assert.match(XIAOHEI_KEY_ART, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_THINKING, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_ENERGY, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-mascot-blink/)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-state='thinking'/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-energy-outer/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-energy-mote-one/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-mascot-breathe/)
   assert.match(XIAOHEI_SCENE_CSS, /transition:\s*opacity 120ms/)
   assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
