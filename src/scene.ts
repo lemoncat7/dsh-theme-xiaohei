@@ -103,6 +103,9 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   aspect-ratio: 1;
   overflow: hidden;
   filter: drop-shadow(0 1.25rem 2.8rem rgb(1 9 10 / 48%));
+  transform-origin: 50% 88%;
+  will-change: transform;
+  animation: xiaohei-mascot-breathe 3.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .xiaohei-scene__mascot-sheet {
@@ -115,8 +118,13 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   max-height: none;
   object-fit: fill;
   transform: translate3d(0, 0, 0);
-  will-change: transform;
-  animation: xiaohei-idle-cycle 6s steps(1, end) infinite;
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 140ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.xiaohei-scene__mascot-sheet--active {
+  opacity: 1;
 }
 
 @keyframes xiaohei-scene-aura {
@@ -139,15 +147,9 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   44% { transform: translate3d(0.45rem, -1.2rem, 0) scale(0.96); opacity: 0.7; }
 }
 
-@keyframes xiaohei-idle-cycle {
-  0%, 13.99% { transform: translate3d(0, 0, 0); }
-  14%, 27.99% { transform: translate3d(-25%, 0, 0); }
-  28%, 41.99% { transform: translate3d(-50%, 0, 0); }
-  42%, 55.99% { transform: translate3d(-75%, 0, 0); }
-  56%, 69.99% { transform: translate3d(0, -50%, 0); }
-  70%, 83.99% { transform: translate3d(-25%, -50%, 0); }
-  84%, 89.99% { transform: translate3d(-50%, -50%, 0); }
-  90%, 100% { transform: translate3d(-75%, -50%, 0); }
+@keyframes xiaohei-mascot-breathe {
+  0%, 100% { transform: translate3d(0, 0.15rem, 0) scale(0.992); }
+  50% { transform: translate3d(0, -0.2rem, 0) scale(1.008); }
 }
 
 @media (max-width: 768px) {
@@ -170,10 +172,12 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 @media (prefers-reduced-motion: reduce) {
   .xiaohei-scene__aura,
   .xiaohei-scene__spirit,
-  .xiaohei-scene__mascot-sheet {
+  .xiaohei-scene__mascot {
     animation: none;
     will-change: auto;
   }
+
+  .xiaohei-scene__mascot-sheet { transition: none; }
 
   .xiaohei-scene__spirit { display: none; }
 }
@@ -203,6 +207,8 @@ const PARTS = [
 /** Number of top-level decorative parts installed into the ambient layer. */
 export const XIAOHEI_SCENE_PART_COUNT = PARTS.length
 
+const IDLE_FRAME_DURATIONS_MS = [500, 500, 500, 500, 500, 450, 130, 420] as const
+
 /**
  * Install the generated scene after plugin boot becomes idle. The theme tokens
  * apply immediately, while image decoding never extends DSH's loading screen.
@@ -214,6 +220,7 @@ export function installXiaoheiScene(
 
   let disposed = false
   let removeMountedScene = (): void => {}
+  let cancelMascotMotion = (): void => {}
 
   const mount = (): void => {
     if (disposed) return
@@ -243,14 +250,35 @@ export function installXiaoheiScene(
       if (className === 'xiaohei-scene__mascot') {
         const mascot = doc.createElement('div')
         mascot.className = className
-        const idleSheet = doc.createElement('img')
-        idleSheet.className = 'xiaohei-scene__mascot-sheet'
-        idleSheet.alt = ''
-        idleSheet.decoding = 'async'
-        idleSheet.fetchPriority = 'low'
-        idleSheet.src = XIAOHEI_IDLE_SHEET
-        mascot.append(idleSheet)
+        const sheets = [createIdleSheet(doc, 0, true), createIdleSheet(doc, 1, false)] as const
+        mascot.append(...sheets)
         layer.append(mascot)
+
+        let currentFrame = 0
+        let visibleSheet = sheets[0]
+        let hiddenSheet = sheets[1]
+        let frameTimer: number | undefined
+
+        const advanceFrame = (): void => {
+          const nextFrame = (currentFrame + 1) % IDLE_FRAME_DURATIONS_MS.length
+          setIdleFrame(hiddenSheet, nextFrame)
+          hiddenSheet.classList.add('xiaohei-scene__mascot-sheet--active')
+          visibleSheet.classList.remove('xiaohei-scene__mascot-sheet--active')
+          ;[visibleSheet, hiddenSheet] = [hiddenSheet, visibleSheet]
+          currentFrame = nextFrame
+          frameTimer = win?.setTimeout(advanceFrame, IDLE_FRAME_DURATIONS_MS[currentFrame])
+        }
+
+        const reducesMotion = win !== null
+          && typeof win.matchMedia === 'function'
+          && win.matchMedia('(prefers-reduced-motion: reduce)').matches
+        if (win !== null && !reducesMotion) {
+          frameTimer = win.setTimeout(advanceFrame, IDLE_FRAME_DURATIONS_MS[0])
+        }
+
+        cancelMascotMotion = (): void => {
+          if (frameTimer !== undefined) win?.clearTimeout(frameTimer)
+        }
         continue
       }
 
@@ -261,6 +289,7 @@ export function installXiaoheiScene(
 
     doc.body.prepend(layer)
     removeMountedScene = () => {
+      cancelMascotMotion()
       layer.remove()
       style.remove()
     }
@@ -288,4 +317,21 @@ export function installXiaoheiScene(
 /** CSS id escaping for the slash in stable plugin-owned DOM ids. */
 function cssEscape(value: string): string {
   return value.replaceAll('/', '\\/')
+}
+
+function createIdleSheet(doc: Document, frame: number, active: boolean): HTMLImageElement {
+  const sheet = doc.createElement('img')
+  sheet.className = `xiaohei-scene__mascot-sheet${active ? ' xiaohei-scene__mascot-sheet--active' : ''}`
+  sheet.alt = ''
+  sheet.decoding = 'async'
+  sheet.fetchPriority = 'low'
+  sheet.src = XIAOHEI_IDLE_SHEET
+  setIdleFrame(sheet, frame)
+  return sheet
+}
+
+function setIdleFrame(sheet: HTMLImageElement, frame: number): void {
+  const column = frame % 4
+  const row = Math.floor(frame / 4)
+  sheet.style.transform = `translate3d(${-column * 25}%, ${-row * 50}%, 0)`
 }
