@@ -6,7 +6,8 @@ import {
   installXiaoheiScene,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
-import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from '../lib/generated-keyart.js'
+import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART, XIAOHEI_THINKING } from '../lib/generated-keyart.js'
+import { bindXiaoheiSessionState, XIAOHEI_STATE_ATTRIBUTE } from '../lib/state.js'
 import { XIAOHEI_NIGHT_THEME, XIAOHEI_NIGHT_THEME_ID } from '../lib/theme.js'
 
 test('registers and activates Xiaohei Night exactly once', () => {
@@ -42,10 +43,12 @@ test('registers and activates Xiaohei Night exactly once', () => {
   assert.deepEqual(calls[2], ['on', 'theme/change'])
   assert.deepEqual(calls[3], ['setTheme', XIAOHEI_NIGHT_THEME_ID])
   assert.deepEqual(calls[4], ['effect', 'xiaohei-theme: install moonlit forest scene'])
+  assert.deepEqual(calls[5], ['effect', 'xiaohei-theme: follow current session running state'])
 
   onThemeChange({ preference: 'system' })
-  assert.deepEqual(calls[5], ['setTheme', XIAOHEI_NIGHT_THEME_ID])
+  assert.deepEqual(calls[6], ['setTheme', XIAOHEI_NIGHT_THEME_ID])
 
+  cleanups[2]()
   cleanups[1]()
   cleanups[0]()
   assert.deepEqual(calls.slice(-2), [
@@ -58,9 +61,12 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.equal(XIAOHEI_SCENE_PART_COUNT, 7)
   assert.match(XIAOHEI_KEY_ART, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_THINKING, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-mascot-blink/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-mascot-breathe|transition:\s*opacity/)
+  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-state='thinking'/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-mascot-breathe/)
+  assert.match(XIAOHEI_SCENE_CSS, /transition:\s*opacity 120ms/)
   assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
   assert.match(installXiaoheiScene.toString(), /decoding = ['"]async['"]/)
   assert.match(installXiaoheiScene.toString(), /fetchPriority = ['"]low['"]/)
@@ -74,6 +80,48 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
     .join('\n')
   assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
   assert.equal(typeof installXiaoheiScene(undefined), 'function')
+})
+
+test('thinking state follows only the selected session running bit', () => {
+  let snapshot = {
+    current: 'session-a',
+    byId: {
+      'session-a': { running: false },
+      'session-b': { running: true },
+    },
+  }
+  const listeners = new Set()
+  const attributes = new Map()
+  const sessions = {
+    list: {
+      getSnapshot: () => snapshot,
+      subscribe(listener) {
+        listeners.add(listener)
+        return () => listeners.delete(listener)
+      },
+    },
+  }
+  const doc = {
+    documentElement: {
+      setAttribute: (name, value) => attributes.set(name, value),
+      removeAttribute: name => attributes.delete(name),
+    },
+  }
+
+  const dispose = bindXiaoheiSessionState(sessions, doc)
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'idle')
+
+  snapshot = { ...snapshot, byId: { ...snapshot.byId, 'session-a': { running: true } } }
+  for (const listener of listeners) listener()
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'thinking')
+
+  snapshot = { ...snapshot, current: 'session-b', byId: { ...snapshot.byId, 'session-b': { running: false } } }
+  for (const listener of listeners) listener()
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'idle')
+
+  dispose()
+  assert.equal(attributes.has(XIAOHEI_STATE_ATTRIBUTE), false)
+  assert.equal(listeners.size, 0)
 })
 
 test('uses dark theme semantics and only DSH custom properties', () => {

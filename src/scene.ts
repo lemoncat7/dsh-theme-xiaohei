@@ -1,4 +1,4 @@
-import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from './generated-keyart.js'
+import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART, XIAOHEI_THINKING } from './generated-keyart.js'
 
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
 export const XIAOHEI_SCENE_STYLE_ID = 'dsh-theme-xiaohei/scene-style'
@@ -120,11 +120,38 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 
 .xiaohei-scene__mascot-sheet--open {
   opacity: 1;
+  transition: opacity 120ms ease-out;
 }
 
 .xiaohei-scene__mascot-sheet--blink {
   will-change: opacity;
   animation: xiaohei-mascot-blink 5.2s step-end infinite;
+}
+
+.xiaohei-scene__mascot-thinking {
+  position: absolute;
+  display: block;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: fill;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-sheet--open {
+  opacity: 0;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-sheet--blink {
+  opacity: 0;
+  animation: none;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-thinking {
+  opacity: 1;
 }
 
 @keyframes xiaohei-scene-aura {
@@ -249,6 +276,7 @@ export function installXiaoheiScene(
         mascot.append(
           createIdleSheet(doc, 7, 'xiaohei-scene__mascot-sheet--open'),
           createIdleSheet(doc, 6, 'xiaohei-scene__mascot-sheet--blink'),
+          createThinkingImage(doc),
         )
         layer.append(mascot)
         continue
@@ -305,4 +333,14 @@ function setIdleFrame(sheet: HTMLImageElement, frame: number): void {
   const column = frame % 4
   const row = Math.floor(frame / 4)
   sheet.style.transform = `translate3d(${-column * 25}%, ${-row * 50}%, 0)`
+}
+
+function createThinkingImage(doc: Document): HTMLImageElement {
+  const image = doc.createElement('img')
+  image.className = 'xiaohei-scene__mascot-thinking'
+  image.alt = ''
+  image.decoding = 'async'
+  image.fetchPriority = 'low'
+  image.src = XIAOHEI_THINKING
+  return image
 }

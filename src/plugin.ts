@@ -1,10 +1,11 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
 import { installXiaoheiScene } from './scene.js'
+import { bindXiaoheiSessionState } from './state.js'
 import { XIAOHEI_NIGHT_THEME } from './theme.js'
 
 /** The browser theme service must exist before this plugin applies. */
-export const inject = ['theme']
+export const inject = ['theme', 'sessions']
 
 /** Register and activate Xiaohei Night for the lifetime of this plugin. */
 export function apply(ctx: ClientContext): void {
@@ -24,4 +25,8 @@ export function apply(ctx: ClientContext): void {
   }, 'xiaohei-theme: register Xiaohei Night theme')
 
   ctx.effect(installXiaoheiScene, 'xiaohei-theme: install moonlit forest scene')
+  ctx.effect(
+    () => bindXiaoheiSessionState(ctx.sessions),
+    'xiaohei-theme: follow current session running state',
+  )
 }
