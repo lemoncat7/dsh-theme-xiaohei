@@ -58,8 +58,8 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 .xiaohei-scene__veil {
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(5 12 15 / 42%) 0%, rgb(5 12 15 / 12%) 44%, transparent 72%),
-    linear-gradient(180deg, rgb(4 10 13 / 12%) 0%, transparent 58%, rgb(4 10 13 / 26%) 100%);
+    linear-gradient(90deg, rgb(5 12 15 / 24%) 0%, rgb(5 12 15 / 7%) 44%, transparent 72%),
+    linear-gradient(180deg, rgb(4 10 13 / 7%) 0%, transparent 58%, rgb(4 10 13 / 18%) 100%);
 }
 
 .xiaohei-scene__aura {

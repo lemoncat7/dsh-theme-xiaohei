@@ -94,7 +94,7 @@ export const XIAOHEI_NIGHT_THEME = {
     '--dsw-specific-login-input': 'rgb(11 24 27 / 92%)',
     '--dsw-specific-menu': '#142A2A',
     '--dsw-specific-selector': '#193333',
-    '--dsw-specific-sidebar-fill': 'rgb(7 17 20 / 80%)',
+    '--dsw-specific-sidebar-fill': 'rgb(7 17 20 / 72%)',
     '--dsw-specific-sidebar-nav-item-active-accent': '#244A45',
     '--dsw-specific-sidebar-nav-item-active': '#193333',
     '--dsw-specific-sidebar-nav-item-hover': '#0F2022',

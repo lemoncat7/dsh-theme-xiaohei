@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 
-const sourcePath = new URL('../src/assets/xiaohei-night-clean.webp', import.meta.url)
+const sourcePath = new URL('../src/assets/xiaohei-night-balanced.webp', import.meta.url)
 const targetPath = new URL('../src/generated-keyart.ts', import.meta.url)
 const source = await readFile(sourcePath)
 const dataUrl = `data:image/webp;base64,${source.toString('base64')}`

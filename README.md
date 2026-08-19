@@ -24,7 +24,7 @@
 安装本地构建包：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.2.0-alpha.4.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.1.tgz
 ```
 
 卸载：
@@ -51,7 +51,7 @@ npm run pack:docker
 
 ## 视觉资产
 
-主题主视觉使用 `gpt-image-2` 通过标准 Images API 生成，并压缩为 WebP 后以内联资源打入浏览器插件。生成提示词的核心要求是：月夜森林、右下角完整黑猫、左侧留出工作区内容空间、无文字、无水印、无黄色电流。
+主题主视觉使用 `gpt-image-2` 通过标准 Images API 生成，并压缩为 WebP 后以内联资源打入浏览器插件。背景以完整月夜森林平衡左右构图：左侧使用低对比度枝叶、树层、雾气小径和稀疏妖灵光补足空间，中央保持安静以承载工作区内容，右下角保留角色舞台；无文字、无水印、无黄色电流。
 
 ## License
 

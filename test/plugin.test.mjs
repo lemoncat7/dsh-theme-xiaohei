@@ -105,6 +105,7 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(installXiaoheiScene.toString(), /fetchPriority = ['"]low['"]/)
   assert.match(XIAOHEI_SCENE_CSS, /pointer-events:\s*none/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart/)
+  assert.match(XIAOHEI_SCENE_CSS, /rgb\(5 12 15 \/ 24%\)/)
   assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_SCENE_CSS, /forced-colors:\s*active/)
 
