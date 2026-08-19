@@ -22,7 +22,7 @@ body {
   background: #19424A;
 }
 
-body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
+#root {
   position: relative;
   z-index: 1;
 }
@@ -55,7 +55,6 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
     linear-gradient(180deg, rgb(5 18 22 / 70%) 0%, rgb(6 20 23 / 62%) 58%, rgb(6 22 24 / 78%) 100%) !important;
   border-right: 1px solid rgb(139 229 213 / 14%);
   box-shadow: inset -1px 0 rgb(255 255 255 / 2%), 16px 0 36px rgb(1 9 10 / 14%);
-  backdrop-filter: blur(14px) saturate(108%);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
@@ -635,7 +634,6 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
 @media (prefers-reduced-transparency: reduce) {
   #root [data-slot='sidebar'] > div {
     background: #07181B !important;
-    backdrop-filter: none;
   }
 }
 
