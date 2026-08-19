@@ -1,0 +1,7 @@
+node_modules/
+lib/
+dist/
+output/
+src/generated-keyart.ts
+*.tgz
+.DS_Store

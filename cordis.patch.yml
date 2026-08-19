@@ -1,0 +1,4 @@
+# The Host row exists so DSH discovers and loads this package's browser half.
+- insert:
+    - id: xiaohei-theme
+      name: '@lemoncat7/dsh-theme-xiaohei'
