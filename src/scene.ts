@@ -53,14 +53,14 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   object-fit: cover;
   object-position: center;
   opacity: 0.98;
-  filter: brightness(1.82) contrast(0.9) saturate(1.12);
+  filter: brightness(1.36) contrast(1.1) saturate(1.06);
 }
 
 .xiaohei-scene__veil {
   inset: 0;
   background:
-    radial-gradient(ellipse at 58% 48%, rgb(3 10 12 / 12%) 0%, rgb(3 10 12 / 5%) 34%, transparent 68%),
-    linear-gradient(180deg, transparent 68%, rgb(3 10 12 / 5%) 100%);
+    radial-gradient(ellipse at 58% 48%, rgb(3 10 12 / 18%) 0%, rgb(3 10 12 / 8%) 34%, transparent 68%),
+    linear-gradient(180deg, transparent 66%, rgb(3 10 12 / 10%) 100%);
 }
 
 .xiaohei-scene__aura {
@@ -146,7 +146,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   transform: translate3d(0, 0, 0);
   opacity: 0;
   z-index: 1;
-  filter: brightness(1.9) contrast(0.58) saturate(1.12);
+  filter: brightness(1.32) contrast(1.02) saturate(1.04);
 }
 
 .xiaohei-scene__mascot-sheet--open {
@@ -170,7 +170,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   object-fit: fill;
   opacity: 0;
   z-index: 1;
-  filter: brightness(1.9) contrast(0.58) saturate(1.12);
+  filter: brightness(1.32) contrast(1.02) saturate(1.04);
   transition: opacity 120ms ease-out;
 }
 
