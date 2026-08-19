@@ -27,6 +27,6 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(installXiaoheiScene, 'xiaohei-theme: install moonlit forest scene')
   ctx.effect(
     () => bindXiaoheiSessionState(ctx.sessions),
-    'xiaohei-theme: follow current session running state',
+    'xiaohei-theme: follow current session agent state',
   )
 }

@@ -6,8 +6,21 @@ import {
   installXiaoheiScene,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
-import { XIAOHEI_ENERGY, XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from '../lib/generated-keyart.js'
-import { bindXiaoheiSessionState, XIAOHEI_STATE_ATTRIBUTE } from '../lib/state.js'
+import {
+  XIAOHEI_COMPLETE,
+  XIAOHEI_ENERGY,
+  XIAOHEI_ERROR,
+  XIAOHEI_IDLE_SHEET,
+  XIAOHEI_KEY_ART,
+  XIAOHEI_STREAMING,
+  XIAOHEI_TOOL,
+  XIAOHEI_WAITING,
+} from '../lib/generated-keyart.js'
+import {
+  bindXiaoheiSessionState,
+  resolveXiaoheiState,
+  XIAOHEI_STATE_ATTRIBUTE,
+} from '../lib/state.js'
 import { XIAOHEI_NIGHT_THEME, XIAOHEI_NIGHT_THEME_ID } from '../lib/theme.js'
 
 test('registers and activates Xiaohei Night exactly once', () => {
@@ -43,7 +56,7 @@ test('registers and activates Xiaohei Night exactly once', () => {
   assert.deepEqual(calls[2], ['on', 'theme/change'])
   assert.deepEqual(calls[3], ['setTheme', XIAOHEI_NIGHT_THEME_ID])
   assert.deepEqual(calls[4], ['effect', 'xiaohei-theme: install moonlit forest scene'])
-  assert.deepEqual(calls[5], ['effect', 'xiaohei-theme: follow current session running state'])
+  assert.deepEqual(calls[5], ['effect', 'xiaohei-theme: follow current session agent state'])
 
   onThemeChange({ preference: 'system' })
   assert.deepEqual(calls[6], ['setTheme', XIAOHEI_NIGHT_THEME_ID])
@@ -61,12 +74,27 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.equal(XIAOHEI_SCENE_PART_COUNT, 7)
   assert.match(XIAOHEI_KEY_ART, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_ENERGY, /^data:image\/webp;base64,/)
+  for (const asset of [
+    XIAOHEI_ENERGY,
+    XIAOHEI_STREAMING,
+    XIAOHEI_TOOL,
+    XIAOHEI_WAITING,
+    XIAOHEI_COMPLETE,
+    XIAOHEI_ERROR,
+  ]) assert.match(asset, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-mascot-blink/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-state='thinking'/)
+  for (const state of ['thinking', 'streaming', 'tool', 'waiting', 'complete', 'error']) {
+    assert.match(XIAOHEI_SCENE_CSS, new RegExp(`data-xiaohei-state='${state}'`))
+    assert.match(XIAOHEI_SCENE_CSS, new RegExp(`mascot-state--${state}`))
+  }
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-energy-outer/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-energy-mote-one/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-stream-mote/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-tool-key/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-waiting-ring/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-complete-spark/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-error-glow/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-mascot-breathe/)
   assert.match(XIAOHEI_SCENE_CSS, /transition:\s*opacity 120ms/)
   assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
@@ -84,23 +112,53 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.equal(typeof installXiaoheiScene(undefined), 'function')
 })
 
-test('thinking state follows only the selected session running bit', () => {
-  let snapshot = {
+test('official state priority is error, waiting, tool, streaming, thinking, idle', () => {
+  const base = conversationSnapshot()
+  assert.equal(resolveXiaoheiState(base, undefined), 'idle')
+  assert.equal(resolveXiaoheiState({ ...base, running: true }, undefined), 'thinking')
+  assert.equal(resolveXiaoheiState({ ...base, running: true, partial: {} }, undefined), 'streaming')
+  assert.equal(resolveXiaoheiState({ ...base, running: true, partial: {}, runningCalls: [{}] }, undefined), 'tool')
+  assert.equal(resolveXiaoheiState({ ...base, running: true, partial: {}, runningCalls: [{}], pending: [{}] }, undefined), 'waiting')
+  assert.equal(resolveXiaoheiState({ ...base, running: true, runningCalls: [{}], pending: [{}], lastAgentError: 'failed' }, undefined), 'error')
+  assert.equal(resolveXiaoheiState(undefined, { running: true }), 'thinking')
+  assert.equal(resolveXiaoheiState(undefined, { running: true, pendingInteraction: 'question' }), 'waiting')
+})
+
+test('selected session drives state, completion is transient, and switching never celebrates', async () => {
+  let listSnapshot = {
     current: 'session-a',
     byId: {
       'session-a': { running: false },
       'session-b': { running: true },
     },
   }
-  const listeners = new Set()
+  const listListeners = new Set()
+  const sessionSnapshots = new Map([
+    ['session-a', conversationSnapshot()],
+    ['session-b', conversationSnapshot({ sessionId: 'session-b', running: true })],
+  ])
+  const sessionListeners = new Map([
+    ['session-a', new Set()],
+    ['session-b', new Set()],
+  ])
+  const sessionFaces = new Map([...sessionSnapshots.keys()].map(id => [id, {
+    getSnapshot: () => sessionSnapshots.get(id),
+    subscribe(listener) {
+      sessionListeners.get(id).add(listener)
+      return () => sessionListeners.get(id).delete(listener)
+    },
+  }]))
   const attributes = new Map()
   const sessions = {
     list: {
-      getSnapshot: () => snapshot,
+      getSnapshot: () => listSnapshot,
       subscribe(listener) {
-        listeners.add(listener)
-        return () => listeners.delete(listener)
+        listListeners.add(listener)
+        return () => listListeners.delete(listener)
       },
+    },
+    binding(id) {
+      return { session: sessionFaces.get(id) }
     },
   }
   const doc = {
@@ -110,20 +168,49 @@ test('thinking state follows only the selected session running bit', () => {
     },
   }
 
-  const dispose = bindXiaoheiSessionState(sessions, doc)
+  const dispose = bindXiaoheiSessionState(sessions, doc, 12)
   assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'idle')
+  assert.equal(sessionListeners.get('session-a').size, 1)
 
-  snapshot = { ...snapshot, byId: { ...snapshot.byId, 'session-a': { running: true } } }
-  for (const listener of listeners) listener()
+  sessionSnapshots.set('session-a', conversationSnapshot({ running: true }))
+  for (const listener of sessionListeners.get('session-a')) listener()
   assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'thinking')
 
-  snapshot = { ...snapshot, current: 'session-b', byId: { ...snapshot.byId, 'session-b': { running: false } } }
-  for (const listener of listeners) listener()
+  sessionSnapshots.set('session-a', conversationSnapshot({ running: true, partial: {} }))
+  for (const listener of sessionListeners.get('session-a')) listener()
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'streaming')
+
+  sessionSnapshots.set('session-a', conversationSnapshot())
+  for (const listener of sessionListeners.get('session-a')) listener()
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'complete')
+
+  sessionSnapshots.set('session-a', conversationSnapshot({ running: true }))
+  for (const listener of sessionListeners.get('session-a')) listener()
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'thinking')
+  await new Promise(resolve => setTimeout(resolve, 18))
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'thinking')
+
+  sessionSnapshots.set('session-a', conversationSnapshot())
+  for (const listener of sessionListeners.get('session-a')) listener()
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'complete')
+  await new Promise(resolve => setTimeout(resolve, 18))
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'idle')
+
+  listSnapshot = { ...listSnapshot, current: 'session-b' }
+  for (const listener of listListeners) listener()
+  assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'thinking')
+  assert.equal(sessionListeners.get('session-a').size, 0)
+  assert.equal(sessionListeners.get('session-b').size, 1)
+
+  listSnapshot = { ...listSnapshot, current: 'session-a' }
+  for (const listener of listListeners) listener()
   assert.equal(attributes.get(XIAOHEI_STATE_ATTRIBUTE), 'idle')
 
   dispose()
   assert.equal(attributes.has(XIAOHEI_STATE_ATTRIBUTE), false)
-  assert.equal(listeners.size, 0)
+  assert.equal(listListeners.size, 0)
+  assert.equal(sessionListeners.get('session-a').size, 0)
+  assert.equal(sessionListeners.get('session-b').size, 0)
 })
 
 test('uses dark theme semantics and only DSH custom properties', () => {
@@ -155,6 +242,22 @@ function contrast(foreground, background) {
   const lighter = Math.max(luminance(foreground), luminance(background))
   const darker = Math.min(luminance(foreground), luminance(background))
   return (lighter + 0.05) / (darker + 0.05)
+}
+
+function conversationSnapshot(overrides = {}) {
+  return {
+    sessionId: 'session-a',
+    removed: false,
+    openState: 'open',
+    openError: null,
+    promptError: null,
+    lastAgentError: null,
+    pending: [],
+    runningCalls: [],
+    partial: null,
+    running: false,
+    ...overrides,
+  }
 }
 
 function luminance(hex) {

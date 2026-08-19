@@ -1,4 +1,13 @@
-import { XIAOHEI_ENERGY, XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from './generated-keyart.js'
+import {
+  XIAOHEI_COMPLETE,
+  XIAOHEI_ENERGY,
+  XIAOHEI_ERROR,
+  XIAOHEI_IDLE_SHEET,
+  XIAOHEI_KEY_ART,
+  XIAOHEI_STREAMING,
+  XIAOHEI_TOOL,
+  XIAOHEI_WAITING,
+} from './generated-keyart.js'
 
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
 export const XIAOHEI_SCENE_STYLE_ID = 'dsh-theme-xiaohei/scene-style'
@@ -128,7 +137,7 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   animation: xiaohei-mascot-blink 5.2s step-end infinite;
 }
 
-.xiaohei-scene__mascot-energy {
+.xiaohei-scene__mascot-state {
   position: absolute;
   display: block;
   inset: 0;
@@ -139,6 +148,24 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   object-fit: fill;
   opacity: 0;
   transition: opacity 120ms ease-out;
+}
+
+html:not([data-xiaohei-state='idle']) .xiaohei-scene__mascot-sheet--open {
+  opacity: 0;
+}
+
+html:not([data-xiaohei-state='idle']) .xiaohei-scene__mascot-sheet--blink {
+  opacity: 0;
+  animation: none;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-state--thinking,
+html[data-xiaohei-state='streaming'] .xiaohei-scene__mascot-state--streaming,
+html[data-xiaohei-state='tool'] .xiaohei-scene__mascot-state--tool,
+html[data-xiaohei-state='waiting'] .xiaohei-scene__mascot-state--waiting,
+html[data-xiaohei-state='complete'] .xiaohei-scene__mascot-state--complete,
+html[data-xiaohei-state='error'] .xiaohei-scene__mascot-state--error {
+  opacity: 1;
 }
 
 .xiaohei-scene__energy-fx,
@@ -152,6 +179,121 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   inset: 0;
   opacity: 0;
   transition: opacity 120ms ease-out;
+}
+
+.xiaohei-scene__state-fx,
+.xiaohei-scene__state-fx > span {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.xiaohei-scene__state-fx {
+  inset: 0;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.xiaohei-scene__state-fx > span {
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+html[data-xiaohei-state='streaming'] .xiaohei-scene__state-fx--streaming,
+html[data-xiaohei-state='tool'] .xiaohei-scene__state-fx--tool,
+html[data-xiaohei-state='waiting'] .xiaohei-scene__state-fx--waiting,
+html[data-xiaohei-state='complete'] .xiaohei-scene__state-fx--complete,
+html[data-xiaohei-state='error'] .xiaohei-scene__state-fx--error {
+  opacity: 1;
+}
+
+.xiaohei-scene__stream-mote {
+  left: 18%;
+  top: 51%;
+  width: 0.3rem;
+  aspect-ratio: 1;
+  background: #A8FFEB;
+  box-shadow: 0 0 0.65rem rgb(91 255 219 / 92%);
+}
+
+html[data-xiaohei-state='streaming'] .xiaohei-scene__stream-mote--one {
+  animation: xiaohei-stream-mote 1.25s ease-out infinite;
+}
+
+html[data-xiaohei-state='streaming'] .xiaohei-scene__stream-mote--two {
+  animation: xiaohei-stream-mote 1.25s ease-out -0.42s infinite;
+}
+
+html[data-xiaohei-state='streaming'] .xiaohei-scene__stream-mote--three {
+  animation: xiaohei-stream-mote 1.25s ease-out -0.84s infinite;
+}
+
+.xiaohei-scene__tool-key {
+  top: 68%;
+  width: 0.3rem;
+  aspect-ratio: 0.7;
+  background: #70F2D9;
+  box-shadow: 0 0 0.7rem rgb(72 238 208 / 90%);
+}
+
+.xiaohei-scene__tool-key--one { left: 35%; }
+.xiaohei-scene__tool-key--two { left: 42%; }
+.xiaohei-scene__tool-key--three { left: 49%; }
+
+html[data-xiaohei-state='tool'] .xiaohei-scene__tool-key--one {
+  animation: xiaohei-tool-key 0.9s ease-in-out infinite;
+}
+
+html[data-xiaohei-state='tool'] .xiaohei-scene__tool-key--two {
+  animation: xiaohei-tool-key 0.9s ease-in-out -0.3s infinite;
+}
+
+html[data-xiaohei-state='tool'] .xiaohei-scene__tool-key--three {
+  animation: xiaohei-tool-key 0.9s ease-in-out -0.6s infinite;
+}
+
+.xiaohei-scene__waiting-ring {
+  left: 28%;
+  top: 37%;
+  width: 13%;
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 207 126 / 88%);
+  box-shadow: 0 0 0.8rem rgb(255 188 93 / 42%);
+}
+
+html[data-xiaohei-state='waiting'] .xiaohei-scene__waiting-ring {
+  animation: xiaohei-waiting-ring 1.8s ease-out infinite;
+}
+
+.xiaohei-scene__complete-spark {
+  left: 50%;
+  top: 57%;
+  width: 0.35rem;
+  aspect-ratio: 1;
+  background: #B6FFED;
+  box-shadow: 0 0 0.8rem rgb(91 255 219 / 92%);
+}
+
+html[data-xiaohei-state='complete'] .xiaohei-scene__complete-spark--one {
+  animation: xiaohei-complete-spark-one 0.8s ease-out infinite;
+}
+
+html[data-xiaohei-state='complete'] .xiaohei-scene__complete-spark--two {
+  animation: xiaohei-complete-spark-two 0.8s ease-out -0.4s infinite;
+}
+
+.xiaohei-scene__error-glow {
+  left: 50%;
+  top: 58%;
+  width: 7%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgb(255 112 82 / 90%) 0%, rgb(224 58 46 / 28%) 48%, transparent 72%);
+  mix-blend-mode: screen;
+}
+
+html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
+  animation: xiaohei-error-glow 2.2s ease-in-out infinite;
 }
 
 .xiaohei-scene__energy-aura {
@@ -208,16 +350,6 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-mote--three {
   animation: xiaohei-energy-mote-three 1.35s ease-in -0.9s infinite;
 }
 
-html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-sheet--open {
-  opacity: 0;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-sheet--blink {
-  opacity: 0;
-  animation: none;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__mascot-energy,
 html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
   opacity: 1;
 }
@@ -277,6 +409,39 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
   to { transform: translate3d(-0.08rem, 0.08rem, 0) scale(0.18); opacity: 0; }
 }
 
+@keyframes xiaohei-stream-mote {
+  from { transform: translate3d(0, 0.55rem, 0) scale(0.45); opacity: 0; }
+  28% { opacity: 0.92; }
+  to { transform: translate3d(-2.1rem, -1.05rem, 0) scale(1); opacity: 0; }
+}
+
+@keyframes xiaohei-tool-key {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.7); opacity: 0.18; }
+  45% { transform: translate3d(0, -0.15rem, 0) scale(1); opacity: 1; }
+}
+
+@keyframes xiaohei-waiting-ring {
+  from { transform: translate3d(-50%, -50%, 0) scale(0.55); opacity: 0.72; }
+  to { transform: translate3d(-50%, -50%, 0) scale(1.45); opacity: 0; }
+}
+
+@keyframes xiaohei-complete-spark-one {
+  from { transform: translate3d(-0.4rem, 0.4rem, 0) scale(0.45); opacity: 0; }
+  35% { opacity: 1; }
+  to { transform: translate3d(-2.5rem, -2rem, 0) scale(1.15); opacity: 0; }
+}
+
+@keyframes xiaohei-complete-spark-two {
+  from { transform: translate3d(0.4rem, 0.3rem, 0) scale(0.45); opacity: 0; }
+  35% { opacity: 0.95; }
+  to { transform: translate3d(2.5rem, -1.75rem, 0) scale(1.1); opacity: 0; }
+}
+
+@keyframes xiaohei-error-glow {
+  0%, 100% { transform: translate3d(-50%, -50%, 0) scale(0.78); opacity: 0.34; }
+  50% { transform: translate3d(-50%, -50%, 0) scale(1.12); opacity: 0.9; }
+}
+
 @media (max-width: 768px) {
   .xiaohei-scene__keyart {
     object-position: 68% center;
@@ -298,13 +463,15 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
   .xiaohei-scene__aura,
   .xiaohei-scene__spirit,
   .xiaohei-scene__mascot-sheet--blink,
-  .xiaohei-scene__energy-fx > span {
+  .xiaohei-scene__energy-fx > span,
+  .xiaohei-scene__state-fx > span {
     animation: none;
     will-change: auto;
   }
 
   .xiaohei-scene__spirit { display: none; }
   .xiaohei-scene__energy-mote { display: none; }
+  .xiaohei-scene__state-fx { display: none; }
 
   html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx > span {
     animation: none;
@@ -380,8 +547,29 @@ export function installXiaoheiScene(
         mascot.append(
           createIdleSheet(doc, 7, 'xiaohei-scene__mascot-sheet--open'),
           createIdleSheet(doc, 6, 'xiaohei-scene__mascot-sheet--blink'),
-          createEnergyImage(doc),
+          createStateImage(doc, 'thinking', XIAOHEI_ENERGY),
+          createStateImage(doc, 'streaming', XIAOHEI_STREAMING),
+          createStateImage(doc, 'tool', XIAOHEI_TOOL),
+          createStateImage(doc, 'waiting', XIAOHEI_WAITING),
+          createStateImage(doc, 'complete', XIAOHEI_COMPLETE),
+          createStateImage(doc, 'error', XIAOHEI_ERROR),
           createEnergyEffects(doc),
+          createStateEffects(doc, 'streaming', [
+            'xiaohei-scene__stream-mote xiaohei-scene__stream-mote--one',
+            'xiaohei-scene__stream-mote xiaohei-scene__stream-mote--two',
+            'xiaohei-scene__stream-mote xiaohei-scene__stream-mote--three',
+          ]),
+          createStateEffects(doc, 'tool', [
+            'xiaohei-scene__tool-key xiaohei-scene__tool-key--one',
+            'xiaohei-scene__tool-key xiaohei-scene__tool-key--two',
+            'xiaohei-scene__tool-key xiaohei-scene__tool-key--three',
+          ]),
+          createStateEffects(doc, 'waiting', ['xiaohei-scene__waiting-ring']),
+          createStateEffects(doc, 'complete', [
+            'xiaohei-scene__complete-spark xiaohei-scene__complete-spark--one',
+            'xiaohei-scene__complete-spark xiaohei-scene__complete-spark--two',
+          ]),
+          createStateEffects(doc, 'error', ['xiaohei-scene__error-glow']),
         )
         layer.append(mascot)
         continue
@@ -440,13 +628,13 @@ function setIdleFrame(sheet: HTMLImageElement, frame: number): void {
   sheet.style.transform = `translate3d(${-column * 25}%, ${-row * 50}%, 0)`
 }
 
-function createEnergyImage(doc: Document): HTMLImageElement {
+function createStateImage(doc: Document, state: string, source: string): HTMLImageElement {
   const image = doc.createElement('img')
-  image.className = 'xiaohei-scene__mascot-energy'
+  image.className = `xiaohei-scene__mascot-state xiaohei-scene__mascot-state--${state}`
   image.alt = ''
   image.decoding = 'async'
   image.fetchPriority = 'low'
-  image.src = XIAOHEI_ENERGY
+  image.src = source
   return image
 }
 
@@ -460,6 +648,17 @@ function createEnergyEffects(doc: Document): HTMLSpanElement {
     'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--two',
     'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--three',
   ]) {
+    const part = doc.createElement('span')
+    part.className = className
+    effects.append(part)
+  }
+  return effects
+}
+
+function createStateEffects(doc: Document, state: string, classNames: readonly string[]): HTMLSpanElement {
+  const effects = doc.createElement('span')
+  effects.className = `xiaohei-scene__state-fx xiaohei-scene__state-fx--${state}`
+  for (const className of classNames) {
     const part = doc.createElement('span')
     part.className = className
     effects.append(part)
