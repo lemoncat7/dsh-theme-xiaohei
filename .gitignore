@@ -5,3 +5,4 @@ output/
 src/generated-keyart.ts
 *.tgz
 .DS_Store
+tmp/

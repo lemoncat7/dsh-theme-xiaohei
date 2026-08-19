@@ -6,7 +6,7 @@ import {
   installXiaoheiScene,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
-import { XIAOHEI_KEY_ART } from '../lib/generated-keyart.js'
+import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from '../lib/generated-keyart.js'
 import { XIAOHEI_NIGHT_THEME, XIAOHEI_NIGHT_THEME_ID } from '../lib/theme.js'
 
 test('registers and activates Xiaohei Night exactly once', () => {
@@ -55,9 +55,11 @@ test('registers and activates Xiaohei Night exactly once', () => {
 })
 
 test('scene uses asynchronously decoded key art and compositor-safe motion', () => {
-  assert.equal(XIAOHEI_SCENE_PART_COUNT, 6)
+  assert.equal(XIAOHEI_SCENE_PART_COUNT, 7)
   assert.match(XIAOHEI_KEY_ART, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-idle-cycle/)
   assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
   assert.match(installXiaoheiScene.toString(), /decoding = ['"]async['"]/)
   assert.match(installXiaoheiScene.toString(), /fetchPriority = ['"]low['"]/)

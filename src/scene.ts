@@ -1,4 +1,4 @@
-import { XIAOHEI_KEY_ART } from './generated-keyart.js'
+import { XIAOHEI_IDLE_SHEET, XIAOHEI_KEY_ART } from './generated-keyart.js'
 
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
 export const XIAOHEI_SCENE_STYLE_ID = 'dsh-theme-xiaohei/scene-style'
@@ -96,6 +96,29 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   animation: xiaohei-spirit-three 7.7s cubic-bezier(0.37, 0, 0.63, 1) -4.1s infinite;
 }
 
+.xiaohei-scene__mascot {
+  right: clamp(0.75rem, 3.8vw, 4rem);
+  bottom: clamp(0.25rem, 1.8vh, 1.5rem);
+  width: clamp(12rem, 22vw, 21rem);
+  aspect-ratio: 1;
+  overflow: hidden;
+  filter: drop-shadow(0 1.25rem 2.8rem rgb(1 9 10 / 48%));
+}
+
+.xiaohei-scene__mascot-sheet {
+  position: absolute;
+  display: block;
+  inset: 0 auto auto 0;
+  width: 400%;
+  height: 200%;
+  max-width: none;
+  max-height: none;
+  object-fit: fill;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  animation: xiaohei-idle-cycle 6s steps(1, end) infinite;
+}
+
 @keyframes xiaohei-scene-aura {
   from { transform: scale(0.94); opacity: 0.44; }
   to { transform: scale(1.05); opacity: 0.78; }
@@ -116,6 +139,17 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   44% { transform: translate3d(0.45rem, -1.2rem, 0) scale(0.96); opacity: 0.7; }
 }
 
+@keyframes xiaohei-idle-cycle {
+  0%, 13.99% { transform: translate3d(0, 0, 0); }
+  14%, 27.99% { transform: translate3d(-25%, 0, 0); }
+  28%, 41.99% { transform: translate3d(-50%, 0, 0); }
+  42%, 55.99% { transform: translate3d(-75%, 0, 0); }
+  56%, 69.99% { transform: translate3d(0, -50%, 0); }
+  70%, 83.99% { transform: translate3d(-25%, -50%, 0); }
+  84%, 89.99% { transform: translate3d(-50%, -50%, 0); }
+  90%, 100% { transform: translate3d(-75%, -50%, 0); }
+}
+
 @media (max-width: 768px) {
   .xiaohei-scene__keyart {
     object-position: 68% center;
@@ -125,11 +159,18 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
   .xiaohei-scene__veil {
     background: linear-gradient(180deg, rgb(5 12 15 / 16%), rgb(5 12 15 / 40%));
   }
+
+  .xiaohei-scene__mascot {
+    right: -1.5rem;
+    bottom: 0;
+    width: clamp(10rem, 42vw, 14rem);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .xiaohei-scene__aura,
-  .xiaohei-scene__spirit {
+  .xiaohei-scene__spirit,
+  .xiaohei-scene__mascot-sheet {
     animation: none;
     will-change: auto;
   }
@@ -156,6 +197,7 @@ const PARTS = [
   'xiaohei-scene__spirit xiaohei-scene__spirit--one',
   'xiaohei-scene__spirit xiaohei-scene__spirit--two',
   'xiaohei-scene__spirit xiaohei-scene__spirit--three',
+  'xiaohei-scene__mascot',
 ] as const
 
 /** Number of top-level decorative parts installed into the ambient layer. */
@@ -198,6 +240,20 @@ export function installXiaoheiScene(
     layer.append(keyArt)
 
     for (const className of PARTS.slice(1)) {
+      if (className === 'xiaohei-scene__mascot') {
+        const mascot = doc.createElement('div')
+        mascot.className = className
+        const idleSheet = doc.createElement('img')
+        idleSheet.className = 'xiaohei-scene__mascot-sheet'
+        idleSheet.alt = ''
+        idleSheet.decoding = 'async'
+        idleSheet.fetchPriority = 'low'
+        idleSheet.src = XIAOHEI_IDLE_SHEET
+        mascot.append(idleSheet)
+        layer.append(mascot)
+        continue
+      }
+
       const part = doc.createElement('span')
       part.className = className
       layer.append(part)
