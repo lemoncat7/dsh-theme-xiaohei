@@ -54,25 +54,25 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 }
 
 .xiaohei-scene__aura {
-  width: 48vmax;
+  width: 58vmax;
   aspect-ratio: 1;
-  right: -13vmax;
-  bottom: -18vmax;
+  right: -16vmax;
+  bottom: -23vmax;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(101 209 190 / 20%) 0%, rgb(58 161 151 / 8%) 38%, transparent 70%);
+  background: radial-gradient(circle, rgb(117 228 208 / 31%) 0%, rgb(58 161 151 / 13%) 38%, transparent 70%);
   mix-blend-mode: screen;
-  opacity: 0.42;
+  opacity: 0.62;
   transform: scale(0.96);
   will-change: transform, opacity;
   animation: xiaohei-scene-aura 7.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
 }
 
 .xiaohei-scene__spirit {
-  width: 0.48rem;
+  width: 0.58rem;
   aspect-ratio: 1;
   border-radius: 50%;
   background: #8BE5D5;
-  box-shadow: 0 0 0.55rem rgb(101 209 190 / 78%), 0 0 1.5rem rgb(101 209 190 / 44%);
+  box-shadow: 0 0 0.7rem rgb(117 228 208 / 88%), 0 0 1.8rem rgb(101 209 190 / 56%);
   mix-blend-mode: screen;
   opacity: 0.18;
   will-change: transform, opacity;
@@ -97,8 +97,8 @@ body > :not(#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}) {
 }
 
 @keyframes xiaohei-scene-aura {
-  from { transform: scale(0.94); opacity: 0.28; }
-  to { transform: scale(1.04); opacity: 0.52; }
+  from { transform: scale(0.94); opacity: 0.44; }
+  to { transform: scale(1.05); opacity: 0.78; }
 }
 
 @keyframes xiaohei-spirit-one {
