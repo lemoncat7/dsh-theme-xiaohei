@@ -18,9 +18,11 @@ import {
   XIAOHEI_CHROME_STYLE_ID,
 } from '../lib/chrome.js'
 import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from '../lib/chrome/accessibility.js'
-import { XIAOHEI_CONTROL_CSS } from '../lib/chrome/controls.js'
+import { XIAOHEI_COMPOSER_CSS } from '../lib/chrome/composer.js'
+import { XIAOHEI_CONVERSATION_CSS } from '../lib/chrome/conversation.js'
+import { XIAOHEI_OVERLAY_CSS } from '../lib/chrome/overlays.js'
 import { XIAOHEI_SIDEBAR_CSS } from '../lib/chrome/sidebar.js'
-import { XIAOHEI_SURFACE_CSS } from '../lib/chrome/surfaces.js'
+import { XIAOHEI_WORKSPACE_CSS } from '../lib/chrome/workspace.js'
 import { XIAOHEI_WORKSPACE_INTERACTION_CSS } from '../lib/chrome/workspace-interactions.js'
 import { XIAOHEI_PORTAL_CSS } from '../lib/chrome/portal.js'
 import { XIAOHEI_BLINK_CSS } from '../lib/chrome/blink.js'
@@ -139,6 +141,8 @@ test('spirit control skin stays semantic, accessible, and lifecycle safe', () =>
   assert.match(XIAOHEI_CHROME_CSS, /prefers-reduced-transparency:[\s\S]*backdrop-filter:\s*none/)
   assert.match(XIAOHEI_CHROME_CSS, /@supports not \(\(backdrop-filter:/)
   assert.doesNotMatch(XIAOHEI_CHROME_CSS, /tail-like|rotate\(/)
+  assert.match(XIAOHEI_CHROME_CSS, /--xiaohei-spirit:/)
+  assert.match(XIAOHEI_CHROME_CSS, /data-slot='conversation\.composer'/)
   assert.doesNotMatch(XIAOHEI_CHROME_CSS, /(?:^|\n)\s*(?:html|body|#root)\s+button\s*\{/)
   const keyframes = extractKeyframes(XIAOHEI_CHROME_CSS)
   assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
@@ -149,9 +153,11 @@ test('control skin composes isolated responsibility layers in a stable order', (
   assert.equal(XIAOHEI_CHROME_CSS, [
     XIAOHEI_CHROME_TOKENS_CSS,
     XIAOHEI_SIDEBAR_CSS,
+    XIAOHEI_WORKSPACE_CSS,
     XIAOHEI_WORKSPACE_INTERACTION_CSS,
-    XIAOHEI_CONTROL_CSS,
-    XIAOHEI_SURFACE_CSS,
+    XIAOHEI_CONVERSATION_CSS,
+    XIAOHEI_COMPOSER_CSS,
+    XIAOHEI_OVERLAY_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
   ].join('\n'))
 })
@@ -176,16 +182,36 @@ test('workspace spirit feedback follows the pointer and releases only on folder 
 
 test('workspace folders own the sidebar spirit framing without ambient fog', () => {
   assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar'/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar\.workspaces'/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /role='treeitem'/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /aria-selected='true'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /data-slot='sidebar\.workspaces'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /aria-selected='true'/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /prefers-reduced-transparency:\s*reduce/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /forced-colors:\s*active/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /role='treeitem'\]\[aria-expanded\]/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /0 0 14px rgb\(83 218 194 \/ 10%\)/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /forced-colors:\s*active/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-expanded\]/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-spirit/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /not\(\[class\*='_collapsed'\]\)::before/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /isolation:\s*isolate/)
-  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /@keyframes|animation:/)
+  assert.doesNotMatch(`${XIAOHEI_SIDEBAR_CSS}\n${XIAOHEI_WORKSPACE_CSS}`, /@keyframes|animation:/)
+})
+
+test('sidebar material preserves the host geometry of fixed overlays', () => {
+  const sidebarShellRule = XIAOHEI_SIDEBAR_CSS.match(
+    /#root \[data-slot='sidebar'\] > div \{([^}]*)\}/,
+  )?.[1] ?? ''
+  const dialogRule = XIAOHEI_OVERLAY_CSS.match(
+    /#root \[role='dialog'\] \{([^}]*)\}/,
+  )?.[1] ?? ''
+
+  assert.notEqual(sidebarShellRule, '')
+  assert.notEqual(dialogRule, '')
+  assert.doesNotMatch(
+    sidebarShellRule,
+    /\b(?:backdrop-filter|filter|transform|perspective|contain)\s*:/,
+  )
+  assert.doesNotMatch(
+    dialogRule,
+    /\b(?:position|inset|width|height|transform)\s*:/,
+  )
 })
 
 test('random Heixiu portal visits are compact, ambient, and compositor safe', () => {
@@ -452,8 +478,8 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_SCENE_CSS, /brightness\(1\.16\) contrast\(1\.12\) saturate\(0\.78\)/)
   assert.match(XIAOHEI_SCENE_CSS, /data-slot='sidebar'/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data-slot='sidebar\.workspaces'/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /role='tree'[\s\S]*class\*='_empty'/)
-  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /role='tree'[^\{]*:only-child/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /role='tree'[\s\S]*class\*='_empty'/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /role='tree'[^\{]*:only-child/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /not\(\[class\*='_collapsed'\]\)/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /button:focus-visible/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /body\s*>\s*:not/)

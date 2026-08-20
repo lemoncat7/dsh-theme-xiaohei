@@ -6,10 +6,10 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
   #root [data-composer-card='true']::after,
   #root button[aria-label='发送消息'],
   #root button[aria-label='Send message'],
-  #root button[aria-label='发送消息']::before,
-  #root button[aria-label='Send message']::before,
   #root button[aria-label='发送消息']::after,
   #root button[aria-label='Send message']::after,
+  #root [data-slot='conversation.composer'] button,
+  #root [data-slot='sidebar'] button,
   #root [role='dialog']::before,
   #root [role='dialog']::after,
   #root [role='dialog'] button,
@@ -25,27 +25,23 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
   #root [role='dialog'],
   #root [role='menu'],
   #root [role='listbox'] {
-    background: var(--xiaohei-chrome-surface-raised) !important;
+    background: var(--xiaohei-surface-raised) !important;
   }
 
   #root [data-composer-card='true']::before,
-  #root button[aria-label='发送消息']::before,
-  #root button[aria-label='Send message']::before,
   #root [role='dialog']::before {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     background: transparent !important;
-    border: 1px solid var(--xiaohei-chrome-edge-strong);
+    border: 1px solid var(--xiaohei-edge-strong);
   }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   #root [data-composer-card='true']::before,
-  #root button[aria-label='发送消息']::before,
-  #root button[aria-label='Send message']::before,
   #root [role='dialog']::before {
     background: transparent;
-    border: 1px solid var(--xiaohei-chrome-edge-strong);
+    border: 1px solid var(--xiaohei-edge-strong);
   }
 }
 
@@ -65,8 +61,6 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
   #root [data-composer-card='true']::after,
   #root [role='dialog']::before,
   #root [role='dialog']::after,
-  #root button[aria-label='发送消息']::before,
-  #root button[aria-label='Send message']::before,
   #root button[aria-label='发送消息']::after,
   #root button[aria-label='Send message']::after {
     display: none;
