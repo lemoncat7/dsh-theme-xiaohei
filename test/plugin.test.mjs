@@ -33,8 +33,10 @@ import {
 } from '../lib/reactions.js'
 import {
   installXiaoheiPortalTransit,
+  resolveXiaoheiPortalInteraction,
   XIAOHEI_PORTAL_ACTIVITY_EVENT,
   XIAOHEI_PORTAL_LAYER_ID,
+  XIAOHEI_PORTAL_PROXIMITY_EVENT,
 } from '../lib/portal.js'
 import {
   XIAOHEI_COMPLETE,
@@ -138,6 +140,7 @@ test('control skin composes isolated responsibility layers in a stable order', (
 test('random Heixiu portal visits are compact, ambient, and compositor safe', () => {
   assert.match(XIAOHEI_PORTAL_LAYER_ID, /portal-layer$/)
   assert.match(XIAOHEI_PORTAL_ACTIVITY_EVENT, /portal-activity$/)
+  assert.match(XIAOHEI_PORTAL_PROXIMITY_EVENT, /portal-proximity$/)
   assert.match(XIAOHEI_PORTAL_CSS, /portal__void--entry/)
   assert.match(XIAOHEI_PORTAL_CSS, /portal__void--exit/)
   assert.match(XIAOHEI_PORTAL_CSS, /portal__traveler/)
@@ -151,11 +154,40 @@ test('random Heixiu portal visits are compact, ambient, and compositor safe', ()
   assert.equal(typeof installXiaoheiPortalTransit(undefined), 'function')
 })
 
+test('Heixiu only greets Xiaohei when the nearest portal phase is close', () => {
+  const mascot = { left: 100, top: 100, width: 200, height: 200 }
+  const nearEntry = resolveXiaoheiPortalInteraction(
+    { x: 180, y: 190, angle: 0 },
+    { x: 1000, y: 640, angle: 0 },
+    mascot,
+  )
+  assert.equal(nearEntry?.phase, 'entry')
+  assert.deepEqual(nearEntry?.target, { x: 180, y: 190 })
+  assert.ok(nearEntry.delayMs > 0)
+
+  const nearExit = resolveXiaoheiPortalInteraction(
+    { x: 1000, y: 640, angle: 0 },
+    { x: 160, y: 180, angle: 0 },
+    mascot,
+  )
+  assert.equal(nearExit?.phase, 'exit')
+  assert.deepEqual(nearExit?.target, { x: 160, y: 180 })
+  assert.ok(nearExit.delayMs > nearEntry.delayMs)
+
+  assert.equal(resolveXiaoheiPortalInteraction(
+    { x: 800, y: 620, angle: 0 },
+    { x: 1100, y: 720, angle: 0 },
+    mascot,
+  ), undefined)
+})
+
 test('idle gaze is proximity-bound, portal-aware, and motion-safe', () => {
   assert.match(XIAOHEI_GAZE_STYLE_ID, /gaze-style$/)
   assert.match(XIAOHEI_GAZE_CSS, /xiaohei-gaze__pupil--left/)
   assert.match(XIAOHEI_GAZE_CSS, /xiaohei-gaze__pupil--right/)
   assert.match(XIAOHEI_GAZE_CSS, /data-xiaohei-state='idle'/)
+  assert.match(XIAOHEI_GAZE_CSS, /xiaohei-gaze-blink-guard/)
+  assert.match(XIAOHEI_GAZE_CSS, /visibility:\s*hidden/)
   assert.match(XIAOHEI_GAZE_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_GAZE_CSS, /hover:\s*none[\s\S]*pointer:\s*coarse/)
   assert.match(XIAOHEI_GAZE_CSS, /will-change:\s*transform/)
@@ -181,6 +213,8 @@ test('idle reactions are complete-frame, proximity-aware, state-safe, and indepe
   assert.match(XIAOHEI_REACTION_CSS, /mascot-blink[\s\S]*z-index:\s*4/)
   assert.match(XIAOHEI_REACTION_CSS, /560ms steps\(8, end\)/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-ear-loop='true'[\s\S]*animation-iteration-count:\s*infinite/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-heixiu-interaction='true'/)
+  assert.match(XIAOHEI_REACTION_CSS, /xiaohei-heixiu-greeting-blink/)
   assert.match(XIAOHEI_REACTION_CSS, /steps\(9, end\)/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-state='idle'/)
   assert.match(XIAOHEI_REACTION_CSS, /prefers-reduced-motion:\s*reduce/)
@@ -188,12 +222,18 @@ test('idle reactions are complete-frame, proximity-aware, state-safe, and indepe
   assert.doesNotMatch(XIAOHEI_REACTION_CSS, /scale\(|rotate\(/)
   const keyframes = extractKeyframes(XIAOHEI_REACTION_CSS)
   assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
+  const greetingBlink = XIAOHEI_REACTION_CSS.match(/@keyframes xiaohei-heixiu-greeting-blink \{([\s\S]*?)\n\}/)?.[1] ?? ''
+  assert.match(greetingBlink, /87%,\s*100%\s*\{\s*opacity:\s*0/)
+  assert.doesNotMatch(greetingBlink, /transform|scale|translate/)
+  const greetingGazeGuard = XIAOHEI_REACTION_CSS.match(/@keyframes xiaohei-heixiu-greeting-gaze-guard \{([\s\S]*?)\n\}/)?.[1] ?? ''
+  assert.match(greetingGazeGuard, /visibility:\s*hidden/)
+  assert.doesNotMatch(greetingGazeGuard, /transform|scale|translate/)
 
   const source = installXiaoheiIdleReactions.toString()
   assert.equal(resolveXiaoheiIdleTailDelay(0), 12_000)
   assert.equal(resolveXiaoheiIdleTailDelay(0.5), 18_000)
   assert.equal(resolveXiaoheiIdleTailDelay(1), 24_000)
-  assert.match(source, /XIAOHEI_PORTAL_ACTIVITY_EVENT/)
+  assert.match(source, /XIAOHEI_PORTAL_PROXIMITY_EVENT/)
   assert.match(source, /visibilitychange/)
   assert.match(source, /previousState === ['"]complete['"]/u)
   assert.match(source, /syncPointerEarLoop/)

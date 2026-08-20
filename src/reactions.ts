@@ -5,9 +5,8 @@ import {
 } from './generated-keyart.js'
 import { XIAOHEI_REACTION_CSS } from './chrome/reactions.js'
 import {
-  XIAOHEI_PORTAL_ACTIVITY_EVENT,
-  XIAOHEI_PORTAL_LAYER_ID,
-  type XiaoheiPortalActivityDetail,
+  XIAOHEI_PORTAL_PROXIMITY_EVENT,
+  type XiaoheiPortalProximityDetail,
 } from './portal.js'
 
 export const XIAOHEI_REACTION_STYLE_ID = 'dsh-theme-xiaohei/reaction-style'
@@ -15,6 +14,8 @@ export const XIAOHEI_REACTION_STYLE_ID = 'dsh-theme-xiaohei/reaction-style'
 const POINTER_ENTER_RADIUS_PX = 460
 const POINTER_EXIT_RADIUS_PX = 520
 const EAR_DELAY_MS = 190
+const HEIXIU_EAR_DELAY_MS = 180
+const HEIXIU_INTERACTION_DURATION_MS = 520
 const EAR_DURATION_MS = 560
 const TAIL_SLOW_DURATION_MS = 1280
 const TAIL_COMPLETE_DURATION_MS = 700
@@ -72,6 +73,7 @@ export function installXiaoheiIdleReactions(
   let reactionTimer = 0
   let pendingEarTimer = 0
   let portalEarTimer = 0
+  let portalInteractionTimer = 0
   let idleTailTimer = 0
 
   const behaviorDisabled = (): boolean => reducedMotion.matches || coarsePointer.matches
@@ -88,6 +90,12 @@ export function installXiaoheiIdleReactions(
   const clearPortalEar = (): void => {
     clearTimer(portalEarTimer)
     portalEarTimer = 0
+  }
+
+  const clearPortalInteraction = (): void => {
+    clearTimer(portalInteractionTimer)
+    portalInteractionTimer = 0
+    mascot?.removeAttribute('data-xiaohei-heixiu-interaction')
   }
 
   const clearReaction = (): void => {
@@ -189,6 +197,7 @@ export function installXiaoheiIdleReactions(
     const ear = earToward(pointer)
     if (ear === undefined) return
     clearPortalEar()
+    clearPortalInteraction()
     clearReaction()
     setEarFrame(ear)
     if (mascot !== undefined) mascot.dataset.xiaoheiEarLoop = 'true'
@@ -265,28 +274,26 @@ export function installXiaoheiIdleReactions(
     stopPointerEarLoop()
   }
 
-  const onPortalActivity = (event: Event): void => {
-    const active = Boolean((event as CustomEvent<XiaoheiPortalActivityDetail>).detail?.active)
+  const onPortalProximity = (event: Event): void => {
+    const detail = (event as CustomEvent<XiaoheiPortalProximityDetail>).detail
+    const active = Boolean(detail?.active)
     if (!active) {
       clearPortalEar()
+      clearPortalInteraction()
       return
     }
 
-    if (pointerInside) return
-
-    // Gaze reacts to the same event immediately. Resolve the moving traveler
-    // shortly afterwards so the ear follows the direction already being seen.
+    if (pointerInside || !isIdle() || detail.target === undefined || mascot === undefined) return
+    clearPortalInteraction()
+    mascot.dataset.xiaoheiHeixiuInteraction = 'true'
+    portalInteractionTimer = win.setTimeout(clearPortalInteraction, HEIXIU_INTERACTION_DURATION_MS)
     clearPortalEar()
     portalEarTimer = win.setTimeout(() => {
       portalEarTimer = 0
-      const traveler = doc.getElementById(XIAOHEI_PORTAL_LAYER_ID)
-        ?.querySelector<HTMLElement>('.xiaohei-portal__traveler')
-      const rect = traveler?.getBoundingClientRect()
-      if (rect === undefined) return
-      const target = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-      const ear = earToward(target)
+      if (pointerInside) return
+      const ear = earToward(detail.target!)
       if (ear !== undefined) playEar(ear)
-    }, EAR_DELAY_MS)
+    }, HEIXIU_EAR_DELAY_MS)
   }
 
   const onStateChange = (): void => {
@@ -296,6 +303,7 @@ export function installXiaoheiIdleReactions(
     previousState = nextState
     clearPendingEar()
     clearPortalEar()
+    clearPortalInteraction()
     clearTimer(idleTailTimer)
     idleTailTimer = 0
 
@@ -313,6 +321,7 @@ export function installXiaoheiIdleReactions(
   const onVisibilityChange = (): void => {
     clearPendingEar()
     clearPortalEar()
+    clearPortalInteraction()
     clearTimer(idleTailTimer)
     idleTailTimer = 0
     if (doc.visibilityState === 'hidden') {
@@ -327,6 +336,7 @@ export function installXiaoheiIdleReactions(
   const onPreferenceChange = (): void => {
     clearPendingEar()
     clearPortalEar()
+    clearPortalInteraction()
     clearReaction()
     scheduleIdleTail()
     syncPointerEarLoop()
@@ -342,7 +352,7 @@ export function installXiaoheiIdleReactions(
   doc.addEventListener('pointermove', onPointerMove, { passive: true })
   doc.addEventListener('pointerleave', clearPointer)
   doc.addEventListener('visibilitychange', onVisibilityChange)
-  doc.addEventListener(XIAOHEI_PORTAL_ACTIVITY_EVENT, onPortalActivity)
+  doc.addEventListener(XIAOHEI_PORTAL_PROXIMITY_EVENT, onPortalProximity)
   win.addEventListener('blur', clearPointer)
   reducedMotion.addEventListener('change', onPreferenceChange)
   coarsePointer.addEventListener('change', onPreferenceChange)
@@ -353,6 +363,7 @@ export function installXiaoheiIdleReactions(
     disposed = true
     clearPendingEar()
     clearPortalEar()
+    clearPortalInteraction()
     clearTimer(idleTailTimer)
     clearReaction()
     mountObserver.disconnect()
@@ -360,13 +371,14 @@ export function installXiaoheiIdleReactions(
     doc.removeEventListener('pointermove', onPointerMove)
     doc.removeEventListener('pointerleave', clearPointer)
     doc.removeEventListener('visibilitychange', onVisibilityChange)
-    doc.removeEventListener(XIAOHEI_PORTAL_ACTIVITY_EVENT, onPortalActivity)
+    doc.removeEventListener(XIAOHEI_PORTAL_PROXIMITY_EVENT, onPortalProximity)
     win.removeEventListener('blur', clearPointer)
     reducedMotion.removeEventListener('change', onPreferenceChange)
     coarsePointer.removeEventListener('change', onPreferenceChange)
     reactionLayer?.remove()
     mascot?.removeAttribute('data-xiaohei-reaction')
     mascot?.removeAttribute('data-xiaohei-ear-loop')
+    mascot?.removeAttribute('data-xiaohei-heixiu-interaction')
     preloads.length = 0
     style.remove()
   }

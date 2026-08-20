@@ -6,19 +6,66 @@ export const XIAOHEI_PORTAL_STYLE_ID = 'dsh-theme-xiaohei/portal-style'
 export const XIAOHEI_PORTAL_LAYER_ID = 'dsh-theme-xiaohei/portal-layer'
 export const XIAOHEI_PORTAL_DURATION_MS = 2600
 export const XIAOHEI_PORTAL_ACTIVITY_EVENT = 'dsh-theme-xiaohei:portal-activity'
+export const XIAOHEI_PORTAL_PROXIMITY_EVENT = 'dsh-theme-xiaohei:portal-proximity'
 
 export interface XiaoheiPortalActivityDetail {
   active: boolean
 }
 
+export interface XiaoheiPortalProximityDetail {
+  active: boolean
+  target?: { x: number; y: number }
+}
+
 const INITIAL_VISIT_DELAY_MS = 1800
 const VISIT_MIN_DELAY_MS = 12_000
 const VISIT_DELAY_RANGE_MS = 9000
+const INTERACTION_RADIUS_PX = 420
+const INTERACTION_DURATION_MS = 520
+const ENTRY_INTERACTION_DELAY_MS = Math.round(XIAOHEI_PORTAL_DURATION_MS * 0.22)
+const EXIT_INTERACTION_DELAY_MS = Math.round(XIAOHEI_PORTAL_DURATION_MS * 0.76)
 
 interface PortalPoint {
   x: number
   y: number
   angle: number
+}
+
+interface PortalInteraction {
+  phase: 'entry' | 'exit'
+  target: { x: number; y: number }
+  delayMs: number
+}
+
+interface RectLike {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+/** Resolve the closest visible portal phase without overlapping distant visits. */
+export function resolveXiaoheiPortalInteraction(
+  start: PortalPoint,
+  finish: PortalPoint,
+  mascotRect: RectLike,
+): PortalInteraction | undefined {
+  const head = {
+    x: mascotRect.left + mascotRect.width * 0.35,
+    y: mascotRect.top + mascotRect.height * 0.42,
+  }
+  const candidates: PortalInteraction[] = [
+    { phase: 'entry', target: { x: start.x, y: start.y }, delayMs: ENTRY_INTERACTION_DELAY_MS },
+    { phase: 'exit', target: { x: finish.x, y: finish.y }, delayMs: EXIT_INTERACTION_DELAY_MS },
+  ]
+  const distance = (candidate: PortalInteraction): number => Math.hypot(
+    candidate.target.x - head.x,
+    candidate.target.y - head.y,
+  )
+  const nearest = distance(candidates[0]!) <= distance(candidates[1]!)
+    ? candidates[0]!
+    : candidates[1]!
+  return distance(nearest) <= INTERACTION_RADIUS_PX ? nearest : undefined
 }
 
 /** Install ambient random visits without coupling them to conversation state. */
@@ -56,6 +103,9 @@ export function installXiaoheiPortalTransit(
   let disposed = false
   let animationTimer = 0
   let visitTimer = 0
+  let interactionStartTimer = 0
+  let interactionEndTimer = 0
+  let interactionActive = false
   let visitsStarted = false
 
   const mount = (): boolean => {
@@ -72,6 +122,16 @@ export function installXiaoheiPortalTransit(
     if (timer !== 0) win.clearTimeout(timer)
   }
 
+  const endInteraction = (): void => {
+    clearTimer(interactionStartTimer)
+    clearTimer(interactionEndTimer)
+    interactionStartTimer = 0
+    interactionEndTimer = 0
+    if (!interactionActive) return
+    interactionActive = false
+    dispatchPortalProximity(doc, false)
+  }
+
   const scheduleVisit = (initial = false): void => {
     clearTimer(visitTimer)
     if (disposed) return
@@ -83,6 +143,7 @@ export function installXiaoheiPortalTransit(
 
   const play = (): void => {
     if (disposed || layer.dataset.running === 'true' || !mount()) return
+    endInteraction()
     const [start, finish] = choosePortalPoints(doc)
     const styleMap = layer.style
     styleMap.setProperty('--portal-entry-x', `${start.x}px`)
@@ -101,10 +162,25 @@ export function installXiaoheiPortalTransit(
     void layer.offsetWidth
     layer.dataset.running = 'true'
     dispatchPortalActivity(doc, true)
+    const mascotRect = doc.querySelector<HTMLElement>('.xiaohei-scene__mascot')?.getBoundingClientRect()
+    const interaction = mascotRect === undefined
+      ? undefined
+      : resolveXiaoheiPortalInteraction(start, finish, mascotRect)
+    layer.dataset.interaction = interaction?.phase ?? 'none'
+    if (interaction !== undefined) {
+      interactionStartTimer = win.setTimeout(() => {
+        interactionStartTimer = 0
+        if (disposed || layer.dataset.running !== 'true') return
+        interactionActive = true
+        dispatchPortalProximity(doc, true, interaction.target)
+        interactionEndTimer = win.setTimeout(endInteraction, INTERACTION_DURATION_MS)
+      }, interaction.delayMs)
+    }
     clearTimer(animationTimer)
     animationTimer = win.setTimeout(() => {
       animationTimer = 0
       if (disposed) return
+      endInteraction()
       layer.dataset.running = 'false'
       dispatchPortalActivity(doc, false)
       scheduleVisit()
@@ -133,11 +209,24 @@ export function installXiaoheiPortalTransit(
     disposed = true
     clearTimer(animationTimer)
     clearTimer(visitTimer)
+    endInteraction()
     mountObserver?.disconnect()
     if (layer.dataset.running === 'true') dispatchPortalActivity(doc, false)
     layer.remove()
     style.remove()
   }
+}
+
+function dispatchPortalProximity(
+  doc: Document,
+  active: boolean,
+  target?: { x: number; y: number },
+): void {
+  const EventConstructor = doc.defaultView?.CustomEvent
+  if (EventConstructor === undefined) return
+  doc.dispatchEvent(new EventConstructor<XiaoheiPortalProximityDetail>(XIAOHEI_PORTAL_PROXIMITY_EVENT, {
+    detail: target === undefined ? { active } : { active, target },
+  }))
 }
 
 function dispatchPortalActivity(doc: Document, active: boolean): void {
