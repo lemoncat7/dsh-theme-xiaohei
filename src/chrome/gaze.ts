@@ -39,11 +39,31 @@ html[data-xiaohei-appearance='light'] .xiaohei-gaze__base {
   filter: brightness(1.02) contrast(1.07) saturate(0.9);
 }
 
+.xiaohei-gaze__eye {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.xiaohei-gaze__eye--left {
+  left: 22.65%;
+  top: 34.35%;
+  width: 9%;
+  height: 13.7%;
+}
+
+.xiaohei-gaze__eye--right {
+  left: 38.25%;
+  top: 35.15%;
+  width: 13.3%;
+  height: 14.5%;
+}
+
 .xiaohei-gaze__pupil {
   position: absolute;
   display: block;
-  width: 5.15%;
-  height: 9.25%;
   border-radius: 48% 52% 49% 51%;
   background:
     radial-gradient(circle at 39% 27%, #F3F7F3 0 12%, transparent 15%),
@@ -61,15 +81,17 @@ html[data-xiaohei-appearance='light'] .xiaohei-gaze__base {
 }
 
 .xiaohei-gaze__pupil--left {
-  left: 27.15%;
-  top: 41.05%;
+  left: 50%;
+  top: 49%;
+  width: 57.25%;
+  height: 67.5%;
 }
 
 .xiaohei-gaze__pupil--right {
-  left: 42.75%;
-  top: 42.2%;
-  width: 5.35%;
-  height: 9.45%;
+  left: 33.5%;
+  top: 48.7%;
+  width: 40.25%;
+  height: 65.2%;
 }
 
 @media (prefers-reduced-motion: reduce), (hover: none) and (pointer: coarse) {

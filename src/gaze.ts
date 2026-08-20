@@ -181,9 +181,17 @@ function createGazeLayer(doc: Document): HTMLSpanElement {
 
   const leftPupil = doc.createElement('span')
   leftPupil.className = 'xiaohei-gaze__pupil xiaohei-gaze__pupil--left'
+  const leftEye = doc.createElement('span')
+  leftEye.className = 'xiaohei-gaze__eye xiaohei-gaze__eye--left'
+  leftEye.append(leftPupil)
+
   const rightPupil = doc.createElement('span')
   rightPupil.className = 'xiaohei-gaze__pupil xiaohei-gaze__pupil--right'
-  layer.append(base, leftPupil, rightPupil)
+  const rightEye = doc.createElement('span')
+  rightEye.className = 'xiaohei-gaze__eye xiaohei-gaze__eye--right'
+  rightEye.append(rightPupil)
+
+  layer.append(base, leftEye, rightEye)
   return layer
 }
 
