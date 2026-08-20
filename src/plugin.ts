@@ -3,6 +3,7 @@ import { bindXiaoheiAppearance } from './appearance.js'
 import { installXiaoheiChrome } from './chrome.js'
 import { installXiaoheiGaze } from './gaze.js'
 import { installXiaoheiPortalTransit } from './portal.js'
+import { installXiaoheiIdleReactions } from './reactions.js'
 import { installXiaoheiScene } from './scene.js'
 import { bindXiaoheiSessionState } from './state.js'
 import { XIAOHEI_THEME_TOKEN_OVERRIDES } from './theme.js'
@@ -21,6 +22,7 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(installXiaoheiScene, 'xiaohei-theme: install moonlit forest scene')
   ctx.effect(installXiaoheiPortalTransit, 'xiaohei-theme: install random Heixiu portal visits')
   ctx.effect(installXiaoheiGaze, 'xiaohei-theme: install proximity gaze')
+  ctx.effect(installXiaoheiIdleReactions, 'xiaohei-theme: install sparse idle reactions')
   ctx.effect(
     () => bindXiaoheiSessionState(ctx.sessions),
     'xiaohei-theme: follow current session agent state',

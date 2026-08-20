@@ -7,7 +7,13 @@ export {
 } from './chrome.js'
 export { XIAOHEI_PORTAL_CSS } from './chrome/portal.js'
 export { XIAOHEI_GAZE_CSS } from './chrome/gaze.js'
+export { XIAOHEI_REACTION_CSS } from './chrome/reactions.js'
 export { installXiaoheiGaze, XIAOHEI_GAZE_STYLE_ID } from './gaze.js'
+export {
+  installXiaoheiIdleReactions,
+  resolveXiaoheiIdleTailDelay,
+  XIAOHEI_REACTION_STYLE_ID,
+} from './reactions.js'
 export {
   installXiaoheiPortalTransit,
   XIAOHEI_PORTAL_ACTIVITY_EVENT,

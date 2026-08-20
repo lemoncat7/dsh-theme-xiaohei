@@ -20,11 +20,17 @@ import { XIAOHEI_CONTROL_CSS } from '../lib/chrome/controls.js'
 import { XIAOHEI_SURFACE_CSS } from '../lib/chrome/surfaces.js'
 import { XIAOHEI_PORTAL_CSS } from '../lib/chrome/portal.js'
 import { XIAOHEI_GAZE_CSS } from '../lib/chrome/gaze.js'
+import { XIAOHEI_REACTION_CSS } from '../lib/chrome/reactions.js'
 import { XIAOHEI_CHROME_TOKENS_CSS } from '../lib/chrome/tokens.js'
 import {
   installXiaoheiGaze,
   XIAOHEI_GAZE_STYLE_ID,
 } from '../lib/gaze.js'
+import {
+  installXiaoheiIdleReactions,
+  resolveXiaoheiIdleTailDelay,
+  XIAOHEI_REACTION_STYLE_ID,
+} from '../lib/reactions.js'
 import {
   installXiaoheiPortalTransit,
   XIAOHEI_PORTAL_ACTIVITY_EVENT,
@@ -38,7 +44,10 @@ import {
   XIAOHEI_HEIXIU_BLINK,
   XIAOHEI_HEIXIU_OPEN,
   XIAOHEI_IDLE_EYE_BASE,
+  XIAOHEI_IDLE_EAR_LEFT,
+  XIAOHEI_IDLE_EAR_RIGHT,
   XIAOHEI_IDLE_SHEET,
+  XIAOHEI_IDLE_TAIL,
   XIAOHEI_KEY_ART,
   XIAOHEI_NIGHT_KEY_ART,
   XIAOHEI_STREAMING,
@@ -87,6 +96,7 @@ test('shades DSH native palettes without forcing a theme preference', () => {
     'xiaohei-theme: install moonlit forest scene',
     'xiaohei-theme: install random Heixiu portal visits',
     'xiaohei-theme: install proximity gaze',
+    'xiaohei-theme: install sparse idle reactions',
     'xiaohei-theme: follow current session agent state',
   ])
   assert.equal(calls.some(call => call[0] === 'setTheme' || call[0] === 'register'), false)
@@ -159,6 +169,33 @@ test('idle gaze is proximity-bound, portal-aware, and motion-safe', () => {
   assert.equal(typeof installXiaoheiGaze(undefined), 'function')
 })
 
+test('idle reactions are sparse, complete-frame, state-safe, and independently owned', () => {
+  assert.match(XIAOHEI_REACTION_STYLE_ID, /reaction-style$/)
+  assert.match(XIAOHEI_REACTION_CSS, /xiaohei-scene__idle-reaction/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='ear-left'/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='ear-right'/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='tail-slow'/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='tail-complete'/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction[\s\S]*xiaohei-gaze__base[\s\S]*opacity:\s*0/)
+  assert.match(XIAOHEI_REACTION_CSS, /mascot-sheet--blink[\s\S]*z-index:\s*4/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-state='idle'/)
+  assert.match(XIAOHEI_REACTION_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.match(XIAOHEI_REACTION_CSS, /hover:\s*none[\s\S]*pointer:\s*coarse/)
+  assert.doesNotMatch(XIAOHEI_REACTION_CSS, /scale\(|rotate\(|animation[^;]*infinite/)
+  const keyframes = extractKeyframes(XIAOHEI_REACTION_CSS)
+  assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
+
+  const source = installXiaoheiIdleReactions.toString()
+  assert.equal(resolveXiaoheiIdleTailDelay(0), 12_000)
+  assert.equal(resolveXiaoheiIdleTailDelay(0.5), 18_000)
+  assert.equal(resolveXiaoheiIdleTailDelay(1), 24_000)
+  assert.match(source, /XIAOHEI_PORTAL_ACTIVITY_EVENT/)
+  assert.match(source, /visibilitychange/)
+  assert.match(source, /previousState === ['"]complete['"]/)
+  assert.doesNotMatch(source, /requestAnimationFrame/)
+  assert.equal(typeof installXiaoheiIdleReactions(undefined), 'function')
+})
+
 test('resolved Light / Dark / System appearance drives the scene attribute', () => {
   const attributes = new Map()
   let listener
@@ -196,6 +233,9 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.equal(XIAOHEI_KEY_ART, XIAOHEI_NIGHT_KEY_ART)
   assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_EYE_BASE, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDLE_EAR_LEFT, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDLE_EAR_RIGHT, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDLE_TAIL, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_HEIXIU_OPEN, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_HEIXIU_BLINK, /^data:image\/webp;base64,/)
   for (const asset of [

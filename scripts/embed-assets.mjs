@@ -8,11 +8,14 @@ const backgroundAssets = [
 const embeddedBackgrounds = await Promise.all(backgroundAssets.map(async ([name, filename]) => {
   const assetPath = new URL(`../src/assets/${filename}`, import.meta.url)
   const asset = await readFile(assetPath)
-  return `export const ${name} = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
+  return `export const ${name}: string = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
 }))
 const characterAssets = [
   ['XIAOHEI_IDLE_SHEET', 'xiaohei-idle.webp'],
   ['XIAOHEI_IDLE_EYE_BASE', 'xiaohei-idle-eye-base-v1.webp'],
+  ['XIAOHEI_IDLE_EAR_LEFT', 'xiaohei-idle-ear-left-v1.webp'],
+  ['XIAOHEI_IDLE_EAR_RIGHT', 'xiaohei-idle-ear-right-v1.webp'],
+  ['XIAOHEI_IDLE_TAIL', 'xiaohei-idle-tail-v1.webp'],
   ['XIAOHEI_THINKING', 'xiaohei-thinking-canonical-v12.webp'],
   ['XIAOHEI_STREAMING', 'xiaohei-streaming-tailwrite-v1.webp'],
   ['XIAOHEI_TOOL', 'xiaohei-tool-canonical-v2.webp'],
@@ -25,7 +28,7 @@ const characterAssets = [
 const embeddedCharacters = await Promise.all(characterAssets.map(async ([name, filename]) => {
   const assetPath = new URL(`../src/assets/character/${filename}`, import.meta.url)
   const asset = await readFile(assetPath)
-  return `export const ${name} = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
+  return `export const ${name}: string = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
 }))
 
 await writeFile(

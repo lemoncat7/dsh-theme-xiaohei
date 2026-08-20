@@ -2,6 +2,9 @@ import { readFile } from 'node:fs/promises'
 
 const assets = [
   ['xiaohei-idle-eye-base-v1.webp', 256, 256],
+  ['xiaohei-idle-ear-left-v1.webp', 1280, 256],
+  ['xiaohei-idle-ear-right-v1.webp', 1280, 256],
+  ['xiaohei-idle-tail-v1.webp', 1536, 256],
   ['xiaohei-thinking-canonical-v12.webp', 512, 512],
   ['xiaohei-streaming-tailwrite-v1.webp', 512, 512],
   ['xiaohei-tool-canonical-v2.webp', 512, 512],
