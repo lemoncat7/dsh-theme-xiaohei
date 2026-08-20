@@ -1,10 +1,10 @@
-/** Native sidebar hierarchy with a static domain-depth plane and no extra icons. */
+/** Native sidebar hierarchy with an ambient spirit glow and no extra icons. */
 export const XIAOHEI_SIDEBAR_CSS = `
 #root [data-slot='sidebar'] > div {
   position: relative;
-  isolation: isolate;
   background:
-    radial-gradient(130% 48% at 12% 90%, rgb(51 138 126 / 18%) 0%, transparent 68%),
+    radial-gradient(110% 40% at 8% 94%, rgb(83 205 183 / 28%) 0%, rgb(51 138 126 / 13%) 38%, transparent 72%),
+    radial-gradient(70% 52% at 102% 48%, rgb(91 218 197 / 15%) 0%, transparent 72%),
     linear-gradient(180deg, rgb(5 18 22 / 70%) 0%, rgb(6 20 23 / 62%) 58%, rgb(6 22 24 / 78%) 100%) !important;
   border-right: 1px solid rgb(139 229 213 / 14%);
   box-shadow:
@@ -16,17 +16,18 @@ export const XIAOHEI_SIDEBAR_CSS = `
 #root [data-slot='sidebar'] > div:not([class*='_collapsed'])::before {
   content: '';
   position: absolute;
-  z-index: 0;
-  top: 5.4rem;
+  top: 4.75rem;
   right: 0;
-  bottom: 5rem;
-  width: 2rem;
+  bottom: 4.25rem;
+  width: 5.5rem;
   pointer-events: none;
-  background: radial-gradient(ellipse at 100% 52%, rgb(121 232 212 / 13%), transparent 72%);
-  border-right: 1px solid rgb(151 239 223 / 14%);
-  opacity: 0.78;
-  -webkit-mask-image: linear-gradient(180deg, transparent, black 18%, black 82%, transparent);
-  mask-image: linear-gradient(180deg, transparent, black 18%, black 82%, transparent);
+  background:
+    radial-gradient(ellipse at 112% 48%, rgb(154 255 236 / 28%) 0%, rgb(92 224 202 / 14%) 38%, transparent 72%),
+    linear-gradient(90deg, transparent 70%, rgb(155 245 229 / 10%) 100%);
+  border-right: 1px solid rgb(169 247 233 / 24%);
+  opacity: 0.96;
+  -webkit-mask-image: linear-gradient(180deg, transparent, black 14%, black 86%, transparent);
+  mask-image: linear-gradient(180deg, transparent, black 14%, black 86%, transparent);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
@@ -162,7 +163,8 @@ export const XIAOHEI_SIDEBAR_CSS = `
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
   background:
-    radial-gradient(130% 48% at 12% 90%, rgb(85 142 119 / 12%) 0%, transparent 68%),
+    radial-gradient(110% 40% at 8% 94%, rgb(72 152 126 / 20%) 0%, rgb(85 142 119 / 8%) 40%, transparent 72%),
+    radial-gradient(70% 52% at 102% 48%, rgb(65 144 122 / 11%) 0%, transparent 72%),
     linear-gradient(180deg, rgb(244 248 244 / 84%) 0%, rgb(239 245 240 / 78%) 58%, rgb(235 242 236 / 88%) 100%) !important;
   border-right-color: rgb(37 92 79 / 13%);
   box-shadow:
@@ -172,8 +174,10 @@ html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed'])::before {
-  background: radial-gradient(ellipse at 100% 52%, rgb(47 133 118 / 9%), transparent 72%);
-  border-right-color: rgb(47 133 118 / 13%);
+  background:
+    radial-gradient(ellipse at 112% 48%, rgb(44 135 113 / 20%) 0%, rgb(63 151 128 / 9%) 38%, transparent 72%),
+    linear-gradient(90deg, transparent 70%, rgb(46 130 110 / 7%) 100%);
+  border-right-color: rgb(38 117 99 / 20%);
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {

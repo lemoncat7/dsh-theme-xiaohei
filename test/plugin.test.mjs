@@ -149,6 +149,8 @@ test('sidebar depth stays static, semantic, and isolated from scene behavior', (
   assert.match(XIAOHEI_SIDEBAR_CSS, /aria-selected='true'/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /prefers-reduced-transparency:\s*reduce/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /forced-colors:\s*active/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /width:\s*5\.5rem/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /isolation:\s*isolate/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /@keyframes|animation:/)
 })
 
