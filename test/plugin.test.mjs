@@ -192,6 +192,7 @@ test('idle reactions are sparse, complete-frame, state-safe, and independently o
   assert.match(source, /XIAOHEI_PORTAL_ACTIVITY_EVENT/)
   assert.match(source, /visibilitychange/)
   assert.match(source, /previousState === ['"]complete['"]/)
+  assert.doesNotMatch(source, /cooldown/i)
   assert.doesNotMatch(source, /requestAnimationFrame/)
   assert.equal(typeof installXiaoheiIdleReactions(undefined), 'function')
 })

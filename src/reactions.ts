@@ -16,7 +16,6 @@ const POINTER_ENTER_RADIUS_PX = 460
 const POINTER_EXIT_RADIUS_PX = 520
 const EAR_DELAY_MS = 190
 const EAR_DURATION_MS = 560
-const EAR_COOLDOWN_MS = 4800
 const TAIL_SLOW_DURATION_MS = 1280
 const TAIL_COMPLETE_DURATION_MS = 700
 const IDLE_TAIL_MIN_DELAY_MS = 12_000
@@ -66,7 +65,6 @@ export function installXiaoheiIdleReactions(
   let pointer: Point | undefined
   let pointerInside = false
   let previousState = currentState(doc)
-  let earCooldownUntil = 0
   let reactionTimer = 0
   let pendingEarTimer = 0
   let idleTailTimer = 0
@@ -113,9 +111,7 @@ export function installXiaoheiIdleReactions(
   }
 
   const playEar = (ear: EarReaction): void => {
-    const now = Date.now()
-    if (now < earCooldownUntil) return
-    if (play(ear, EAR_DURATION_MS)) earCooldownUntil = now + EAR_COOLDOWN_MS
+    play(ear, EAR_DURATION_MS)
   }
 
   const attach = (): void => {
