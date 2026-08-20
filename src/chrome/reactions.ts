@@ -26,6 +26,10 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__idle-reaction {
   animation: xiaohei-idle-ear-reaction 560ms steps(8, end) both;
 }
 
+.xiaohei-scene__mascot[data-xiaohei-ear-loop='true'] .xiaohei-scene__idle-reaction {
+  animation-iteration-count: infinite;
+}
+
 .xiaohei-scene__mascot[data-xiaohei-reaction='tail-slow'] .xiaohei-scene__idle-reaction,
 .xiaohei-scene__mascot[data-xiaohei-reaction='tail-complete'] .xiaohei-scene__idle-reaction {
   width: 1000%;
@@ -55,7 +59,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__idle-reaction {
 }
 
 /* Blink remains the highest character frame and naturally covers the pupils. */
-.xiaohei-scene__mascot-sheet.xiaohei-scene__mascot-sheet--blink {
+.xiaohei-scene__mascot-blink {
   z-index: 4;
 }
 

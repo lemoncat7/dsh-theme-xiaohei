@@ -5,6 +5,7 @@ import {
   XIAOHEI_ERROR,
   XIAOHEI_HEIXIU_BLINK,
   XIAOHEI_HEIXIU_OPEN,
+  XIAOHEI_IDLE_BLINK,
   XIAOHEI_IDLE_SHEET,
   XIAOHEI_NIGHT_KEY_ART,
   XIAOHEI_STREAMING,
@@ -624,7 +625,18 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__heixiu > img {
   transition: opacity 120ms ease-out;
 }
 
-.xiaohei-scene__mascot-sheet--blink {
+.xiaohei-scene__mascot-blink {
+  position: absolute;
+  display: block;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  opacity: 0;
+  z-index: 3;
+  filter: brightness(1.32) contrast(1.02) saturate(1.04);
   will-change: opacity;
   animation: xiaohei-mascot-blink 5.2s step-end infinite;
 }
@@ -652,6 +664,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__heixiu > img {
 }
 
 html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot-sheet,
+html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot-blink,
 html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot-state {
   filter: brightness(1.02) contrast(1.07) saturate(0.9);
 }
@@ -664,7 +677,7 @@ html:not([data-xiaohei-state='idle']) .xiaohei-scene__mascot-sheet--open {
   opacity: 0;
 }
 
-html:not([data-xiaohei-state='idle']) .xiaohei-scene__mascot-sheet--blink {
+html:not([data-xiaohei-state='idle']) .xiaohei-scene__mascot-blink {
   opacity: 0;
   animation: none;
 }
@@ -1093,7 +1106,7 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   .xiaohei-scene__sidebar-aura,
   .xiaohei-scene__sidebar-current,
   .xiaohei-scene__sidebar-spirit,
-  .xiaohei-scene__mascot-sheet--blink,
+  .xiaohei-scene__mascot-blink,
   .xiaohei-scene__heixiu,
   .xiaohei-scene__heixiu-open,
   .xiaohei-scene__heixiu-blink,
@@ -1217,7 +1230,7 @@ export function installXiaoheiScene(
         idleViewport.className = 'xiaohei-scene__mascot-idle-viewport'
         idleViewport.append(
           createIdleSheet(doc, 7, 'xiaohei-scene__mascot-sheet--open'),
-          createIdleSheet(doc, 6, 'xiaohei-scene__mascot-sheet--blink'),
+          createIdleBlink(doc),
         )
         mascot.append(
           idleViewport,
@@ -1303,6 +1316,16 @@ function createIdleSheet(doc: Document, frame: number, modifier: string): HTMLIm
   sheet.src = XIAOHEI_IDLE_SHEET
   setIdleFrame(sheet, frame)
   return sheet
+}
+
+function createIdleBlink(doc: Document): HTMLImageElement {
+  const image = doc.createElement('img')
+  image.className = 'xiaohei-scene__mascot-blink'
+  image.alt = ''
+  image.decoding = 'async'
+  image.fetchPriority = 'low'
+  image.src = XIAOHEI_IDLE_BLINK
+  return image
 }
 
 function setIdleFrame(sheet: HTMLImageElement, frame: number): void {

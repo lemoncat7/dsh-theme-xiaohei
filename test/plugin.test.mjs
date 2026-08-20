@@ -46,6 +46,7 @@ import {
   XIAOHEI_IDLE_EYE_BASE,
   XIAOHEI_IDLE_EAR_LEFT,
   XIAOHEI_IDLE_EAR_RIGHT,
+  XIAOHEI_IDLE_BLINK,
   XIAOHEI_IDLE_SHEET,
   XIAOHEI_IDLE_TAIL,
   XIAOHEI_KEY_ART,
@@ -169,7 +170,7 @@ test('idle gaze is proximity-bound, portal-aware, and motion-safe', () => {
   assert.equal(typeof installXiaoheiGaze(undefined), 'function')
 })
 
-test('idle reactions are sparse, complete-frame, state-safe, and independently owned', () => {
+test('idle reactions are complete-frame, proximity-aware, state-safe, and independently owned', () => {
   assert.match(XIAOHEI_REACTION_STYLE_ID, /reaction-style$/)
   assert.match(XIAOHEI_REACTION_CSS, /xiaohei-scene__idle-reaction/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='ear-left'/)
@@ -177,13 +178,14 @@ test('idle reactions are sparse, complete-frame, state-safe, and independently o
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='tail-slow'/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='tail-complete'/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction[\s\S]*xiaohei-gaze__base[\s\S]*opacity:\s*0/)
-  assert.match(XIAOHEI_REACTION_CSS, /mascot-sheet--blink[\s\S]*z-index:\s*4/)
+  assert.match(XIAOHEI_REACTION_CSS, /mascot-blink[\s\S]*z-index:\s*4/)
   assert.match(XIAOHEI_REACTION_CSS, /560ms steps\(8, end\)/)
+  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-ear-loop='true'[\s\S]*animation-iteration-count:\s*infinite/)
   assert.match(XIAOHEI_REACTION_CSS, /steps\(9, end\)/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-state='idle'/)
   assert.match(XIAOHEI_REACTION_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_REACTION_CSS, /hover:\s*none[\s\S]*pointer:\s*coarse/)
-  assert.doesNotMatch(XIAOHEI_REACTION_CSS, /scale\(|rotate\(|animation[^;]*infinite/)
+  assert.doesNotMatch(XIAOHEI_REACTION_CSS, /scale\(|rotate\(/)
   const keyframes = extractKeyframes(XIAOHEI_REACTION_CSS)
   assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
 
@@ -193,7 +195,9 @@ test('idle reactions are sparse, complete-frame, state-safe, and independently o
   assert.equal(resolveXiaoheiIdleTailDelay(1), 24_000)
   assert.match(source, /XIAOHEI_PORTAL_ACTIVITY_EVENT/)
   assert.match(source, /visibilitychange/)
-  assert.match(source, /previousState === ['"]complete['"]/)
+  assert.match(source, /previousState === ['"]complete['"]/u)
+  assert.match(source, /syncPointerEarLoop/)
+  assert.match(source, /xiaoheiEarLoop/)
   assert.doesNotMatch(source, /cooldown/i)
   assert.doesNotMatch(source, /requestAnimationFrame/)
   assert.equal(typeof installXiaoheiIdleReactions(undefined), 'function')
@@ -235,6 +239,7 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_DAWN_KEY_ART, /^data:image\/webp;base64,/)
   assert.equal(XIAOHEI_KEY_ART, XIAOHEI_NIGHT_KEY_ART)
   assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDLE_BLINK, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_EYE_BASE, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_EAR_LEFT, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_EAR_RIGHT, /^data:image\/webp;base64,/)
@@ -251,6 +256,9 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   ]) assert.match(asset, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-mascot-blink/)
+  assert.match(installXiaoheiScene.toString(), /createIdleBlink/)
+  const blinkKeyframes = XIAOHEI_SCENE_CSS.match(/@keyframes xiaohei-mascot-blink \{([\s\S]*?)\n\}/)?.[1] ?? ''
+  assert.doesNotMatch(blinkKeyframes, /transform|scale|translate/)
   for (const state of ['thinking', 'streaming', 'tool', 'waiting', 'complete', 'error']) {
     assert.match(XIAOHEI_SCENE_CSS, new RegExp(`data-xiaohei-state='${state}'`))
     assert.match(XIAOHEI_SCENE_CSS, new RegExp(`mascot-state--${state}`))

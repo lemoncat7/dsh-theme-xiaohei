@@ -1,6 +1,6 @@
 /** Visual geometry for Xiaohei's idle gaze. Behavior lives in ../gaze.ts. */
 export const XIAOHEI_GAZE_CSS = `
-.xiaohei-scene__mascot-sheet.xiaohei-scene__mascot-sheet--blink {
+.xiaohei-scene__mascot-blink {
   z-index: 3;
 }
 

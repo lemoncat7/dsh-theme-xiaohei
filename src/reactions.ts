@@ -37,7 +37,7 @@ export function resolveXiaoheiIdleTailDelay(randomValue = Math.random()): number
   return IDLE_TAIL_MIN_DELAY_MS + Math.round(normalized * IDLE_TAIL_DELAY_RANGE_MS)
 }
 
-/** Install sparse idle-only reactions without maintaining an animation loop. */
+/** Install proximity ear motion and sparse idle tails without a JavaScript frame loop. */
 export function installXiaoheiIdleReactions(
   doc: Document | undefined = typeof document === 'undefined' ? undefined : document,
 ): () => void {
@@ -67,6 +67,7 @@ export function installXiaoheiIdleReactions(
   let previousState = currentState(doc)
   let reactionTimer = 0
   let pendingEarTimer = 0
+  let portalEarTimer = 0
   let idleTailTimer = 0
 
   const behaviorDisabled = (): boolean => reducedMotion.matches || coarsePointer.matches
@@ -80,10 +81,16 @@ export function installXiaoheiIdleReactions(
     pendingEarTimer = 0
   }
 
+  const clearPortalEar = (): void => {
+    clearTimer(portalEarTimer)
+    portalEarTimer = 0
+  }
+
   const clearReaction = (): void => {
     clearTimer(reactionTimer)
     reactionTimer = 0
     mascot?.removeAttribute('data-xiaohei-reaction')
+    mascot?.removeAttribute('data-xiaohei-ear-loop')
     reactionLayer?.removeAttribute('data-reaction')
   }
 
@@ -112,6 +119,18 @@ export function installXiaoheiIdleReactions(
 
   const playEar = (ear: EarReaction): void => {
     play(ear, EAR_DURATION_MS)
+  }
+
+  const setEarFrame = (ear: EarReaction): void => {
+    if (mascot === undefined || reactionLayer === undefined) return
+    reactionLayer.src = sourceFor(ear)
+    reactionLayer.dataset.reaction = ear
+    mascot.dataset.xiaoheiReaction = ear
+  }
+
+  const stopPointerEarLoop = (): void => {
+    clearPendingEar()
+    if (mascot?.dataset.xiaoheiEarLoop === 'true') clearReaction()
   }
 
   const attach = (): void => {
@@ -150,14 +169,43 @@ export function installXiaoheiIdleReactions(
     return target.x < origin.x ? 'ear-left' : 'ear-right'
   }
 
-  const scheduleEarToward = (target: Point, delayMs = EAR_DELAY_MS): void => {
-    clearPendingEar()
-    const ear = earToward(target)
-    if (ear === undefined || behaviorDisabled() || !isIdle()) return
+  const startPointerEarLoop = (): void => {
+    if (!pointerInside || pointer === undefined || behaviorDisabled() || !isIdle()) return
+    const ear = earToward(pointer)
+    if (ear === undefined) return
+    clearPortalEar()
+    clearReaction()
+    setEarFrame(ear)
+    if (mascot !== undefined) mascot.dataset.xiaoheiEarLoop = 'true'
+  }
+
+  const schedulePointerEarLoop = (): void => {
+    if (pendingEarTimer !== 0 || mascot?.dataset.xiaoheiEarLoop === 'true') return
+    if (!pointerInside || pointer === undefined || behaviorDisabled() || !isIdle()) return
     pendingEarTimer = win.setTimeout(() => {
       pendingEarTimer = 0
-      playEar(ear)
-    }, delayMs)
+      startPointerEarLoop()
+    }, EAR_DELAY_MS)
+  }
+
+  const refreshPointerEarDirection = (): void => {
+    if (mascot?.dataset.xiaoheiEarLoop !== 'true' || pointer === undefined) return
+    const ear = earToward(pointer)
+    if (ear === undefined || mascot.dataset.xiaoheiReaction === ear) return
+    setEarFrame(ear)
+  }
+
+  const syncPointerEarLoop = (): void => {
+    const origin = pointer === undefined ? undefined : eyeCenter()
+    const inside = pointer !== undefined
+      && origin !== undefined
+      && Math.hypot(pointer.x - origin.x, pointer.y - origin.y) < POINTER_ENTER_RADIUS_PX
+    pointerInside = inside
+    if (inside) {
+      schedulePointerEarLoop()
+    } else {
+      stopPointerEarLoop()
+    }
   }
 
   const scheduleIdleTail = (): void => {
@@ -176,7 +224,7 @@ export function installXiaoheiIdleReactions(
     if (event.pointerType === 'touch') {
       pointer = undefined
       pointerInside = false
-      clearPendingEar()
+      stopPointerEarLoop()
       return
     }
 
@@ -186,31 +234,36 @@ export function installXiaoheiIdleReactions(
     const distance = Math.hypot(pointer.x - origin.x, pointer.y - origin.y)
     if (!pointerInside && distance < POINTER_ENTER_RADIUS_PX) {
       pointerInside = true
-      scheduleEarToward(pointer)
+      schedulePointerEarLoop()
     } else if (pointerInside && distance > POINTER_EXIT_RADIUS_PX) {
       pointerInside = false
-      clearPendingEar()
+      stopPointerEarLoop()
+    } else if (pointerInside) {
+      schedulePointerEarLoop()
+      refreshPointerEarDirection()
     }
   }
 
   const clearPointer = (): void => {
     pointer = undefined
     pointerInside = false
-    clearPendingEar()
+    stopPointerEarLoop()
   }
 
   const onPortalActivity = (event: Event): void => {
     const active = Boolean((event as CustomEvent<XiaoheiPortalActivityDetail>).detail?.active)
     if (!active) {
-      clearPendingEar()
+      clearPortalEar()
       return
     }
 
+    if (pointerInside) return
+
     // Gaze reacts to the same event immediately. Resolve the moving traveler
     // shortly afterwards so the ear follows the direction already being seen.
-    clearPendingEar()
-    pendingEarTimer = win.setTimeout(() => {
-      pendingEarTimer = 0
+    clearPortalEar()
+    portalEarTimer = win.setTimeout(() => {
+      portalEarTimer = 0
       const traveler = doc.getElementById(XIAOHEI_PORTAL_LAYER_ID)
         ?.querySelector<HTMLElement>('.xiaohei-portal__traveler')
       const rect = traveler?.getBoundingClientRect()
@@ -227,6 +280,7 @@ export function installXiaoheiIdleReactions(
     const cameFromComplete = previousState === 'complete' && nextState === 'idle'
     previousState = nextState
     clearPendingEar()
+    clearPortalEar()
     clearTimer(idleTailTimer)
     idleTailTimer = 0
 
@@ -238,24 +292,29 @@ export function installXiaoheiIdleReactions(
 
     if (cameFromComplete) play('tail-complete', TAIL_COMPLETE_DURATION_MS)
     scheduleIdleTail()
+    syncPointerEarLoop()
   }
 
   const onVisibilityChange = (): void => {
     clearPendingEar()
+    clearPortalEar()
     clearTimer(idleTailTimer)
     idleTailTimer = 0
-    pointerInside = false
     if (doc.visibilityState === 'hidden') {
+      pointerInside = false
       clearReaction()
     } else {
       scheduleIdleTail()
+      syncPointerEarLoop()
     }
   }
 
   const onPreferenceChange = (): void => {
     clearPendingEar()
+    clearPortalEar()
     clearReaction()
     scheduleIdleTail()
+    syncPointerEarLoop()
   }
 
   const mountObserver = new win.MutationObserver(attach)
@@ -278,6 +337,7 @@ export function installXiaoheiIdleReactions(
   return () => {
     disposed = true
     clearPendingEar()
+    clearPortalEar()
     clearTimer(idleTailTimer)
     clearReaction()
     mountObserver.disconnect()
@@ -291,6 +351,7 @@ export function installXiaoheiIdleReactions(
     coarsePointer.removeEventListener('change', onPreferenceChange)
     reactionLayer?.remove()
     mascot?.removeAttribute('data-xiaohei-reaction')
+    mascot?.removeAttribute('data-xiaohei-ear-loop')
     preloads.length = 0
     style.remove()
   }

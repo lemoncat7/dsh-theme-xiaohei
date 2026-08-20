@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 
 const assets = [
+  ['xiaohei-idle-blink-v1.webp', 256, 256],
   ['xiaohei-idle-eye-base-v1.webp', 256, 256],
   ['xiaohei-idle-ear-left-v1.webp', 2304, 256],
   ['xiaohei-idle-ear-right-v1.webp', 2304, 256],

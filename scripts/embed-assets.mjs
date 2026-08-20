@@ -12,6 +12,7 @@ const embeddedBackgrounds = await Promise.all(backgroundAssets.map(async ([name,
 }))
 const characterAssets = [
   ['XIAOHEI_IDLE_SHEET', 'xiaohei-idle.webp'],
+  ['XIAOHEI_IDLE_BLINK', 'xiaohei-idle-blink-v1.webp'],
   ['XIAOHEI_IDLE_EYE_BASE', 'xiaohei-idle-eye-base-v1.webp'],
   ['XIAOHEI_IDLE_EAR_LEFT', 'xiaohei-idle-ear-left-v1.webp'],
   ['XIAOHEI_IDLE_EAR_RIGHT', 'xiaohei-idle-ear-right-v1.webp'],
