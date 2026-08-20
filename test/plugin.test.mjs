@@ -4,6 +4,7 @@ import {
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_PART_COUNT,
   installXiaoheiScene,
+  shouldRestoreXiaoheiHeixiuCompanions,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
 import {
@@ -17,11 +18,14 @@ import {
 } from '../lib/chrome.js'
 import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from '../lib/chrome/accessibility.js'
 import { XIAOHEI_CONTROL_CSS } from '../lib/chrome/controls.js'
+import { XIAOHEI_SIDEBAR_CSS } from '../lib/chrome/sidebar.js'
 import { XIAOHEI_SURFACE_CSS } from '../lib/chrome/surfaces.js'
 import { XIAOHEI_PORTAL_CSS } from '../lib/chrome/portal.js'
 import { XIAOHEI_GAZE_CSS } from '../lib/chrome/gaze.js'
 import { XIAOHEI_REACTION_CSS } from '../lib/chrome/reactions.js'
 import { XIAOHEI_CHROME_TOKENS_CSS } from '../lib/chrome/tokens.js'
+import { XIAOHEI_HEIXIU_FEEDBACK_CSS } from '../lib/scene/heixiu-feedback.js'
+import { XIAOHEI_STATE_TRANSITION_CSS } from '../lib/scene/state-transitions.js'
 import {
   installXiaoheiGaze,
   XIAOHEI_GAZE_STYLE_ID,
@@ -131,10 +135,21 @@ test('spirit control skin stays semantic, accessible, and lifecycle safe', () =>
 test('control skin composes isolated responsibility layers in a stable order', () => {
   assert.equal(XIAOHEI_CHROME_CSS, [
     XIAOHEI_CHROME_TOKENS_CSS,
+    XIAOHEI_SIDEBAR_CSS,
     XIAOHEI_CONTROL_CSS,
     XIAOHEI_SURFACE_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
   ].join('\n'))
+})
+
+test('sidebar depth stays static, semantic, and isolated from scene behavior', () => {
+  assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar'/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar\.workspaces'/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /role='treeitem'/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /aria-selected='true'/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /prefers-reduced-transparency:\s*reduce/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /forced-colors:\s*active/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /@keyframes|animation:/)
 })
 
 test('random Heixiu portal visits are compact, ambient, and compositor safe', () => {
@@ -323,8 +338,14 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-sidebar-spirit-one/)
   assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion[\s\S]*xiaohei-scene__sidebar-spirit/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__heixiu-field/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__heixiu-body/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-heixiu-open/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-heixiu-blink/)
+  assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /data-xiaohei-state='thinking'/)
+  assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /data-xiaohei-state='complete'/)
+  assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /data-xiaohei-state='error'/)
+  assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.doesNotMatch(XIAOHEI_HEIXIU_FEEDBACK_CSS, /scale\(|rotate\(/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /heixiu--random|xiaohei-heixiu-drift-four/)
   assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion[\s\S]*xiaohei-scene__heixiu/)
   assert.match(XIAOHEI_SCENE_CSS, /max-width:\s*768px[\s\S]*heixiu--sidebar\s*\{ display: none; \}/)
@@ -335,26 +356,30 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__mascot-state[\s\S]*bottom:\s*0[\s\S]*transform:\s*translateX\(-50%\)/)
   assert.match(XIAOHEI_SCENE_CSS, /brightness\(1\.32\) contrast\(1\.02\)/)
   assert.match(XIAOHEI_SCENE_CSS, /drop-shadow\([^)]*83 218 193/)
-  assert.match(XIAOHEI_SCENE_CSS, /transition:\s*opacity 120ms/)
+  assert.match(XIAOHEI_STATE_TRANSITION_CSS, /transition-duration:\s*220ms/)
+  assert.match(XIAOHEI_STATE_TRANSITION_CSS, /transition-delay:\s*70ms/)
+  assert.doesNotMatch(XIAOHEI_STATE_TRANSITION_CSS, /transform|scale|translate|requestAnimationFrame|setTimeout/)
   assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
   assert.match(installXiaoheiScene.toString(), /decoding = ['"]async['"]/)
   assert.match(installXiaoheiScene.toString(), /fetchPriority = ['"]low['"]/)
   assert.match(installXiaoheiScene.toString(), /createHeixiuField/)
   assert.match(installXiaoheiScene.toString(), /installHeixiuCompanions/)
+  assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: true }]), false)
+  assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: false }]), true)
+  assert.match(XIAOHEI_SCENE_CSS, /update:\s*slow/)
   assert.match(XIAOHEI_SCENE_CSS, /pointer-events:\s*none/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--dawn/)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'/)
   assert.match(XIAOHEI_SCENE_CSS, /brightness\(1\.16\) contrast\(1\.12\) saturate\(0\.78\)/)
   assert.match(XIAOHEI_SCENE_CSS, /data-slot='sidebar'/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-slot='sidebar\.workspaces'/)
-  assert.match(XIAOHEI_SCENE_CSS, /role='tree'[\s\S]*class\*='_empty'/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /role='tree'[^\{]*:only-child/)
-  assert.match(XIAOHEI_SCENE_CSS, /not\(\[class\*='_collapsed'\]\)/)
-  assert.match(XIAOHEI_SCENE_CSS, /button:focus-visible/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data-slot='sidebar\.workspaces'/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /role='tree'[\s\S]*class\*='_empty'/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /role='tree'[^\{]*:only-child/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /not\(\[class\*='_collapsed'\]\)/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /button:focus-visible/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /body\s*>\s*:not/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /backdrop-filter/)
-  assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-transparency:\s*reduce/)
   assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_SCENE_CSS, /forced-colors:\s*active/)
 

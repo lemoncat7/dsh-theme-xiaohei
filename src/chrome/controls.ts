@@ -1,6 +1,6 @@
 /** Composer, send action, and command affordances. */
 export const XIAOHEI_CONTROL_CSS = `
-/* The composer owns interaction styling; spatial refraction is a separate service. */
+/* The composer uses two quiet edge planes instead of a decorative outer ring. */
 #root [data-composer-card='true'] {
   position: relative;
   isolation: isolate;
@@ -16,12 +16,47 @@ export const XIAOHEI_CONTROL_CSS = `
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
+#root [data-composer-card='true']::before,
+#root [data-composer-card='true']::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  transition: opacity 180ms ease;
+}
+
+#root [data-composer-card='true']::before {
+  inset: -1px;
+  padding: 1px;
+  background: linear-gradient(
+    112deg,
+    transparent 0 38%,
+    var(--xiaohei-chrome-edge-strong) 52%,
+    transparent 67%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.28;
+}
+
+#root [data-composer-card='true']::after {
+  inset: 3px;
+  border-top: 1px solid rgb(236 255 250 / 7%);
+  border-right: 1px solid rgb(139 229 213 / 5%);
+  opacity: 0.62;
+}
+
 #root [data-composer-card='true']:focus-within {
   border-color: var(--xiaohei-chrome-edge-strong) !important;
   box-shadow:
     inset 0 1px rgb(255 255 255 / 7%),
     0 16px 38px var(--xiaohei-chrome-shadow) !important;
 }
+
+#root [data-composer-card='true']:focus-within::before { opacity: 0.72; }
+#root [data-composer-card='true']:focus-within::after { opacity: 1; }
 
 /* Send is a two-plane domain core that contracts once when activated. */
 #root button[aria-label='发送消息'],

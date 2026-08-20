@@ -19,6 +19,16 @@ export const XIAOHEI_SURFACE_CSS = `
     linear-gradient(145deg, rgb(255 255 255 / 3%), transparent 34%) !important;
 }
 
+#root [role='dialog']::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-top: 1px solid rgb(255 255 255 / 5%);
+  border-left: 1px solid rgb(101 209 190 / 5%);
+  border-radius: 14px;
+  pointer-events: none;
+}
+
 #root [role='dialog'] > nav {
   border-right: 1px solid var(--xiaohei-chrome-edge);
   background:
@@ -34,7 +44,15 @@ export const XIAOHEI_SURFACE_CSS = `
 #root [role='dialog'] button,
 #root [role='menu'] button,
 #root [role='listbox'] button {
+  border: 1px solid transparent;
   transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+}
+
+#root [role='dialog'] button:not(:disabled):hover,
+#root [role='menu'] button:not(:disabled):hover,
+#root [role='listbox'] button:not(:disabled):hover {
+  border-color: var(--xiaohei-chrome-edge);
+  box-shadow: inset 0 1px rgb(255 255 255 / 5%);
 }
 
 #root [role='dialog'] button:not(:disabled):active,
