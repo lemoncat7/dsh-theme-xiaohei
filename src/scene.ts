@@ -446,7 +446,6 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__heixiu-body > img {
   z-index: 3;
   filter: brightness(1.32) contrast(1.02) saturate(1.04);
   will-change: opacity;
-  animation: xiaohei-mascot-blink 5.2s step-end infinite;
 }
 
 .xiaohei-scene__mascot-state {
@@ -817,12 +816,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   66% { transform: translate3d(0.15rem, -2rem, 0) scale(0.74); opacity: 0.24; }
 }
 
-@keyframes xiaohei-mascot-blink {
-  0%, 91.9% { opacity: 0; }
-  92%, 94.5% { opacity: 1; }
-  94.6%, 100% { opacity: 0; }
-}
-
 @keyframes xiaohei-thinking-dot {
   0%, 18%, 100% { opacity: 0.28; }
   42%, 62% { opacity: 0.96; }
@@ -914,7 +907,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   .xiaohei-scene__sidebar-aura,
   .xiaohei-scene__sidebar-current,
   .xiaohei-scene__sidebar-spirit,
-  .xiaohei-scene__mascot-blink,
   .xiaohei-scene__heixiu,
   .xiaohei-scene__heixiu-open,
   .xiaohei-scene__heixiu-blink,

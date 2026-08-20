@@ -1,5 +1,6 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import { bindXiaoheiAppearance } from './appearance.js'
+import { installXiaoheiBlink } from './blink.js'
 import { installXiaoheiChrome } from './chrome.js'
 import { installXiaoheiGaze } from './gaze.js'
 import { installXiaoheiHeixiuInteractions } from './heixiu-interactions.js'
@@ -26,6 +27,7 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(installXiaoheiHeixiuInteractions, 'xiaohei-theme: bind Heixiu companion interactions')
   ctx.effect(installXiaoheiPortalTransit, 'xiaohei-theme: install random Heixiu portal visits')
   ctx.effect(installXiaoheiGaze, 'xiaohei-theme: install proximity gaze')
+  ctx.effect(installXiaoheiBlink, 'xiaohei-theme: synchronize complete-frame blinking')
   ctx.effect(installXiaoheiIdleReactions, 'xiaohei-theme: install sparse idle reactions')
   ctx.effect(
     () => bindXiaoheiSessionState(ctx.sessions),

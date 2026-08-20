@@ -11,6 +11,7 @@ import {
   bindXiaoheiAppearance,
   XIAOHEI_APPEARANCE_ATTRIBUTE,
 } from '../lib/appearance.js'
+import { installXiaoheiBlink, XIAOHEI_BLINK_STYLE_ID } from '../lib/blink.js'
 import {
   installXiaoheiChrome,
   XIAOHEI_CHROME_CSS,
@@ -22,6 +23,7 @@ import { XIAOHEI_SIDEBAR_CSS } from '../lib/chrome/sidebar.js'
 import { XIAOHEI_SURFACE_CSS } from '../lib/chrome/surfaces.js'
 import { XIAOHEI_WORKSPACE_INTERACTION_CSS } from '../lib/chrome/workspace-interactions.js'
 import { XIAOHEI_PORTAL_CSS } from '../lib/chrome/portal.js'
+import { XIAOHEI_BLINK_CSS } from '../lib/chrome/blink.js'
 import { XIAOHEI_GAZE_CSS } from '../lib/chrome/gaze.js'
 import { XIAOHEI_REACTION_CSS } from '../lib/chrome/reactions.js'
 import { XIAOHEI_CHROME_TOKENS_CSS } from '../lib/chrome/tokens.js'
@@ -113,6 +115,7 @@ test('shades DSH native palettes without forcing a theme preference', () => {
     'xiaohei-theme: bind Heixiu companion interactions',
     'xiaohei-theme: install random Heixiu portal visits',
     'xiaohei-theme: install proximity gaze',
+    'xiaohei-theme: synchronize complete-frame blinking',
     'xiaohei-theme: install sparse idle reactions',
     'xiaohei-theme: follow current session agent state',
   ])
@@ -282,8 +285,7 @@ test('idle reactions are complete-frame, proximity-aware, state-safe, and indepe
   assert.match(XIAOHEI_REACTION_CSS, /mascot-blink[\s\S]*z-index:\s*4/)
   assert.match(XIAOHEI_REACTION_CSS, /560ms steps\(8, end\)/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-ear-loop='true'[\s\S]*animation-iteration-count:\s*infinite/)
-  assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-heixiu-interaction='true'/)
-  assert.match(XIAOHEI_REACTION_CSS, /xiaohei-heixiu-greeting-blink/)
+  assert.doesNotMatch(XIAOHEI_REACTION_CSS, /xiaohei-heixiu-greeting-blink/)
   assert.match(XIAOHEI_REACTION_CSS, /steps\(9, end\)/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-state='idle'/)
   assert.match(XIAOHEI_REACTION_CSS, /prefers-reduced-motion:\s*reduce/)
@@ -291,9 +293,6 @@ test('idle reactions are complete-frame, proximity-aware, state-safe, and indepe
   assert.doesNotMatch(XIAOHEI_REACTION_CSS, /scale\(|rotate\(/)
   const keyframes = extractKeyframes(XIAOHEI_REACTION_CSS)
   assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
-  const greetingBlink = XIAOHEI_REACTION_CSS.match(/@keyframes xiaohei-heixiu-greeting-blink \{([\s\S]*?)\n\}/)?.[1] ?? ''
-  assert.match(greetingBlink, /87%,\s*100%\s*\{\s*opacity:\s*0/)
-  assert.doesNotMatch(greetingBlink, /transform|scale|translate/)
   assert.doesNotMatch(XIAOHEI_REACTION_CSS, /greeting-gaze-guard|visibility:\s*hidden/)
 
   const source = installXiaoheiIdleReactions.toString()
@@ -318,6 +317,21 @@ test('idle reactions are complete-frame, proximity-aware, state-safe, and indepe
   assert.equal(resolveXiaoheiPointerEar(bounds, { x: 125, y: 72 }), undefined)
   assert.equal(resolveXiaoheiPointerEar(bounds, { x: 84, y: 108 }), undefined)
   assert.equal(resolveXiaoheiPointerEar(bounds, { x: 84, y: 108 }, 'ear-left'), 'ear-left')
+})
+
+test('blinking atomically swaps live eyes for the complete closed frame', () => {
+  assert.match(XIAOHEI_BLINK_STYLE_ID, /blink-style$/)
+  assert.match(XIAOHEI_BLINK_CSS, /data-xiaohei-blink='closed'[\s\S]*mascot-blink[\s\S]*opacity:\s*1/)
+  assert.match(XIAOHEI_BLINK_CSS, /data-xiaohei-blink='closed'[\s\S]*xiaohei-gaze__eye[\s\S]*visibility:\s*hidden/)
+  assert.doesNotMatch(XIAOHEI_BLINK_CSS, /@keyframes|animation-duration/)
+  const source = installXiaoheiBlink.toString()
+  assert.match(source, /XIAOHEI_HEIXIU_GREETING_EVENT/)
+  assert.match(source, /INITIAL_BLINK_DELAY_MS/)
+  assert.match(source, /HEIXIU_GREETING_BLINK_STEPS/)
+  assert.match(source, /prefers-reduced-motion:\s*reduce/)
+  assert.match(source, /visibilitychange/)
+  assert.doesNotMatch(source, /requestAnimationFrame/)
+  assert.equal(typeof installXiaoheiBlink(undefined), 'function')
 })
 
 test('resolved Light / Dark / System appearance drives the scene attribute', () => {
@@ -372,10 +386,8 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
     XIAOHEI_ERROR,
   ]) assert.match(asset, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-mascot-blink/)
   assert.match(installXiaoheiScene.toString(), /createIdleBlink/)
-  const blinkKeyframes = XIAOHEI_SCENE_CSS.match(/@keyframes xiaohei-mascot-blink \{([\s\S]*?)\n\}/)?.[1] ?? ''
-  assert.doesNotMatch(blinkKeyframes, /transform|scale|translate/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /@keyframes xiaohei-mascot-blink/)
   for (const state of ['thinking', 'streaming', 'tool', 'waiting', 'complete', 'error']) {
     assert.match(XIAOHEI_SCENE_CSS, new RegExp(`data-xiaohei-state='${state}'`))
     assert.match(XIAOHEI_SCENE_CSS, new RegExp(`mascot-state--${state}`))

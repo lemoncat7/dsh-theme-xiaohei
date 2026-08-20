@@ -30,12 +30,6 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__idle-reaction {
   animation-iteration-count: infinite;
 }
 
-.xiaohei-scene__mascot[data-xiaohei-heixiu-interaction='true'] .xiaohei-scene__mascot-blink {
-  animation: xiaohei-heixiu-greeting-blink 520ms step-end both;
-}
-
-/* Keep the live gaze painted beneath the complete blink frame to avoid black/white transition flashes. */
-
 .xiaohei-scene__mascot[data-xiaohei-reaction='tail-slow'] .xiaohei-scene__idle-reaction,
 .xiaohei-scene__mascot[data-xiaohei-reaction='tail-complete'] .xiaohei-scene__idle-reaction {
   width: 1000%;
@@ -84,15 +78,7 @@ html:not([data-xiaohei-state='idle']) .xiaohei-scene__idle-reaction {
   to { transform: translate3d(-90%, 0, 0); }
 }
 
-@keyframes xiaohei-heixiu-greeting-blink {
-  0%, 14%, 44%, 66%, 87%, 100% { opacity: 0; }
-  15%, 43%, 67%, 86% { opacity: 1; }
-}
-
 @media (prefers-reduced-motion: reduce), (hover: none) and (pointer: coarse) {
   .xiaohei-scene__idle-reaction { display: none; }
-  .xiaohei-scene__mascot[data-xiaohei-heixiu-interaction='true'] .xiaohei-scene__mascot-blink {
-    animation: none;
-  }
 }
 `
