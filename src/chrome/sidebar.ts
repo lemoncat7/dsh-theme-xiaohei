@@ -1,33 +1,13 @@
-/** Native sidebar hierarchy with an ambient spirit glow and no extra icons. */
+/** Native sidebar hierarchy with spirit-framed workspace folders and no extra icons. */
 export const XIAOHEI_SIDEBAR_CSS = `
 #root [data-slot='sidebar'] > div {
   position: relative;
-  background:
-    radial-gradient(110% 40% at 8% 94%, rgb(83 205 183 / 28%) 0%, rgb(51 138 126 / 13%) 38%, transparent 72%),
-    radial-gradient(70% 52% at 102% 48%, rgb(91 218 197 / 15%) 0%, transparent 72%),
-    linear-gradient(180deg, rgb(5 18 22 / 70%) 0%, rgb(6 20 23 / 62%) 58%, rgb(6 22 24 / 78%) 100%) !important;
+  background: linear-gradient(180deg, rgb(5 18 22 / 70%) 0%, rgb(6 20 23 / 62%) 58%, rgb(6 22 24 / 78%) 100%) !important;
   border-right: 1px solid rgb(139 229 213 / 14%);
   box-shadow:
     inset -1px 0 rgb(255 255 255 / 2%),
     inset -12px 0 28px rgb(82 207 185 / 3%),
     16px 0 36px rgb(1 9 10 / 14%);
-}
-
-#root [data-slot='sidebar'] > div:not([class*='_collapsed'])::before {
-  content: '';
-  position: absolute;
-  top: 4.75rem;
-  right: 0;
-  bottom: 4.25rem;
-  width: 5.5rem;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 112% 48%, rgb(154 255 236 / 28%) 0%, rgb(92 224 202 / 14%) 38%, transparent 72%),
-    linear-gradient(90deg, transparent 70%, rgb(155 245 229 / 10%) 100%);
-  border-right: 1px solid rgb(169 247 233 / 24%);
-  opacity: 0.96;
-  -webkit-mask-image: linear-gradient(180deg, transparent, black 14%, black 86%, transparent);
-  mask-image: linear-gradient(180deg, transparent, black 14%, black 86%, transparent);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
@@ -106,6 +86,28 @@ export const XIAOHEI_SIDEBAR_CSS = `
   padding-top: 6px;
 }
 
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded] {
+  box-sizing: border-box;
+  min-height: 34px;
+  margin-inline: 2px;
+  border: 1px solid rgb(126 225 207 / 18%);
+  border-radius: 9px;
+  background: linear-gradient(100deg, rgb(101 209 190 / 10%), rgb(101 209 190 / 3%) 72%, transparent) !important;
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 4%),
+    0 0 14px rgb(83 218 194 / 10%);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]:hover,
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
+  border-color: rgb(139 234 216 / 30%);
+  background: linear-gradient(100deg, rgb(101 209 190 / 15%), rgb(101 209 190 / 5%) 72%, transparent) !important;
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 6%),
+    0 0 16px rgb(83 218 194 / 15%);
+}
+
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'],
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-current='true'] {
   background: linear-gradient(90deg, rgb(101 209 190 / 13%), rgb(101 209 190 / 4%));
@@ -120,9 +122,7 @@ export const XIAOHEI_SIDEBAR_CSS = `
   border: 1px solid rgb(139 229 213 / 9%);
   border-radius: 11px;
   color: #91AAA5;
-  background:
-    radial-gradient(circle at 88% 22%, rgb(101 209 190 / 10%), transparent 34%),
-    rgb(3 14 17 / 22%);
+  background: rgb(3 14 17 / 22%);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -162,22 +162,12 @@ export const XIAOHEI_SIDEBAR_CSS = `
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
-  background:
-    radial-gradient(110% 40% at 8% 94%, rgb(72 152 126 / 20%) 0%, rgb(85 142 119 / 8%) 40%, transparent 72%),
-    radial-gradient(70% 52% at 102% 48%, rgb(65 144 122 / 11%) 0%, transparent 72%),
-    linear-gradient(180deg, rgb(244 248 244 / 84%) 0%, rgb(239 245 240 / 78%) 58%, rgb(235 242 236 / 88%) 100%) !important;
+  background: linear-gradient(180deg, rgb(244 248 244 / 84%) 0%, rgb(239 245 240 / 78%) 58%, rgb(235 242 236 / 88%) 100%) !important;
   border-right-color: rgb(37 92 79 / 13%);
   box-shadow:
     inset -1px 0 rgb(255 255 255 / 42%),
     inset -12px 0 28px rgb(47 133 118 / 3%),
     16px 0 36px rgb(47 72 61 / 8%);
-}
-
-html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed'])::before {
-  background:
-    radial-gradient(ellipse at 112% 48%, rgb(44 135 113 / 20%) 0%, rgb(63 151 128 / 9%) 38%, transparent 72%),
-    linear-gradient(90deg, transparent 70%, rgb(46 130 110 / 7%) 100%);
-  border-right-color: rgb(38 117 99 / 20%);
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
@@ -211,12 +201,27 @@ html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([cla
   color: #5C7069;
 }
 
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded] {
+  border-color: rgb(47 133 118 / 18%);
+  background: linear-gradient(100deg, rgb(255 255 255 / 56%), rgb(47 133 118 / 5%) 76%, transparent) !important;
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 72%),
+    0 0 12px rgb(47 133 118 / 8%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]:hover,
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
+  border-color: rgb(47 133 118 / 30%);
+  background: linear-gradient(100deg, rgb(255 255 255 / 72%), rgb(47 133 118 / 8%) 76%, transparent) !important;
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 82%),
+    0 0 14px rgb(47 133 118 / 12%);
+}
+
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='tree'] > [class*='_empty'] {
   border-color: rgb(37 92 79 / 10%);
   color: #6A7B75;
-  background:
-    radial-gradient(circle at 88% 22%, rgb(47 133 118 / 9%), transparent 34%),
-    rgb(255 255 255 / 28%);
+  background: rgb(255 255 255 / 28%);
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:last-child {
@@ -249,6 +254,9 @@ html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] button:focus-v
 }
 
 @media (prefers-contrast: more), (forced-colors: active) {
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed'])::before { display: none; }
+  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded] {
+    border-color: currentColor;
+    box-shadow: none;
+  }
 }
 `

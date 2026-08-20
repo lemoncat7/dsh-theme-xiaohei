@@ -142,14 +142,16 @@ test('control skin composes isolated responsibility layers in a stable order', (
   ].join('\n'))
 })
 
-test('sidebar depth stays static, semantic, and isolated from scene behavior', () => {
+test('workspace folders own the sidebar spirit framing without ambient fog', () => {
   assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar'/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar\.workspaces'/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /role='treeitem'/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /aria-selected='true'/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /prefers-reduced-transparency:\s*reduce/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /forced-colors:\s*active/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /width:\s*5\.5rem/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /role='treeitem'\]\[aria-expanded\]/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /0 0 14px rgb\(83 218 194 \/ 10%\)/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /not\(\[class\*='_collapsed'\]\)::before/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /isolation:\s*isolate/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /@keyframes|animation:/)
 })
