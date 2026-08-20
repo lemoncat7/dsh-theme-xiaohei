@@ -5,6 +5,10 @@ import {
 } from './generated-keyart.js'
 import { XIAOHEI_REACTION_CSS } from './chrome/reactions.js'
 import {
+  XIAOHEI_HEIXIU_GREETING_EVENT,
+  type XiaoheiHeixiuGreetingDetail,
+} from './heixiu-interactions.js'
+import {
   XIAOHEI_PORTAL_PROXIMITY_EVENT,
   type XiaoheiPortalProximityDetail,
 } from './portal.js'
@@ -15,7 +19,7 @@ const POINTER_ENTER_RADIUS_PX = 460
 const POINTER_EXIT_RADIUS_PX = 520
 const EAR_DELAY_MS = 190
 const HEIXIU_EAR_DELAY_MS = 180
-const HEIXIU_INTERACTION_DURATION_MS = 520
+const HEIXIU_INTERACTION_DURATION_MS = 800
 const EAR_DURATION_MS = 560
 const TAIL_SLOW_DURATION_MS = 1280
 const TAIL_COMPLETE_DURATION_MS = 700
@@ -72,8 +76,8 @@ export function installXiaoheiIdleReactions(
   let previousState = currentState(doc)
   let reactionTimer = 0
   let pendingEarTimer = 0
-  let portalEarTimer = 0
-  let portalInteractionTimer = 0
+  let heixiuEarTimer = 0
+  let heixiuInteractionTimer = 0
   let idleTailTimer = 0
 
   const behaviorDisabled = (): boolean => reducedMotion.matches || coarsePointer.matches
@@ -87,14 +91,14 @@ export function installXiaoheiIdleReactions(
     pendingEarTimer = 0
   }
 
-  const clearPortalEar = (): void => {
-    clearTimer(portalEarTimer)
-    portalEarTimer = 0
+  const clearHeixiuEar = (): void => {
+    clearTimer(heixiuEarTimer)
+    heixiuEarTimer = 0
   }
 
-  const clearPortalInteraction = (): void => {
-    clearTimer(portalInteractionTimer)
-    portalInteractionTimer = 0
+  const clearHeixiuInteraction = (): void => {
+    clearTimer(heixiuInteractionTimer)
+    heixiuInteractionTimer = 0
     mascot?.removeAttribute('data-xiaohei-heixiu-interaction')
   }
 
@@ -196,8 +200,8 @@ export function installXiaoheiIdleReactions(
     if (!pointerInside || pointer === undefined || behaviorDisabled() || !isIdle()) return
     const ear = earToward(pointer)
     if (ear === undefined) return
-    clearPortalEar()
-    clearPortalInteraction()
+    clearHeixiuEar()
+    clearHeixiuInteraction()
     clearReaction()
     setEarFrame(ear)
     if (mascot !== undefined) mascot.dataset.xiaoheiEarLoop = 'true'
@@ -278,22 +282,38 @@ export function installXiaoheiIdleReactions(
     const detail = (event as CustomEvent<XiaoheiPortalProximityDetail>).detail
     const active = Boolean(detail?.active)
     if (!active) {
-      clearPortalEar()
-      clearPortalInteraction()
+      clearHeixiuEar()
+      clearHeixiuInteraction()
       return
     }
 
     if (pointerInside || !isIdle() || detail.target === undefined || mascot === undefined) return
-    clearPortalInteraction()
+    startHeixiuInteraction(detail.target, false)
+  }
+
+  const startHeixiuInteraction = (target: Point, supersedePointer: boolean): void => {
+    if (!isIdle() || behaviorDisabled() || mascot === undefined) return
+    if (pointerInside && !supersedePointer) return
+    if (supersedePointer) stopPointerEarLoop()
+    clearHeixiuInteraction()
     mascot.dataset.xiaoheiHeixiuInteraction = 'true'
-    portalInteractionTimer = win.setTimeout(clearPortalInteraction, HEIXIU_INTERACTION_DURATION_MS)
-    clearPortalEar()
-    portalEarTimer = win.setTimeout(() => {
-      portalEarTimer = 0
-      if (pointerInside) return
-      const ear = earToward(detail.target!)
+    heixiuInteractionTimer = win.setTimeout(() => {
+      heixiuInteractionTimer = 0
+      mascot?.removeAttribute('data-xiaohei-heixiu-interaction')
+      syncPointerEarLoop()
+    }, HEIXIU_INTERACTION_DURATION_MS)
+    clearHeixiuEar()
+    heixiuEarTimer = win.setTimeout(() => {
+      heixiuEarTimer = 0
+      const ear = earToward(target)
       if (ear !== undefined) playEar(ear)
     }, HEIXIU_EAR_DELAY_MS)
+  }
+
+  const onHeixiuGreeting = (event: Event): void => {
+    const detail = (event as CustomEvent<XiaoheiHeixiuGreetingDetail>).detail
+    if (detail?.target === undefined) return
+    startHeixiuInteraction(detail.target, true)
   }
 
   const onStateChange = (): void => {
@@ -302,8 +322,8 @@ export function installXiaoheiIdleReactions(
     const cameFromComplete = previousState === 'complete' && nextState === 'idle'
     previousState = nextState
     clearPendingEar()
-    clearPortalEar()
-    clearPortalInteraction()
+    clearHeixiuEar()
+    clearHeixiuInteraction()
     clearTimer(idleTailTimer)
     idleTailTimer = 0
 
@@ -320,8 +340,8 @@ export function installXiaoheiIdleReactions(
 
   const onVisibilityChange = (): void => {
     clearPendingEar()
-    clearPortalEar()
-    clearPortalInteraction()
+    clearHeixiuEar()
+    clearHeixiuInteraction()
     clearTimer(idleTailTimer)
     idleTailTimer = 0
     if (doc.visibilityState === 'hidden') {
@@ -335,8 +355,8 @@ export function installXiaoheiIdleReactions(
 
   const onPreferenceChange = (): void => {
     clearPendingEar()
-    clearPortalEar()
-    clearPortalInteraction()
+    clearHeixiuEar()
+    clearHeixiuInteraction()
     clearReaction()
     scheduleIdleTail()
     syncPointerEarLoop()
@@ -353,6 +373,7 @@ export function installXiaoheiIdleReactions(
   doc.addEventListener('pointerleave', clearPointer)
   doc.addEventListener('visibilitychange', onVisibilityChange)
   doc.addEventListener(XIAOHEI_PORTAL_PROXIMITY_EVENT, onPortalProximity)
+  doc.addEventListener(XIAOHEI_HEIXIU_GREETING_EVENT, onHeixiuGreeting)
   win.addEventListener('blur', clearPointer)
   reducedMotion.addEventListener('change', onPreferenceChange)
   coarsePointer.addEventListener('change', onPreferenceChange)
@@ -362,8 +383,8 @@ export function installXiaoheiIdleReactions(
   return () => {
     disposed = true
     clearPendingEar()
-    clearPortalEar()
-    clearPortalInteraction()
+    clearHeixiuEar()
+    clearHeixiuInteraction()
     clearTimer(idleTailTimer)
     clearReaction()
     mountObserver.disconnect()
@@ -372,6 +393,7 @@ export function installXiaoheiIdleReactions(
     doc.removeEventListener('pointerleave', clearPointer)
     doc.removeEventListener('visibilitychange', onVisibilityChange)
     doc.removeEventListener(XIAOHEI_PORTAL_PROXIMITY_EVENT, onPortalProximity)
+    doc.removeEventListener(XIAOHEI_HEIXIU_GREETING_EVENT, onHeixiuGreeting)
     win.removeEventListener('blur', clearPointer)
     reducedMotion.removeEventListener('change', onPreferenceChange)
     coarsePointer.removeEventListener('change', onPreferenceChange)

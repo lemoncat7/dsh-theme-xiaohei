@@ -2,6 +2,7 @@ import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import { bindXiaoheiAppearance } from './appearance.js'
 import { installXiaoheiChrome } from './chrome.js'
 import { installXiaoheiGaze } from './gaze.js'
+import { installXiaoheiHeixiuInteractions } from './heixiu-interactions.js'
 import { installXiaoheiPortalTransit } from './portal.js'
 import { installXiaoheiIdleReactions } from './reactions.js'
 import { installXiaoheiScene } from './scene.js'
@@ -22,6 +23,7 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(installXiaoheiChrome, 'xiaohei-theme: install spirit control skin')
   ctx.effect(installXiaoheiWorkspaceInteractions, 'xiaohei-theme: bind workspace spirit feedback')
   ctx.effect(installXiaoheiScene, 'xiaohei-theme: install moonlit forest scene')
+  ctx.effect(installXiaoheiHeixiuInteractions, 'xiaohei-theme: bind Heixiu companion interactions')
   ctx.effect(installXiaoheiPortalTransit, 'xiaohei-theme: install random Heixiu portal visits')
   ctx.effect(installXiaoheiGaze, 'xiaohei-theme: install proximity gaze')
   ctx.effect(installXiaoheiIdleReactions, 'xiaohei-theme: install sparse idle reactions')

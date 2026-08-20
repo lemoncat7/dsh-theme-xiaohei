@@ -26,11 +26,16 @@ import { XIAOHEI_GAZE_CSS } from '../lib/chrome/gaze.js'
 import { XIAOHEI_REACTION_CSS } from '../lib/chrome/reactions.js'
 import { XIAOHEI_CHROME_TOKENS_CSS } from '../lib/chrome/tokens.js'
 import { XIAOHEI_HEIXIU_FEEDBACK_CSS } from '../lib/scene/heixiu-feedback.js'
+import { XIAOHEI_HEIXIU_INTERACTION_CSS } from '../lib/scene/heixiu-interactions.js'
 import { XIAOHEI_STATE_TRANSITION_CSS } from '../lib/scene/state-transitions.js'
 import {
   installXiaoheiGaze,
   XIAOHEI_GAZE_STYLE_ID,
 } from '../lib/gaze.js'
+import {
+  installXiaoheiHeixiuInteractions,
+  XIAOHEI_HEIXIU_GREETING_EVENT,
+} from '../lib/heixiu-interactions.js'
 import {
   installXiaoheiIdleReactions,
   resolveXiaoheiIdleTailDelay,
@@ -104,6 +109,7 @@ test('shades DSH native palettes without forcing a theme preference', () => {
     'xiaohei-theme: install spirit control skin',
     'xiaohei-theme: bind workspace spirit feedback',
     'xiaohei-theme: install moonlit forest scene',
+    'xiaohei-theme: bind Heixiu companion interactions',
     'xiaohei-theme: install random Heixiu portal visits',
     'xiaohei-theme: install proximity gaze',
     'xiaohei-theme: install sparse idle reactions',
@@ -220,6 +226,25 @@ test('Heixiu only greets Xiaohei when the nearest portal phase is close', () => 
     { x: 1100, y: 720, angle: 0 },
     mascot,
   ), undefined)
+})
+
+test('fixed Heixiu companions notice the pointer and greet Xiaohei reliably', () => {
+  assert.match(XIAOHEI_HEIXIU_GREETING_EVENT, /heixiu-greeting$/)
+  assert.match(XIAOHEI_HEIXIU_INTERACTION_CSS, /data-xiaohei-heixiu-attention='true'/)
+  assert.match(XIAOHEI_HEIXIU_INTERACTION_CSS, /data-xiaohei-heixiu-greeting='true'/)
+  assert.match(XIAOHEI_HEIXIU_INTERACTION_CSS, /xiaohei-heixiu-greet-xiaohei/)
+  assert.match(XIAOHEI_HEIXIU_INTERACTION_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.match(XIAOHEI_HEIXIU_INTERACTION_CSS, /forced-colors:\s*active/)
+  const keyframes = extractKeyframes(XIAOHEI_HEIXIU_INTERACTION_CSS)
+  assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background|background-position)\s*:/)
+
+  const source = installXiaoheiHeixiuInteractions.toString()
+  assert.match(source, /HEIXIU_ENTER_RADIUS_PX/)
+  assert.match(source, /requestAnimationFrame/)
+  assert.match(source, /pointerType === ['"]touch['"]/)
+  assert.match(source, /INITIAL_GREETING_DELAY_MS/)
+  assert.match(source, /XIAOHEI_HEIXIU_GREETING_EVENT/)
+  assert.equal(typeof installXiaoheiHeixiuInteractions(undefined), 'function')
 })
 
 test('idle gaze is proximity-bound, portal-aware, and motion-safe', () => {
@@ -371,6 +396,8 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /data-xiaohei-state='complete'/)
   assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /data-xiaohei-state='error'/)
   assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-heixiu-attention='true'/)
+  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-heixiu-greeting='true'/)
   assert.doesNotMatch(XIAOHEI_HEIXIU_FEEDBACK_CSS, /scale\(|rotate\(/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /heixiu--random|xiaohei-heixiu-drift-four/)
   assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion[\s\S]*xiaohei-scene__heixiu/)

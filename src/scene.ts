@@ -13,6 +13,7 @@ import {
   XIAOHEI_WAITING,
 } from './generated-keyart.js'
 import { XIAOHEI_HEIXIU_FEEDBACK_CSS } from './scene/heixiu-feedback.js'
+import { XIAOHEI_HEIXIU_INTERACTION_CSS } from './scene/heixiu-interactions.js'
 import { XIAOHEI_STATE_TRANSITION_CSS } from './scene/state-transitions.js'
 
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
@@ -976,6 +977,7 @@ export const XIAOHEI_SCENE_CSS = [
   XIAOHEI_SCENE_BASE_CSS,
   XIAOHEI_STATE_TRANSITION_CSS,
   XIAOHEI_HEIXIU_FEEDBACK_CSS,
+  XIAOHEI_HEIXIU_INTERACTION_CSS,
 ].join('\n')
 
 const PARTS = [

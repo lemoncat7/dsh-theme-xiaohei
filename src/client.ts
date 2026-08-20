@@ -11,6 +11,10 @@ export { XIAOHEI_REACTION_CSS } from './chrome/reactions.js'
 export { XIAOHEI_WORKSPACE_INTERACTION_CSS } from './chrome/workspace-interactions.js'
 export { installXiaoheiGaze, XIAOHEI_GAZE_STYLE_ID } from './gaze.js'
 export {
+  installXiaoheiHeixiuInteractions,
+  XIAOHEI_HEIXIU_GREETING_EVENT,
+} from './heixiu-interactions.js'
+export {
   installXiaoheiIdleReactions,
   resolveXiaoheiIdleTailDelay,
   XIAOHEI_REACTION_STYLE_ID,
