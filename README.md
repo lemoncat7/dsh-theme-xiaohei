@@ -16,7 +16,7 @@
 - 聚能、回答、工具、等待、完成和错误分别使用轻量局部光效，离开对应状态后动画立即停止。
 - 环境使用独立妖灵浮光，动画仅改变 `transform` 与 `opacity`。
 - 左侧栏使用分层半透明材质重新组织品牌区、主操作、工作区与底部工具，不新增无功能入口。
-- 工作区、工具区、会话输入区与浮层使用统一的“小黑框架”：外框、内框、铭牌、挂件各自独立，收起侧栏后所有工具回到同一条 35px 视觉轴。
+- 工作区、工具区、会话输入区与浮层使用统一的“小黑框架”：外框、内框、墨线题签、嘿咻挂坠各自独立；框体始终收在侧栏内容边界内，收起后所有工具回到同一条 35px 视觉轴。
 - 支持减少动态、增强对比度、强制颜色和打印模式降级。
 - 插件加载后自动启用 `xiaohei-night`，卸载后由 DSH 主题服务恢复系统主题。
 
@@ -72,8 +72,8 @@ SSH、伙伴、Git 等后续工具不需要复制主题 CSS。插件根节点使
 ```
 
 - `data-xiaohei-frame="module"`：完整区域框裱；紧凑控件可使用 `compact`。
-- `data-xiaohei-frame-label`：嵌入上边框的模块铭牌。
-- `data-xiaohei-frame-ornament="spirit-knot"`：可选的妖灵结挂件。
+- `data-xiaohei-frame-label`：嵌入上边框的手写墨线题签。
+- `data-xiaohei-frame-ornament="spirit-knot"`：可选的双线嘿咻挂坠；悬停时提供轻微摆动反馈。
 - `data-xiaohei-module-kind`：保留模块身份，方便主题以后为 SSH、伙伴、Git 等提供差异化细节。
 - `data-xiaohei-frame-header` 与 `data-xiaohei-frame-actions`：统一标题栏和操作区对齐。
 

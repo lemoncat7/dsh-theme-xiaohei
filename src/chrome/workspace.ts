@@ -3,8 +3,10 @@ export const XIAOHEI_WORKSPACE_CSS = `
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div {
   position: relative;
   box-sizing: border-box;
-  width: auto !important;
-  margin: 0 4px 7px;
+  width: calc(100% - 16px) !important;
+  min-width: 0;
+  max-width: calc(100% - 16px);
+  margin: 0 auto 7px;
   padding: 22px 7px 7px;
   border: 1px solid var(--xiaohei-frame-line);
   border-radius: 13px;
@@ -15,27 +17,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
     var(--xiaohei-frame-fill);
   box-shadow:
     inset 0 0 0 1px var(--xiaohei-frame-inner),
-    0 10px 26px rgb(1 8 11 / 8%);
-}
-
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::before {
-  content: '会馆 · 工作区';
-  position: absolute;
-  z-index: 2;
-  top: 4px;
-  left: 13px;
-  height: 16px;
-  padding-inline: 7px;
-  border: 1px solid var(--xiaohei-frame-line);
-  border-radius: 3px 7px 7px 3px;
-  color: var(--xiaohei-frame-label);
-  background: var(--xiaohei-frame-plaque);
-  box-shadow: inset 0 1px var(--xiaohei-frame-inner), 0 4px 9px var(--xiaohei-shadow);
-  font-size: 9px;
-  font-weight: 650;
-  line-height: 14px;
-  letter-spacing: 0.12em;
-  pointer-events: none;
+    inset 0 10px 24px -24px var(--xiaohei-shadow);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div > div:last-child {

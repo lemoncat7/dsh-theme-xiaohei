@@ -22,61 +22,12 @@ export const XIAOHEI_COMPOSER_CSS = `
     box-shadow var(--xiaohei-motion-base) ease;
 }
 
-#root [data-composer-card='true']::after {
-  content: '小黑 · 会话域';
-  position: absolute;
-  z-index: 2;
-  top: -9px;
-  right: auto;
-  bottom: auto;
-  left: clamp(132px, 19%, 152px);
-  width: max-content;
-  height: 17px;
-  padding-inline: 8px;
-  border: 1px solid var(--xiaohei-frame-line);
-  border-radius: 3px 8px 8px 3px;
-  color: var(--xiaohei-frame-label);
-  background: var(--xiaohei-frame-plaque);
-  box-shadow: inset 0 1px var(--xiaohei-frame-inner), 0 4px 10px var(--xiaohei-shadow);
-  font-size: 9px;
-  font-weight: 650;
-  line-height: 15px;
-  letter-spacing: 0.14em;
-  -webkit-mask-image: none;
-  mask-image: none;
-  pointer-events: none;
-}
-
-/* The spirit seam stays part of the control edge instead of reading as a pasted ornament. */
-#root [data-composer-card='true']::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  right: 22px;
-  width: 68px;
-  height: 2px;
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, var(--xiaohei-spirit-strong), transparent);
-  box-shadow: 0 0 10px var(--xiaohei-focus-shadow);
-  opacity: 0.42;
-  pointer-events: none;
-  transform: scaleX(0.74);
-  transform-origin: right center;
-  transition: opacity var(--xiaohei-motion-base) ease, transform 260ms var(--xiaohei-motion-curve);
-}
-
 #root [data-composer-card='true']:focus-within {
   border-color: var(--xiaohei-edge-strong) !important;
   box-shadow:
     inset 0 1px rgb(255 255 255 / 9%),
     0 16px 40px var(--xiaohei-shadow),
     0 0 0 4px var(--xiaohei-focus-shadow) !important;
-}
-
-#root [data-composer-card='true']:focus-within::before {
-  opacity: 0.9;
-  transform: scaleX(1);
 }
 
 #root [data-composer-card='true'] textarea {

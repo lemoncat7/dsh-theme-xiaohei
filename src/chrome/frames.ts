@@ -26,45 +26,6 @@ export const XIAOHEI_FRAME_SYSTEM_CSS = `
   border-radius: var(--xiaohei-radius-control);
 }
 
-:where([data-xiaohei-frame-label])::before {
-  content: attr(data-xiaohei-frame-label);
-  position: absolute;
-  z-index: 2;
-  top: -9px;
-  left: 14px;
-  min-width: 42px;
-  height: 17px;
-  padding-inline: 8px;
-  border: 1px solid var(--xiaohei-frame-line);
-  border-radius: 3px 8px 8px 3px;
-  color: var(--xiaohei-frame-label);
-  background: var(--xiaohei-frame-plaque);
-  box-shadow: inset 0 1px var(--xiaohei-frame-inner), 0 4px 10px var(--xiaohei-shadow);
-  font-size: 9px;
-  font-weight: 650;
-  line-height: 15px;
-  letter-spacing: 0.12em;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-:where([data-xiaohei-frame-ornament='spirit-knot'])::after {
-  content: '';
-  position: absolute;
-  z-index: 2;
-  top: -6px;
-  right: 16px;
-  width: 13px;
-  height: 13px;
-  border: 1px solid var(--xiaohei-frame-line-strong);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 38% 35%, rgb(255 255 255 / 32%) 0 8%, transparent 10%),
-    radial-gradient(circle, var(--xiaohei-frame-ink) 0 55%, var(--xiaohei-spirit) 58% 68%, transparent 72%);
-  box-shadow: 0 0 10px var(--xiaohei-focus-shadow), 0 4px 8px var(--xiaohei-shadow);
-  pointer-events: none;
-}
-
 :where([data-xiaohei-frame-header]) {
   min-height: 38px;
   border-bottom: 1px solid var(--xiaohei-frame-line);
@@ -87,9 +48,5 @@ export const XIAOHEI_FRAME_SYSTEM_CSS = `
     box-shadow: none;
   }
 
-  :where([data-xiaohei-frame-label])::before,
-  :where([data-xiaohei-frame-ornament])::after {
-    display: none;
-  }
 }
 `

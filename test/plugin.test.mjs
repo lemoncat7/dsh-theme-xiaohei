@@ -21,6 +21,7 @@ import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from '../lib/chrome/accessibility.js
 import { XIAOHEI_COMPOSER_CSS } from '../lib/chrome/composer.js'
 import { XIAOHEI_CONVERSATION_CSS } from '../lib/chrome/conversation.js'
 import { XIAOHEI_FRAME_SYSTEM_CSS } from '../lib/chrome/frames.js'
+import { XIAOHEI_IDENTITY_CSS } from '../lib/chrome/identity.js'
 import { XIAOHEI_OVERLAY_CSS } from '../lib/chrome/overlays.js'
 import { XIAOHEI_SIDEBAR_CSS } from '../lib/chrome/sidebar.js'
 import { XIAOHEI_WORKSPACE_CSS } from '../lib/chrome/workspace.js'
@@ -141,7 +142,7 @@ test('spirit control skin stays semantic, accessible, and lifecycle safe', () =>
   assert.match(XIAOHEI_CHROME_CSS, /forced-colors:\s*active/)
   assert.match(XIAOHEI_CHROME_CSS, /prefers-reduced-transparency:[\s\S]*backdrop-filter:\s*none/)
   assert.match(XIAOHEI_CHROME_CSS, /@supports not \(\(backdrop-filter:/)
-  assert.doesNotMatch(XIAOHEI_CHROME_CSS, /tail-like|rotate\(/)
+  assert.doesNotMatch(XIAOHEI_CHROME_CSS, /tail-like/)
   assert.match(XIAOHEI_CHROME_CSS, /--xiaohei-spirit:/)
   assert.match(XIAOHEI_CHROME_CSS, /data-slot='conversation\.composer'/)
   assert.doesNotMatch(XIAOHEI_CHROME_CSS, /(?:^|\n)\s*(?:html|body|#root)\s+button\s*\{/)
@@ -154,6 +155,7 @@ test('control skin composes isolated responsibility layers in a stable order', (
   assert.equal(XIAOHEI_CHROME_CSS, [
     XIAOHEI_CHROME_TOKENS_CSS,
     XIAOHEI_FRAME_SYSTEM_CSS,
+    XIAOHEI_IDENTITY_CSS,
     XIAOHEI_SIDEBAR_CSS,
     XIAOHEI_WORKSPACE_CSS,
     XIAOHEI_WORKSPACE_INTERACTION_CSS,
@@ -167,11 +169,24 @@ test('control skin composes isolated responsibility layers in a stable order', (
 test('public Xiaohei frame contract supports future feature plugins', () => {
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame='module'/)
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame='compact'/)
-  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame-label/)
-  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame-ornament='spirit-knot'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /data-xiaohei-frame-label/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /data-xiaohei-frame-ornament='spirit-knot'/)
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-module-kind/)
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame-header/)
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /forced-colors:\s*active/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /forced-colors:\s*active/)
+})
+
+test('brush plaques and Heixiu pendants share one identity layer', () => {
+  assert.match(XIAOHEI_IDENTITY_CSS, /AR PL UKai CN.*STKaiti, KaiTi, FangSong/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /linear-gradient\(106deg/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /clip-path:\s*polygon/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'会馆 · 工作区'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'小黑 · 工具札'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(circle at 43% 73%/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(circle at 50% 43%/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /data-composer-card='true'\]:focus-within::before/)
+  assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /@keyframes|animation:/)
 })
 
 test('workspace spirit feedback follows the pointer and releases only on folder activation', () => {
@@ -207,9 +222,22 @@ test('workspace folders own the sidebar spirit framing without ambient fog', () 
 })
 
 test('workspace plaque stays inside the host clipping boundary', () => {
+  const plaqueRule = XIAOHEI_IDENTITY_CSS.match(
+    /\[data-slot='sidebar\.workspaces'\] > div::before \{([^}]*)\}/,
+  )?.[1] ?? ''
   assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*22px 7px 7px/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /content:\s*'会馆 · 工作区'[\s\S]*top:\s*4px/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /content:\s*'会馆 · 工作区'[\s\S]{0,240}top:\s*-/)
+  assert.match(plaqueRule, /content:\s*'会馆 · 工作区'/)
+  assert.match(plaqueRule, /top:\s*5px/)
+  assert.doesNotMatch(plaqueRule, /top:\s*-/)
+})
+
+test('expanded workspace frame cannot cross the sidebar content edge', () => {
+  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 16px\)\s*!important/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /max-width:\s*calc\(100% - 16px\)/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /min-width:\s*0/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /margin:\s*0 auto 7px/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /right:\s*0;[\s\S]*width:\s*12px/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /right:\s*-24px/)
 })
 
 test('sidebar material preserves the host geometry of fixed overlays', () => {

@@ -27,17 +27,17 @@ export const XIAOHEI_SIDEBAR_CSS = `
   pointer-events: none;
 }
 
-/* A narrow material falloff joins the foreground rail to the forest behind it. */
+/* Keep the material falloff inside the rail so it cannot create horizontal overflow. */
 #root [data-slot='sidebar'] > div::after {
   content: '';
   position: absolute;
   z-index: 0;
   top: 0;
-  right: -24px;
+  right: 0;
   bottom: 0;
-  width: 24px;
+  width: 12px;
   pointer-events: none;
-  background: linear-gradient(90deg, var(--xiaohei-sidebar-fade), transparent);
+  background: linear-gradient(90deg, transparent, var(--xiaohei-sidebar-fade));
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
@@ -147,25 +147,6 @@ export const XIAOHEI_SIDEBAR_CSS = `
     linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)) 14px 0 / 30px 1px no-repeat,
     var(--xiaohei-frame-fill);
   box-shadow: inset 0 0 0 1px var(--xiaohei-frame-inner);
-}
-
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::before {
-  content: '小黑工具';
-  position: absolute;
-  z-index: 2;
-  top: -8px;
-  left: 13px;
-  height: 16px;
-  padding-inline: 7px;
-  border: 1px solid var(--xiaohei-frame-line);
-  border-radius: 3px 7px 7px 3px;
-  color: var(--xiaohei-frame-label);
-  background: var(--xiaohei-frame-plaque);
-  font-size: 9px;
-  font-weight: 650;
-  line-height: 14px;
-  letter-spacing: 0.12em;
-  pointer-events: none;
 }
 
 #root [data-slot='sidebar.footer.action'] > button,
