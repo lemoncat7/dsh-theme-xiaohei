@@ -3,6 +3,7 @@ import { XIAOHEI_CONTROL_CSS } from './chrome/controls.js'
 import { XIAOHEI_SIDEBAR_CSS } from './chrome/sidebar.js'
 import { XIAOHEI_SURFACE_CSS } from './chrome/surfaces.js'
 import { XIAOHEI_CHROME_TOKENS_CSS } from './chrome/tokens.js'
+import { XIAOHEI_WORKSPACE_INTERACTION_CSS } from './chrome/workspace-interactions.js'
 
 /** Stable public style id used for lifecycle cleanup and regression checks. */
 export const XIAOHEI_CHROME_STYLE_ID = 'dsh-theme-xiaohei/chrome-style'
@@ -14,6 +15,7 @@ export const XIAOHEI_CHROME_STYLE_ID = 'dsh-theme-xiaohei/chrome-style'
 export const XIAOHEI_CHROME_CSS = [
   XIAOHEI_CHROME_TOKENS_CSS,
   XIAOHEI_SIDEBAR_CSS,
+  XIAOHEI_WORKSPACE_INTERACTION_CSS,
   XIAOHEI_CONTROL_CSS,
   XIAOHEI_SURFACE_CSS,
   XIAOHEI_CHROME_ACCESSIBILITY_CSS,

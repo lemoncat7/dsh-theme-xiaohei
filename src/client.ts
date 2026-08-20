@@ -8,6 +8,7 @@ export {
 export { XIAOHEI_PORTAL_CSS } from './chrome/portal.js'
 export { XIAOHEI_GAZE_CSS } from './chrome/gaze.js'
 export { XIAOHEI_REACTION_CSS } from './chrome/reactions.js'
+export { XIAOHEI_WORKSPACE_INTERACTION_CSS } from './chrome/workspace-interactions.js'
 export { installXiaoheiGaze, XIAOHEI_GAZE_STYLE_ID } from './gaze.js'
 export {
   installXiaoheiIdleReactions,
@@ -28,6 +29,7 @@ export {
   installXiaoheiScene,
 } from './scene.js'
 export { bindXiaoheiSessionState, XIAOHEI_STATE_ATTRIBUTE } from './state.js'
+export { installXiaoheiWorkspaceInteractions } from './workspace-interactions.js'
 export {
   XIAOHEI_DAWN_THEME,
   XIAOHEI_DAWN_THEME_ID,

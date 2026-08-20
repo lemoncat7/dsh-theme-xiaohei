@@ -20,6 +20,7 @@ import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from '../lib/chrome/accessibility.js
 import { XIAOHEI_CONTROL_CSS } from '../lib/chrome/controls.js'
 import { XIAOHEI_SIDEBAR_CSS } from '../lib/chrome/sidebar.js'
 import { XIAOHEI_SURFACE_CSS } from '../lib/chrome/surfaces.js'
+import { XIAOHEI_WORKSPACE_INTERACTION_CSS } from '../lib/chrome/workspace-interactions.js'
 import { XIAOHEI_PORTAL_CSS } from '../lib/chrome/portal.js'
 import { XIAOHEI_GAZE_CSS } from '../lib/chrome/gaze.js'
 import { XIAOHEI_REACTION_CSS } from '../lib/chrome/reactions.js'
@@ -35,6 +36,7 @@ import {
   resolveXiaoheiIdleTailDelay,
   XIAOHEI_REACTION_STYLE_ID,
 } from '../lib/reactions.js'
+import { installXiaoheiWorkspaceInteractions } from '../lib/workspace-interactions.js'
 import {
   installXiaoheiPortalTransit,
   resolveXiaoheiPortalInteraction,
@@ -100,6 +102,7 @@ test('shades DSH native palettes without forcing a theme preference', () => {
   assert.deepEqual(calls.slice(2).map(call => call[1]), [
     'xiaohei-theme: follow resolved appearance',
     'xiaohei-theme: install spirit control skin',
+    'xiaohei-theme: bind workspace spirit feedback',
     'xiaohei-theme: install moonlit forest scene',
     'xiaohei-theme: install random Heixiu portal visits',
     'xiaohei-theme: install proximity gaze',
@@ -136,10 +139,29 @@ test('control skin composes isolated responsibility layers in a stable order', (
   assert.equal(XIAOHEI_CHROME_CSS, [
     XIAOHEI_CHROME_TOKENS_CSS,
     XIAOHEI_SIDEBAR_CSS,
+    XIAOHEI_WORKSPACE_INTERACTION_CSS,
     XIAOHEI_CONTROL_CSS,
     XIAOHEI_SURFACE_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
   ].join('\n'))
+})
+
+test('workspace spirit feedback follows the pointer and releases only on folder activation', () => {
+  assert.match(XIAOHEI_WORKSPACE_INTERACTION_CSS, /data-xiaohei-workspace-hover='true'/)
+  assert.match(XIAOHEI_WORKSPACE_INTERACTION_CSS, /data-xiaohei-workspace-release='true'/)
+  assert.match(XIAOHEI_WORKSPACE_INTERACTION_CSS, /xiaohei-workspace-spirit-release/)
+  assert.match(XIAOHEI_WORKSPACE_INTERACTION_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.match(XIAOHEI_WORKSPACE_INTERACTION_CSS, /forced-colors:\s*active/)
+  const keyframes = extractKeyframes(XIAOHEI_WORKSPACE_INTERACTION_CSS)
+  assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background|background-position)\s*:/)
+
+  const source = installXiaoheiWorkspaceInteractions.toString()
+  assert.match(source, /pointermove/)
+  assert.match(source, /requestAnimationFrame/)
+  assert.match(source, /pointerType === ['"]touch['"]/)
+  assert.match(source, /prefers-reduced-motion/)
+  assert.match(source, /closest\(['"]button['"]\)/)
+  assert.equal(typeof installXiaoheiWorkspaceInteractions(undefined), 'function')
 })
 
 test('workspace folders own the sidebar spirit framing without ambient fog', () => {
