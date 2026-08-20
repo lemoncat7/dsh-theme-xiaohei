@@ -146,9 +146,11 @@ def main() -> None:
     if source.size != (FRAME_SIZE, FRAME_SIZE):
         raise RuntimeError(f"expected 256x256 source, got {source.size}")
 
-    left = [source] + [deform(source, ear_mapper("left", angle)) for angle in (-4.0, -8.0, -3.0)] + [source]
-    right = [source] + [deform(source, ear_mapper("right", angle)) for angle in (4.0, 8.0, 3.0)] + [source]
-    tail = [source] + [deform(source, tail_mapper(angle)) for angle in (-3.5, -8.0, -2.0, 2.0)] + [source]
+    ear_angles = (-2.0, -4.5, -7.0, -8.0, -5.5, -3.0, -1.2)
+    tail_angles = (-2.0, -4.5, -7.5, -8.0, -5.0, -1.0, 2.0, 1.0)
+    left = [source] + [deform(source, ear_mapper("left", angle)) for angle in ear_angles] + [source]
+    right = [source] + [deform(source, ear_mapper("right", -angle)) for angle in ear_angles] + [source]
+    tail = [source] + [deform(source, tail_mapper(angle)) for angle in tail_angles] + [source]
 
     for frame in left[1:-1]:
         assert_local_change(source, frame, (35, 10, 132, 112))

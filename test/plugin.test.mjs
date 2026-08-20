@@ -178,6 +178,8 @@ test('idle reactions are sparse, complete-frame, state-safe, and independently o
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction='tail-complete'/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-reaction[\s\S]*xiaohei-gaze__base[\s\S]*opacity:\s*0/)
   assert.match(XIAOHEI_REACTION_CSS, /mascot-sheet--blink[\s\S]*z-index:\s*4/)
+  assert.match(XIAOHEI_REACTION_CSS, /560ms steps\(8, end\)/)
+  assert.match(XIAOHEI_REACTION_CSS, /steps\(9, end\)/)
   assert.match(XIAOHEI_REACTION_CSS, /data-xiaohei-state='idle'/)
   assert.match(XIAOHEI_REACTION_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_REACTION_CSS, /hover:\s*none[\s\S]*pointer:\s*coarse/)
