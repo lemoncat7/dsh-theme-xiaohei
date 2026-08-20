@@ -243,6 +243,51 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
   box-shadow: 0 0 0.7rem rgb(75 130 108 / 18%);
 }
 
+.xiaohei-scene__sidebar-signature {
+  position: absolute;
+  display: block;
+  z-index: 1;
+  left: 3.9rem;
+  top: 45%;
+  width: 11rem;
+  color: var(--xiaohei-signature-ink);
+  font-family: 'AR PL UKai CN', STKaiti, KaiTi, FangSong, serif;
+  font-size: 4.15rem;
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.18em;
+  text-align: center;
+  text-shadow:
+    0.04em 0.025em 0 rgb(5 19 23 / 28%),
+    -0.025em 0.04em 0 rgb(111 211 196 / 14%);
+  mix-blend-mode: screen;
+  opacity: 0.16;
+  transform: rotate(-9deg) skewX(-3deg) scaleY(1.06);
+  pointer-events: none;
+  user-select: none;
+}
+
+.xiaohei-scene__sidebar-signature::after {
+  content: '';
+  position: absolute;
+  left: 1.8rem;
+  right: 0.9rem;
+  bottom: -0.38rem;
+  height: 0.34rem;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.72;
+  transform: rotate(-4deg) skewX(-18deg);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-signature {
+  text-shadow:
+    0.04em 0.025em 0 rgb(25 61 58 / 16%),
+    -0.025em 0.04em 0 rgb(255 255 255 / 34%);
+  mix-blend-mode: multiply;
+  opacity: 0.17;
+}
+
 .xiaohei-scene__sidebar-spirit--one {
   left: 4.1rem;
   top: 46%;
@@ -265,7 +310,8 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
 
 html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-aura,
 html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-current,
-html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-spirit {
+html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-spirit,
+html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-signature {
   display: none;
 }
 
@@ -968,6 +1014,7 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   .xiaohei-scene__sidebar-aura,
   .xiaohei-scene__sidebar-current,
   .xiaohei-scene__sidebar-spirit,
+  .xiaohei-scene__sidebar-signature,
   .xiaohei-scene__heixiu-field,
   .xiaohei-scene__heixiu--sidebar,
   .xiaohei-scene__heixiu--composer { display: none; }
@@ -1202,6 +1249,7 @@ function createHeixiuCreature(doc: Document, name: string): HTMLSpanElement {
 }
 
 function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => void {
+  const sidebarSignature = createSidebarSignature(doc)
   const companions = [
     { slot: 'sidebar', creature: createHeixiuCreature(doc, 'sidebar') },
     { slot: 'conversation.composer.bar', creature: createHeixiuCreature(doc, 'composer') },
@@ -1211,6 +1259,10 @@ function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => vo
 
   const attach = (): void => {
     attachQueued = false
+    const sidebarHost = doc.querySelector<HTMLElement>("[data-slot='sidebar']")?.firstElementChild
+    if (sidebarHost !== null && sidebarHost !== undefined && sidebarSignature.parentElement !== sidebarHost) {
+      sidebarHost.append(sidebarSignature)
+    }
     for (const { slot, creature } of companions) {
       const host = doc.querySelector<HTMLElement>(`[data-slot='${slot}']`)?.firstElementChild
       if (host !== null && host !== undefined && creature.parentElement !== host) host.append(creature)
@@ -1224,7 +1276,7 @@ function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => vo
   }
 
   const restoreDetachedCompanions = (): void => {
-    if (!shouldRestoreXiaoheiHeixiuCompanions(companionCreatures)) return
+    if (sidebarSignature.isConnected && !shouldRestoreXiaoheiHeixiuCompanions(companionCreatures)) return
     queueAttach()
   }
 
@@ -1235,8 +1287,17 @@ function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => vo
 
   return () => {
     observer?.disconnect()
+    sidebarSignature.remove()
     for (const { creature } of companions) creature.remove()
   }
+}
+
+function createSidebarSignature(doc: Document): HTMLSpanElement {
+  const signature = doc.createElement('span')
+  signature.className = 'xiaohei-scene__sidebar-signature'
+  signature.setAttribute('aria-hidden', 'true')
+  signature.textContent = '小黑'
+  return signature
 }
 
 function createHeixiuImage(doc: Document, source: string, className: string): HTMLImageElement {

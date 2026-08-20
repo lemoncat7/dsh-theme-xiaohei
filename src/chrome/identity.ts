@@ -1,6 +1,6 @@
 /**
  * Xiaohei identity marks shared by native DSH chrome and opt-in feature plugins.
- * Frames own geometry; this layer owns brush plaques, sketch strokes, and pendants.
+ * Frames own geometry; this layer owns handwritten plaques, sketch strokes, and ink seals.
  */
 export const XIAOHEI_IDENTITY_CSS = `
 :where([data-xiaohei-frame-label])::before,
@@ -11,33 +11,34 @@ export const XIAOHEI_IDENTITY_CSS = `
   z-index: 3;
   box-sizing: border-box;
   width: max-content;
-  min-width: 48px;
-  height: 19px;
-  padding-inline: 10px 14px;
+  min-width: 58px;
+  height: 22px;
+  padding-inline: 10px 17px;
   overflow: hidden;
   border: 0;
-  border-radius: 2px 6px 3px 2px;
-  clip-path: polygon(0 18%, 7px 2%, 42% 0, 47% 8%, 92% 3%, 100% 24%, calc(100% - 4px) 69%, 100% 85%, 79% 100%, 45% 92%, 14% 100%, 0 78%);
+  border-radius: 2px 7px 3px 2px;
+  clip-path: polygon(0 14%, 6px 3%, 46% 0, 50% 6%, 94% 2%, 100% 21%, calc(100% - 3px) 76%, 96% 94%, 56% 100%, 48% 94%, 12% 100%, 0 82%);
   color: var(--xiaohei-frame-label);
   background:
-    linear-gradient(106deg, transparent 0 43%, var(--xiaohei-frame-line-strong) 45% 48%, transparent 50%) calc(100% - 11px) 3px / 9px 12px no-repeat,
-    linear-gradient(92deg, var(--xiaohei-frame-line-strong), transparent 84%) 7px 1px / calc(100% - 20px) 1px no-repeat,
-    linear-gradient(88deg, transparent, var(--xiaohei-frame-line) 12% 88%, transparent) 3px calc(100% - 2px) / calc(100% - 7px) 1px no-repeat,
-    linear-gradient(96deg, rgb(255 255 255 / 4%), transparent 42%),
+    linear-gradient(108deg, transparent 0 43%, var(--xiaohei-frame-line-strong) 45% 48%, transparent 50%) calc(100% - 13px) 4px / 10px 13px no-repeat,
+    linear-gradient(91deg, var(--xiaohei-frame-line-strong), transparent 76%) 8px 2px / calc(100% - 21px) 1px no-repeat,
+    linear-gradient(87deg, transparent, var(--xiaohei-frame-line) 10% 84%, transparent) 4px calc(100% - 3px) / calc(100% - 8px) 1px no-repeat,
+    linear-gradient(93deg, transparent 0 7%, var(--xiaohei-frame-line) 8% 32%, transparent 35%) 0 calc(100% - 1px) / 100% 1px no-repeat,
+    linear-gradient(96deg, rgb(255 255 255 / 7%), transparent 46%),
     var(--xiaohei-frame-plaque);
   box-shadow:
     -1px 1px 0 var(--xiaohei-frame-line),
     2px -1px 0 -1px var(--xiaohei-frame-line-strong),
     0 5px 10px var(--xiaohei-shadow);
   font-family: 'AR PL UKai CN', STKaiti, KaiTi, FangSong, serif;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 18px;
-  letter-spacing: 0.15em;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 21px;
+  letter-spacing: 0.08em;
   white-space: nowrap;
-  text-shadow: 0 1px 0 var(--xiaohei-frame-ink);
+  text-shadow: 0.35px 0 currentColor;
   pointer-events: none;
-  transform: rotate(-0.65deg) skewX(-1.5deg);
+  transform: rotate(-1.35deg) skewX(-2deg);
   transform-origin: left center;
 }
 
@@ -48,19 +49,19 @@ export const XIAOHEI_IDENTITY_CSS = `
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::before {
-  content: '会馆 · 工作区';
+  content: '小黑手记';
   top: 5px;
   left: 13px;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::before {
-  content: '小黑 · 工具札';
+  content: '小黑随行';
   top: -9px;
   left: 13px;
 }
 
 #root [data-composer-card='true']::after {
-  content: '小黑 · 会话域';
+  content: '小黑会话';
   top: -9px;
   right: auto;
   bottom: auto;
@@ -76,43 +77,46 @@ export const XIAOHEI_IDENTITY_CSS = `
   content: '';
   position: absolute;
   z-index: 3;
-  width: 22px;
-  height: 33px;
-  border: 0;
+  box-sizing: border-box;
+  width: 24px;
+  height: 23px;
+  border: 1px solid var(--xiaohei-frame-line-strong);
+  border-radius: 48% 52% 45% 55% / 52% 46% 54% 48%;
   background:
-    radial-gradient(circle at 43% 73%, var(--xiaohei-frame-label) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 57% 73%, var(--xiaohei-frame-label) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 50% 43%, var(--xiaohei-frame-line-strong) 0 2px, transparent 2.5px),
-    radial-gradient(circle at 50% 72%, var(--xiaohei-frame-ink) 0 7px, var(--xiaohei-frame-line-strong) 7.5px 8px, transparent 8.5px),
-    linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)) 50% 0 / 1px 17px no-repeat,
-    linear-gradient(83deg, transparent 46%, var(--xiaohei-frame-line-strong) 48% 51%, transparent 53%) 4px 0 / 8px 21px no-repeat,
-    linear-gradient(97deg, transparent 46%, var(--xiaohei-frame-line) 48% 51%, transparent 53%) 10px 0 / 8px 21px no-repeat;
-  box-shadow: none;
-  filter: drop-shadow(0 4px 5px var(--xiaohei-shadow));
-  opacity: 1;
+    radial-gradient(ellipse at 50% 68%, var(--xiaohei-frame-label) 0 4px, transparent 4.5px),
+    radial-gradient(circle at 28% 38%, var(--xiaohei-frame-label) 0 2px, transparent 2.4px),
+    radial-gradient(circle at 50% 28%, var(--xiaohei-frame-label) 0 2px, transparent 2.4px),
+    radial-gradient(circle at 72% 38%, var(--xiaohei-frame-label) 0 2px, transparent 2.4px),
+    linear-gradient(132deg, rgb(255 255 255 / 8%), transparent 48%),
+    var(--xiaohei-frame-plaque);
+  box-shadow:
+    inset 0 0 0 1px var(--xiaohei-frame-inner),
+    0 3px 7px var(--xiaohei-shadow);
+  filter: none;
+  opacity: 0.94;
   pointer-events: none;
-  transform: rotate(2deg);
-  transform-origin: 50% 0;
+  transform: rotate(4deg);
+  transform-origin: 50% 50%;
   transition: transform 320ms var(--xiaohei-motion-curve), filter var(--xiaohei-motion-base) ease;
 }
 
 :where([data-xiaohei-frame-ornament='spirit-knot'])::after {
-  top: -5px;
+  top: -9px;
   right: 16px;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::after {
-  top: -1px;
+  top: 5px;
   right: 11px;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::after {
-  top: -8px;
+  top: -10px;
   right: 13px;
 }
 
 #root [data-composer-card='true']::before {
-  top: -3px;
+  top: -9px;
   right: 24px;
 }
 
@@ -120,8 +124,12 @@ export const XIAOHEI_IDENTITY_CSS = `
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div:hover::after,
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action']):hover::after,
 #root [data-composer-card='true']:focus-within::before {
-  filter: drop-shadow(0 5px 7px var(--xiaohei-focus-shadow));
-  transform: rotate(-5deg);
+  border-color: var(--xiaohei-spirit);
+  box-shadow:
+    inset 0 0 0 1px var(--xiaohei-frame-inner),
+    0 4px 9px var(--xiaohei-focus-shadow);
+  filter: none;
+  transform: rotate(-4deg) scale(1.04);
 }
 
 @media (forced-colors: active) {

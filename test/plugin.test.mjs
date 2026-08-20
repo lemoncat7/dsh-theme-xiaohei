@@ -177,14 +177,15 @@ test('public Xiaohei frame contract supports future feature plugins', () => {
   assert.match(XIAOHEI_IDENTITY_CSS, /forced-colors:\s*active/)
 })
 
-test('brush plaques and Heixiu pendants share one identity layer', () => {
+test('handwritten plaques and cat-paw ink seals share one identity layer', () => {
   assert.match(XIAOHEI_IDENTITY_CSS, /AR PL UKai CN.*STKaiti, KaiTi, FangSong/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /linear-gradient\(106deg/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /linear-gradient\(108deg/)
   assert.match(XIAOHEI_IDENTITY_CSS, /clip-path:\s*polygon/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'会馆 · 工作区'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'小黑 · 工具札'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(circle at 43% 73%/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(circle at 50% 43%/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'小黑手记'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'小黑随行'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(ellipse at 50% 68%/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(circle at 50% 28%/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /border-radius:\s*48% 52%/)
   assert.match(XIAOHEI_IDENTITY_CSS, /data-composer-card='true'\]:focus-within::before/)
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /@keyframes|animation:/)
 })
@@ -226,16 +227,16 @@ test('workspace plaque stays inside the host clipping boundary', () => {
     /\[data-slot='sidebar\.workspaces'\] > div::before \{([^}]*)\}/,
   )?.[1] ?? ''
   assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*22px 7px 7px/)
-  assert.match(plaqueRule, /content:\s*'会馆 · 工作区'/)
+  assert.match(plaqueRule, /content:\s*'小黑手记'/)
   assert.match(plaqueRule, /top:\s*5px/)
   assert.doesNotMatch(plaqueRule, /top:\s*-/)
 })
 
 test('expanded workspace frame cannot cross the sidebar content edge', () => {
-  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 16px\)\s*!important/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /max-width:\s*calc\(100% - 16px\)/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*auto\s*!important/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /max-width:\s*none/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /min-width:\s*0/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /margin:\s*0 auto 7px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /margin:\s*0 14px 7px 4px/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /right:\s*0;[\s\S]*width:\s*12px/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /right:\s*-24px/)
 })
@@ -471,6 +472,10 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   ]) assert.match(asset, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
   assert.match(installXiaoheiScene.toString(), /createIdleBlink/)
+  assert.match(installXiaoheiScene.toString(), /installHeixiuCompanions/)
+  assert.match(XIAOHEI_SCENE_CSS, /z-index:\s*1;[\s\S]*xiaohei-signature-ink/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__sidebar-signature/)
+  assert.match(XIAOHEI_SCENE_CSS, /--xiaohei-signature-ink/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /@keyframes xiaohei-mascot-blink/)
   for (const state of ['thinking', 'streaming', 'tool', 'waiting', 'complete', 'error']) {
     assert.match(XIAOHEI_SCENE_CSS, new RegExp(`data-xiaohei-state='${state}'`))

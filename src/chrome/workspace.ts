@@ -3,10 +3,10 @@ export const XIAOHEI_WORKSPACE_CSS = `
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div {
   position: relative;
   box-sizing: border-box;
-  width: calc(100% - 16px) !important;
+  width: auto !important;
   min-width: 0;
-  max-width: calc(100% - 16px);
-  margin: 0 auto 7px;
+  max-width: none;
+  margin: 0 14px 7px 4px;
   padding: 22px 7px 7px;
   border: 1px solid var(--xiaohei-frame-line);
   border-radius: 13px;
