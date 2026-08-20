@@ -12,7 +12,6 @@ const GREETING_DURATION_MS = 800
 const INITIAL_GREETING_DELAY_MS = 3600
 const GREETING_MIN_DELAY_MS = 12_000
 const GREETING_DELAY_RANGE_MS = 6000
-const DIRECT_GREETING_COOLDOWN_MS = 2400
 
 interface Point {
   x: number
@@ -40,7 +39,6 @@ export function installXiaoheiHeixiuInteractions(
   let frameId = 0
   let greetingTimer = 0
   let greetingCleanupTimer = 0
-  let lastDirectGreetingAt = 0
 
   const behaviorDisabled = (): boolean => reducedMotion.matches || coarsePointer.matches
   const isIdle = (): boolean => (
@@ -123,8 +121,7 @@ export function installXiaoheiHeixiuInteractions(
       return
     }
 
-    const entering = active !== candidate.element
-    if (entering) {
+    if (active !== candidate.element) {
       clearAttention()
       active = candidate.element
       active.setAttribute('data-xiaohei-heixiu-attention', 'true')
@@ -135,15 +132,6 @@ export function installXiaoheiHeixiuInteractions(
     const y = (pointer.y - candidate.center.y) / distance * HEIXIU_ATTENTION_OFFSET_PX
     candidate.element.style.setProperty('--xiaohei-heixiu-attention-x', `${x.toFixed(2)}px`)
     candidate.element.style.setProperty('--xiaohei-heixiu-attention-y', `${y.toFixed(2)}px`)
-
-    if (
-      entering
-      && candidate.element.classList.contains('xiaohei-scene__heixiu--mascot')
-      && win.performance.now() - lastDirectGreetingAt >= DIRECT_GREETING_COOLDOWN_MS
-    ) {
-      lastDirectGreetingAt = win.performance.now()
-      playGreeting(candidate.element, candidate.center)
-    }
   }
 
   const wake = (): void => {

@@ -232,7 +232,7 @@ test('Heixiu only greets Xiaohei when the nearest portal phase is close', () => 
   ), undefined)
 })
 
-test('fixed Heixiu companions notice the pointer and greet Xiaohei reliably', () => {
+test('fixed Heixiu companions answer the pointer without summoning Xiaohei', () => {
   assert.match(XIAOHEI_HEIXIU_GREETING_EVENT, /heixiu-greeting$/)
   assert.match(XIAOHEI_HEIXIU_INTERACTION_CSS, /data-xiaohei-heixiu-attention='true'/)
   assert.match(XIAOHEI_HEIXIU_INTERACTION_CSS, /data-xiaohei-heixiu-greeting='true'/)
@@ -248,6 +248,11 @@ test('fixed Heixiu companions notice the pointer and greet Xiaohei reliably', ()
   assert.match(source, /pointerType === ['"]touch['"]/)
   assert.match(source, /INITIAL_GREETING_DELAY_MS/)
   assert.match(source, /XIAOHEI_HEIXIU_GREETING_EVENT/)
+  assert.doesNotMatch(source, /DIRECT_GREETING_COOLDOWN_MS|lastDirectGreetingAt/)
+  assert.doesNotMatch(
+    source.match(/const applyPointerAttention[\s\S]*?const wake/)?.[0] ?? '',
+    /playGreeting/,
+  )
   assert.equal(typeof installXiaoheiHeixiuInteractions(undefined), 'function')
 })
 
