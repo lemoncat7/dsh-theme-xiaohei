@@ -1,0 +1,66 @@
+import { readFile } from 'node:fs/promises'
+
+const assets = [
+  ['xiaohei-idle-eye-base-v1.webp', 256, 256],
+  ['xiaohei-thinking-canonical-v12.webp', 512, 512],
+  ['xiaohei-streaming-tailwrite-v1.webp', 512, 512],
+  ['xiaohei-tool-canonical-v2.webp', 512, 512],
+  ['xiaohei-waiting-canonical-v2.webp', 512, 512],
+  ['xiaohei-complete-canonical-v2.webp', 512, 512],
+  ['xiaohei-error-canonical-v2.webp', 512, 512],
+]
+
+for (const [filename, expectedWidth, expectedHeight] of assets) {
+  const source = await readFile(new URL(`../src/assets/character/${filename}`, import.meta.url))
+  const { width, height } = readWebpDimensions(source)
+  if (width !== expectedWidth || height !== expectedHeight) {
+    throw new Error(`${filename}: expected ${expectedWidth}x${expectedHeight}, received ${width}x${height}`)
+  }
+}
+
+function readWebpDimensions(source) {
+  if (source.toString('ascii', 0, 4) !== 'RIFF' || source.toString('ascii', 8, 12) !== 'WEBP') {
+    throw new Error('character asset is not a valid WebP RIFF container')
+  }
+
+  let offset = 12
+  while (offset + 8 <= source.length) {
+    const type = source.toString('ascii', offset, offset + 4)
+    const size = source.readUInt32LE(offset + 4)
+    const data = offset + 8
+
+    if (type === 'VP8X') {
+      return {
+        width: 1 + readUInt24LE(source, data + 4),
+        height: 1 + readUInt24LE(source, data + 7),
+      }
+    }
+
+    if (type === 'VP8L') {
+      if (source[data] !== 0x2f) throw new Error('invalid VP8L signature')
+      const bits = source.readUInt32LE(data + 1)
+      return {
+        width: 1 + (bits & 0x3fff),
+        height: 1 + ((bits >>> 14) & 0x3fff),
+      }
+    }
+
+    if (type === 'VP8 ') {
+      if (source[data + 3] !== 0x9d || source[data + 4] !== 0x01 || source[data + 5] !== 0x2a) {
+        throw new Error('invalid VP8 key-frame signature')
+      }
+      return {
+        width: source.readUInt16LE(data + 6) & 0x3fff,
+        height: source.readUInt16LE(data + 8) & 0x3fff,
+      }
+    }
+
+    offset = data + size + (size % 2)
+  }
+
+  throw new Error('WebP dimensions were not found')
+}
+
+function readUInt24LE(source, offset) {
+  return source[offset] | (source[offset + 1] << 8) | (source[offset + 2] << 16)
+}

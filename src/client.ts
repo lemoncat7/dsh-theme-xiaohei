@@ -1,4 +1,19 @@
 export { apply, inject } from './plugin.js'
+export { bindXiaoheiAppearance, XIAOHEI_APPEARANCE_ATTRIBUTE } from './appearance.js'
+export {
+  installXiaoheiChrome,
+  XIAOHEI_CHROME_CSS,
+  XIAOHEI_CHROME_STYLE_ID,
+} from './chrome.js'
+export { XIAOHEI_PORTAL_CSS } from './chrome/portal.js'
+export { XIAOHEI_GAZE_CSS } from './chrome/gaze.js'
+export { installXiaoheiGaze, XIAOHEI_GAZE_STYLE_ID } from './gaze.js'
+export {
+  installXiaoheiPortalTransit,
+  XIAOHEI_PORTAL_ACTIVITY_EVENT,
+  XIAOHEI_PORTAL_LAYER_ID,
+  XIAOHEI_PORTAL_STYLE_ID,
+} from './portal.js'
 export {
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_LAYER_ID,
@@ -7,4 +22,10 @@ export {
   installXiaoheiScene,
 } from './scene.js'
 export { bindXiaoheiSessionState, XIAOHEI_STATE_ATTRIBUTE } from './state.js'
-export { XIAOHEI_NIGHT_THEME, XIAOHEI_NIGHT_THEME_ID } from './theme.js'
+export {
+  XIAOHEI_DAWN_THEME,
+  XIAOHEI_DAWN_THEME_ID,
+  XIAOHEI_NIGHT_THEME,
+  XIAOHEI_NIGHT_THEME_ID,
+  XIAOHEI_THEME_TOKEN_OVERRIDES,
+} from './theme.js'

@@ -48,7 +48,7 @@
     "node": "^22.19.0 || >=24.0.0"
   },
   "scripts": {
-    "build": "node scripts/embed-assets.mjs && tsc -p tsconfig.json && node scripts/build-client.mjs",
+    "build": "node scripts/validate-character-assets.mjs && node scripts/embed-assets.mjs && tsc -p tsconfig.json && node scripts/build-client.mjs",
     "clean": "node -e \"require('node:fs').rmSync('lib', { recursive: true, force: true })\"",
     "prepare": "npm run clean && npm run build",
     "test": "npm run build && node --test test/*.test.mjs",

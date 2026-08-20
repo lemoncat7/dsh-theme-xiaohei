@@ -1,9 +1,12 @@
 import {
   XIAOHEI_COMPLETE,
-  XIAOHEI_ENERGY,
+  XIAOHEI_DAWN_KEY_ART,
+  XIAOHEI_THINKING,
   XIAOHEI_ERROR,
+  XIAOHEI_HEIXIU_BLINK,
+  XIAOHEI_HEIXIU_OPEN,
   XIAOHEI_IDLE_SHEET,
-  XIAOHEI_KEY_ART,
+  XIAOHEI_NIGHT_KEY_ART,
   XIAOHEI_STREAMING,
   XIAOHEI_TOOL,
   XIAOHEI_WAITING,
@@ -22,6 +25,10 @@ body {
   background: #19424A;
 }
 
+html[data-xiaohei-appearance='light'] body {
+  background: #E6ECE6;
+}
+
 #root {
   position: relative;
   z-index: 1;
@@ -37,6 +44,10 @@ body {
   pointer-events: none;
   user-select: none;
   background: #19424A;
+}
+
+html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
+  background: #E6ECE6;
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} > * {
@@ -126,7 +137,7 @@ body {
   padding-top: 6px;
 }
 
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='tree'] > div:only-child:not([role]) {
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='tree'] > [class*='_empty'] {
   margin: 2px 4px 0;
   padding: 16px 14px 17px;
   border: 1px solid rgb(139 229 213 / 9%);
@@ -171,6 +182,75 @@ body {
   outline-offset: 2px;
 }
 
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
+  background:
+    radial-gradient(130% 48% at 12% 90%, rgb(85 142 119 / 12%) 0%, transparent 68%),
+    linear-gradient(180deg, rgb(244 248 244 / 84%) 0%, rgb(239 245 240 / 78%) 58%, rgb(235 242 236 / 88%) 100%) !important;
+  border-right-color: rgb(37 92 79 / 13%);
+  box-shadow: inset -1px 0 rgb(255 255 255 / 42%), 16px 0 36px rgb(47 72 61 / 8%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
+  border-bottom-color: rgb(37 92 79 / 9%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child:hover,
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] button:hover {
+  color: #1E2B28;
+  background: rgb(47 133 118 / 9%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'] {
+  border-color: rgb(47 133 118 / 24%);
+  background: linear-gradient(180deg, rgb(255 255 255 / 62%), rgb(237 245 239 / 72%)) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 72%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']:hover {
+  border-color: rgb(47 133 118 / 38%);
+  background: linear-gradient(180deg, rgb(255 255 255 / 78%), rgb(229 240 232 / 82%)) !important;
+  box-shadow: inset 0 1px rgb(255 255 255 / 84%), 0 6px 18px rgb(44 73 60 / 8%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div > div:first-child {
+  background: rgb(255 255 255 / 24%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div > div:first-child > span:first-child {
+  color: #5C7069;
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] [role='tree'] > [class*='_empty'] {
+  border-color: rgb(37 92 79 / 10%);
+  color: #6A7B75;
+  background:
+    radial-gradient(circle at 88% 22%, rgb(47 133 118 / 9%), transparent 34%),
+    rgb(255 255 255 / 28%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:last-child {
+  border-color: rgb(37 92 79 / 11%);
+  background: rgb(247 250 247 / 56%);
+  box-shadow: inset 0 1px rgb(255 255 255 / 62%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.footer.action'] > button,
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.settings'] > button {
+  color: #52645F;
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.footer.action'] > button:hover,
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.settings'] > button:hover,
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.footer.action'] > button[aria-expanded='true'],
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.settings'] > button[aria-expanded='true'] {
+  color: #1E2B28;
+  background: rgb(47 133 118 / 9%);
+}
+
+html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] button:focus-visible {
+  outline-color: #2F8576;
+}
+
 .xiaohei-scene__keyart {
   inset: -2.5%;
   width: 105%;
@@ -178,29 +258,61 @@ body {
   max-width: none;
   object-fit: cover;
   object-position: center;
-  opacity: 0.98;
-  filter: brightness(1.36) contrast(1.1) saturate(1.06);
+  transform: scale(1.015);
+  transition: opacity 320ms ease-out;
+}
+
+.xiaohei-scene__keyart--night {
+  opacity: 0.9;
+  filter: brightness(1.16) contrast(1.12) saturate(0.78);
+}
+
+.xiaohei-scene__keyart--dawn {
+  opacity: 0;
+  filter: brightness(0.96) contrast(0.92) saturate(0.7);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night {
+  opacity: 0;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
+  opacity: 0.94;
 }
 
 .xiaohei-scene__veil {
   inset: 0;
   background:
-    radial-gradient(ellipse at 58% 48%, rgb(3 10 12 / 18%) 0%, rgb(3 10 12 / 8%) 34%, transparent 68%),
-    linear-gradient(180deg, transparent 66%, rgb(3 10 12 / 10%) 100%);
+    linear-gradient(90deg, rgb(3 10 12 / 10%) 0%, rgb(3 10 12 / 5%) 48%, rgb(3 10 12 / 17%) 100%),
+    radial-gradient(ellipse at 82% 22%, rgb(3 10 12 / 12%) 0%, rgb(3 10 12 / 5%) 28%, transparent 56%),
+    linear-gradient(180deg, rgb(3 10 12 / 4%) 0%, transparent 54%, rgb(3 10 12 / 13%) 100%);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__veil {
+  background:
+    linear-gradient(90deg, rgb(226 233 226 / 30%) 0%, rgb(233 237 231 / 18%) 42%, rgb(219 228 220 / 24%) 100%),
+    radial-gradient(ellipse at 57% 43%, rgb(226 232 224 / 32%) 0%, rgb(226 232 224 / 14%) 34%, transparent 68%),
+    linear-gradient(180deg, rgb(229 234 227 / 14%) 0%, transparent 52%, rgb(205 216 207 / 22%) 100%);
 }
 
 .xiaohei-scene__aura {
-  width: 58vmax;
-  aspect-ratio: 1;
-  right: -16vmax;
-  bottom: -23vmax;
+  width: 48vmax;
+  aspect-ratio: 1.28;
+  right: -9vmax;
+  bottom: -18vmax;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(117 228 208 / 42%) 0%, rgb(58 161 151 / 19%) 38%, transparent 70%);
+  background: radial-gradient(ellipse at 56% 54%, rgb(117 228 208 / 35%) 0%, rgb(58 161 151 / 15%) 36%, transparent 70%);
   mix-blend-mode: screen;
-  opacity: 0.78;
+  opacity: 0.46;
   transform: scale(0.96);
   will-change: transform, opacity;
   animation: xiaohei-scene-aura 7.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__aura {
+  background: radial-gradient(ellipse at 56% 54%, rgb(73 143 119 / 18%) 0%, rgb(87 137 116 / 9%) 38%, transparent 70%);
+  mix-blend-mode: multiply;
+  opacity: 0.28;
 }
 
 .xiaohei-scene__spirit {
@@ -214,34 +326,158 @@ body {
   will-change: transform, opacity;
 }
 
+html[data-xiaohei-appearance='light'] .xiaohei-scene__spirit {
+  background: #4D927C;
+  box-shadow: 0 0 0.45rem rgb(67 133 111 / 54%), 0 0 1.4rem rgb(106 151 132 / 28%);
+  mix-blend-mode: multiply;
+}
+
 .xiaohei-scene__spirit--one {
-  right: 18%;
-  bottom: 22%;
+  right: 22%;
+  bottom: 20%;
   animation: xiaohei-spirit-one 6.8s cubic-bezier(0.37, 0, 0.63, 1) infinite;
 }
 
 .xiaohei-scene__spirit--two {
-  right: 31%;
-  bottom: 31%;
+  right: 34%;
+  bottom: 30%;
   animation: xiaohei-spirit-two 8.4s cubic-bezier(0.37, 0, 0.63, 1) -2.2s infinite;
 }
 
 .xiaohei-scene__spirit--three {
-  right: 9%;
-  bottom: 42%;
+  right: 13%;
+  bottom: 45%;
   animation: xiaohei-spirit-three 7.7s cubic-bezier(0.37, 0, 0.63, 1) -4.1s infinite;
 }
 
-.xiaohei-scene__mascot {
-  right: clamp(0.75rem, 3.8vw, 4rem);
-  bottom: clamp(0.25rem, 1.8vh, 1.5rem);
-  width: clamp(12rem, 22vw, 21rem);
+.xiaohei-scene__sidebar-aura {
+  left: -7rem;
+  top: 30%;
+  width: 24rem;
+  height: 32rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 44% 52%,
+    rgb(108 239 215 / 78%) 0%,
+    rgb(43 154 143 / 38%) 34%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.88;
+  will-change: opacity;
+  animation: xiaohei-sidebar-aura 9.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
+}
+
+.xiaohei-scene__sidebar-current {
+  left: 2.2rem;
+  top: 35%;
+  width: 11rem;
+  height: 21rem;
+  border-left: 1px solid rgb(169 255 236 / 92%);
+  border-radius: 56% 0 0 48%;
+  box-shadow: -0.45rem 0 1.55rem rgb(88 229 203 / 48%);
+  opacity: 0.62;
+  transform: rotate(-9deg);
+  will-change: opacity;
+  -webkit-mask-image: linear-gradient(180deg, transparent, black 18%, black 76%, transparent);
+  mask-image: linear-gradient(180deg, transparent, black 18%, black 76%, transparent);
+  animation: xiaohei-sidebar-current 8.8s ease-in-out infinite;
+}
+
+.xiaohei-scene__sidebar-spirit {
+  width: 0.48rem;
   aspect-ratio: 1;
-  overflow: hidden;
+  border-radius: 50%;
+  background: #D0FFF4;
+  box-shadow:
+    0 0 0.55rem rgb(159 255 235 / 100%),
+    0 0 1.5rem rgb(70 217 194 / 90%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.xiaohei-scene__sidebar-spirit::after {
+  content: '';
+  position: absolute;
+  inset: -0.48rem;
+  border: 1px solid rgb(151 255 233 / 58%);
+  border-radius: 50%;
+  box-shadow: 0 0 0.8rem rgb(86 229 203 / 32%);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-aura {
+  background: radial-gradient(
+    ellipse at 44% 52%,
+    rgb(75 139 116 / 24%) 0%,
+    rgb(91 137 117 / 11%) 34%,
+    transparent 70%
+  );
+  mix-blend-mode: multiply;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-current {
+  border-left-color: rgb(49 114 94 / 46%);
+  box-shadow: -0.45rem 0 1.55rem rgb(75 130 108 / 18%);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit {
+  background: #397E69;
+  box-shadow:
+    0 0 0.45rem rgb(67 126 106 / 52%),
+    0 0 1.2rem rgb(91 139 120 / 30%);
+  mix-blend-mode: multiply;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
+  border-color: rgb(49 114 94 / 38%);
+  box-shadow: 0 0 0.7rem rgb(75 130 108 / 18%);
+}
+
+.xiaohei-scene__sidebar-spirit--one {
+  left: 4.1rem;
+  top: 46%;
+  animation: xiaohei-sidebar-spirit-one 10.5s ease-in-out infinite;
+}
+
+.xiaohei-scene__sidebar-spirit--two {
+  left: 9.2rem;
+  top: 57%;
+  width: 0.38rem;
+  animation: xiaohei-sidebar-spirit-two 12.4s ease-in-out -4.3s infinite;
+}
+
+.xiaohei-scene__sidebar-spirit--three {
+  left: 5.8rem;
+  top: 67%;
+  width: 0.32rem;
+  animation: xiaohei-sidebar-spirit-three 11.6s ease-in-out -7.1s infinite;
+}
+
+html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-aura,
+html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-current,
+html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-spirit {
+  display: none;
+}
+
+.xiaohei-scene__mascot {
+  right: clamp(4.5rem, 8vw, 9rem);
+  bottom: clamp(5rem, 10vh, 7rem);
+  width: clamp(11.5rem, 19vw, 19rem);
+  aspect-ratio: 1;
+  overflow: visible;
   isolation: isolate;
   filter:
     drop-shadow(0 0.6rem 1.45rem rgb(83 218 193 / 35%))
     drop-shadow(0 1.25rem 2.6rem rgb(1 9 10 / 30%));
+}
+
+.xiaohei-scene__mascot-idle-viewport {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .xiaohei-scene__mascot::before {
@@ -257,7 +493,115 @@ body {
     rgb(34 144 132 / 18%) 58%,
     transparent 74%
   );
-  opacity: 0.94;
+  opacity: 0.66;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot {
+  filter:
+    drop-shadow(0 0.55rem 0.9rem rgb(40 58 51 / 22%))
+    drop-shadow(0 1.15rem 2.2rem rgb(45 64 56 / 14%));
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot::before {
+  background: radial-gradient(
+    circle at 50% 58%,
+    rgb(236 242 230 / 72%) 0%,
+    rgb(198 219 202 / 34%) 40%,
+    transparent 72%
+  );
+  opacity: 0.42;
+}
+
+.xiaohei-scene__heixiu-field {
+  inset: 0;
+  overflow: hidden;
+}
+
+.xiaohei-scene__heixiu {
+  position: absolute;
+  display: block;
+  aspect-ratio: 1;
+  opacity: var(--heixiu-opacity, 0.58);
+  filter:
+    drop-shadow(0 0.32rem 0.58rem rgb(109 233 211 / 18%))
+    drop-shadow(0 0.68rem 1.15rem rgb(1 9 10 / 20%));
+  will-change: transform;
+}
+
+#root [data-slot='sidebar'] > div,
+#root [data-slot='conversation.composer.bar'] > div {
+  position: relative !important;
+}
+
+.xiaohei-scene__heixiu > img {
+  position: absolute;
+  display: block;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  filter: brightness(1.12) contrast(1.04) saturate(0.82);
+}
+
+.xiaohei-scene__heixiu-open {
+  opacity: 1;
+  will-change: opacity;
+  animation: xiaohei-heixiu-open var(--heixiu-blink-duration, 7.6s) step-end var(--heixiu-blink-delay, 0s) infinite;
+}
+
+.xiaohei-scene__heixiu-blink {
+  opacity: 0;
+  will-change: opacity;
+  animation: xiaohei-heixiu-blink var(--heixiu-blink-duration, 7.6s) step-end var(--heixiu-blink-delay, 0s) infinite;
+}
+
+.xiaohei-scene__heixiu--mascot {
+  right: clamp(19rem, 25vw, 30rem);
+  bottom: clamp(9.5rem, 16vh, 13rem);
+  width: clamp(4.2rem, 5.4vw, 5.5rem);
+  --heixiu-opacity: 0.72;
+  --heixiu-blink-duration: 7.2s;
+  --heixiu-blink-delay: -1.1s;
+  animation: xiaohei-heixiu-drift-one 13.6s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+
+.xiaohei-scene__heixiu--sidebar {
+  z-index: 3;
+  right: 0.7rem;
+  top: 49%;
+  width: 3.15rem;
+  --heixiu-opacity: 0.52;
+  --heixiu-blink-duration: 8.9s;
+  --heixiu-blink-delay: -4.7s;
+  animation: xiaohei-heixiu-drift-two 16.2s cubic-bezier(0.37, 0, 0.63, 1) -5.2s infinite;
+}
+
+.xiaohei-scene__heixiu--composer {
+  z-index: 3;
+  left: 54%;
+  right: auto;
+  top: -1.7rem;
+  width: 3.45rem;
+  --heixiu-opacity: 0.6;
+  --heixiu-blink-duration: 9.4s;
+  --heixiu-blink-delay: -6.2s;
+  animation: xiaohei-heixiu-drift-three 17.2s cubic-bezier(0.37, 0, 0.63, 1) -8.1s infinite;
+}
+
+#root [data-slot='sidebar'] > div[class*='_collapsed'] .xiaohei-scene__heixiu--sidebar {
+  display: none;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__heixiu {
+  filter:
+    drop-shadow(0 0.28rem 0.5rem rgb(52 83 71 / 13%))
+    drop-shadow(0 0.62rem 1rem rgb(45 64 56 / 10%));
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__heixiu > img {
+  filter: brightness(1.02) contrast(1.05) saturate(0.74);
 }
 
 .xiaohei-scene__mascot-sheet {
@@ -288,16 +632,32 @@ body {
 .xiaohei-scene__mascot-state {
   position: absolute;
   display: block;
-  inset: 0;
+  left: 50%;
+  bottom: 0;
   width: 100%;
-  height: 100%;
+  height: auto;
   max-width: none;
   max-height: none;
-  object-fit: fill;
+  object-fit: contain;
   opacity: 0;
   z-index: 1;
   filter: brightness(1.32) contrast(1.02) saturate(1.04);
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
   transition: opacity 120ms ease-out;
+}
+
+.xiaohei-scene__mascot-state--thinking {
+  filter: brightness(1.34) contrast(1.02) saturate(1.03);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot-sheet,
+html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot-state {
+  filter: brightness(1.02) contrast(1.07) saturate(0.9);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot-state--thinking {
+  filter: brightness(1.04) contrast(1.06) saturate(0.91);
 }
 
 html:not([data-xiaohei-state='idle']) .xiaohei-scene__mascot-sheet--open {
@@ -318,18 +678,97 @@ html[data-xiaohei-state='error'] .xiaohei-scene__mascot-state--error {
   opacity: 1;
 }
 
-.xiaohei-scene__energy-fx,
-.xiaohei-scene__energy-fx > span {
+.xiaohei-scene__thinking-fx,
+.xiaohei-scene__thinking-bubble,
+.xiaohei-scene__thinking-dot {
   position: absolute;
   display: block;
   pointer-events: none;
 }
 
-.xiaohei-scene__energy-fx {
+.xiaohei-scene__thinking-fx {
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   opacity: 0;
-  transition: opacity 120ms ease-out;
+  transition: opacity 160ms ease-out;
+}
+
+.xiaohei-scene__thinking-bubble {
+  left: 56%;
+  top: -4%;
+  width: 36%;
+  height: 18%;
+  border: 1px solid rgb(210 242 235 / 44%);
+  border-radius: 999px;
+  background: rgb(226 242 238 / 88%);
+  box-shadow:
+    0 0.45rem 1.15rem rgb(1 9 10 / 18%),
+    inset 0 1px rgb(255 255 255 / 68%);
+}
+
+.xiaohei-scene__thinking-bubble::before,
+.xiaohei-scene__thinking-bubble::after {
+  position: absolute;
+  display: block;
+  content: '';
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: inherit;
+  box-shadow: inherit;
+}
+
+.xiaohei-scene__thinking-bubble::before {
+  left: 12%;
+  bottom: -31%;
+  width: 15%;
+}
+
+.xiaohei-scene__thinking-bubble::after {
+  left: 2%;
+  bottom: -51%;
+  width: 8%;
+}
+
+.xiaohei-scene__thinking-dot {
+  top: 50%;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #526B66;
+  opacity: 0.28;
+  transform: translateY(-50%);
+}
+
+.xiaohei-scene__thinking-dot--one { left: 25%; }
+.xiaohei-scene__thinking-dot--two { left: 46%; }
+.xiaohei-scene__thinking-dot--three { left: 67%; }
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__thinking-fx {
+  opacity: 1;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__thinking-dot--one {
+  animation: xiaohei-thinking-dot 1.8s ease-in-out infinite;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__thinking-dot--two {
+  animation: xiaohei-thinking-dot 1.8s ease-in-out 0.3s infinite;
+}
+
+html[data-xiaohei-state='thinking'] .xiaohei-scene__thinking-dot--three {
+  animation: xiaohei-thinking-dot 1.8s ease-in-out 0.6s infinite;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__thinking-bubble {
+  border-color: rgb(46 94 83 / 20%);
+  background: rgb(247 250 247 / 92%);
+  box-shadow:
+    0 0.45rem 1.1rem rgb(44 73 60 / 12%),
+    inset 0 1px rgb(255 255 255 / 86%);
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__thinking-dot {
+  background: #45635C;
 }
 
 .xiaohei-scene__state-fx,
@@ -360,38 +799,67 @@ html[data-xiaohei-state='error'] .xiaohei-scene__state-fx--error {
   opacity: 1;
 }
 
-.xiaohei-scene__stream-mote {
-  left: 18%;
-  top: 51%;
-  width: 0.3rem;
-  aspect-ratio: 1;
-  background: #A8FFEB;
-  box-shadow: 0 0 0.65rem rgb(91 255 219 / 92%);
+.xiaohei-scene__tail-write {
+  left: var(--tail-write-left);
+  top: var(--tail-write-top);
+  width: var(--tail-write-width);
+  height: 7%;
+  border-top: 2px solid #A8FFEB;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 0.34rem rgb(91 255 219 / 78%));
+  transform: rotate(var(--tail-write-angle)) scaleX(0.08);
+  transform-origin: 100% 50%;
 }
 
-html[data-xiaohei-state='streaming'] .xiaohei-scene__stream-mote--one {
-  animation: xiaohei-stream-mote 1.25s ease-out infinite;
+.xiaohei-scene__tail-write--one {
+  --tail-write-left: 67%;
+  --tail-write-top: 34%;
+  --tail-write-width: 16%;
+  --tail-write-angle: -18deg;
 }
 
-html[data-xiaohei-state='streaming'] .xiaohei-scene__stream-mote--two {
-  animation: xiaohei-stream-mote 1.25s ease-out -0.42s infinite;
+.xiaohei-scene__tail-write--two {
+  --tail-write-left: 59%;
+  --tail-write-top: 27%;
+  --tail-write-width: 19%;
+  --tail-write-angle: -12deg;
 }
 
-html[data-xiaohei-state='streaming'] .xiaohei-scene__stream-mote--three {
-  animation: xiaohei-stream-mote 1.25s ease-out -0.84s infinite;
+.xiaohei-scene__tail-write--three {
+  --tail-write-left: 50%;
+  --tail-write-top: 21%;
+  --tail-write-width: 21%;
+  --tail-write-angle: -6deg;
+}
+
+html[data-xiaohei-appearance='light'] .xiaohei-scene__tail-write {
+  border-top-color: #2F8576;
+  filter: drop-shadow(0 0 0.28rem rgb(47 133 118 / 34%));
+}
+
+html[data-xiaohei-state='streaming'] .xiaohei-scene__tail-write--one {
+  animation: xiaohei-tail-write 1.9s ease-in-out infinite;
+}
+
+html[data-xiaohei-state='streaming'] .xiaohei-scene__tail-write--two {
+  animation: xiaohei-tail-write 1.9s ease-in-out 0.3s infinite;
+}
+
+html[data-xiaohei-state='streaming'] .xiaohei-scene__tail-write--three {
+  animation: xiaohei-tail-write 1.9s ease-in-out 0.6s infinite;
 }
 
 .xiaohei-scene__tool-key {
-  top: 68%;
+  top: 84%;
   width: 0.3rem;
   aspect-ratio: 0.7;
   background: #70F2D9;
   box-shadow: 0 0 0.7rem rgb(72 238 208 / 90%);
 }
 
-.xiaohei-scene__tool-key--one { left: 35%; }
-.xiaohei-scene__tool-key--two { left: 42%; }
-.xiaohei-scene__tool-key--three { left: 49%; }
+.xiaohei-scene__tool-key--one { left: 29%; }
+.xiaohei-scene__tool-key--two { left: 38%; }
+.xiaohei-scene__tool-key--three { left: 47%; }
 
 html[data-xiaohei-state='tool'] .xiaohei-scene__tool-key--one {
   animation: xiaohei-tool-key 0.9s ease-in-out infinite;
@@ -406,8 +874,8 @@ html[data-xiaohei-state='tool'] .xiaohei-scene__tool-key--three {
 }
 
 .xiaohei-scene__waiting-ring {
-  left: 28%;
-  top: 37%;
+  left: 61%;
+  top: 34%;
   width: 13%;
   aspect-ratio: 1;
   border: 1px solid rgb(255 207 126 / 88%);
@@ -419,13 +887,14 @@ html[data-xiaohei-state='waiting'] .xiaohei-scene__waiting-ring {
 }
 
 .xiaohei-scene__complete-spark {
-  left: 50%;
-  top: 57%;
   width: 0.35rem;
   aspect-ratio: 1;
   background: #B6FFED;
   box-shadow: 0 0 0.8rem rgb(91 255 219 / 92%);
 }
+
+.xiaohei-scene__complete-spark--one { left: 36%; top: 70%; }
+.xiaohei-scene__complete-spark--two { left: 62%; top: 67%; }
 
 html[data-xiaohei-state='complete'] .xiaohei-scene__complete-spark--one {
   animation: xiaohei-complete-spark-one 0.8s ease-out infinite;
@@ -436,8 +905,8 @@ html[data-xiaohei-state='complete'] .xiaohei-scene__complete-spark--two {
 }
 
 .xiaohei-scene__error-glow {
-  left: 50%;
-  top: 58%;
+  left: 41%;
+  top: 82%;
   width: 7%;
   aspect-ratio: 1;
   background: radial-gradient(circle, rgb(255 112 82 / 90%) 0%, rgb(224 58 46 / 28%) 48%, transparent 72%);
@@ -448,67 +917,40 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   animation: xiaohei-error-glow 2.2s ease-in-out infinite;
 }
 
-.xiaohei-scene__energy-aura {
-  left: 33%;
-  top: 52%;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-  transform: translate(-50%, -50%);
-  will-change: transform, opacity;
-}
-
-.xiaohei-scene__energy-aura--outer {
-  width: 28%;
-  aspect-ratio: 1;
-  background: radial-gradient(circle, rgb(139 255 230 / 58%) 0%, rgb(72 238 208 / 28%) 35%, transparent 72%);
-}
-
-.xiaohei-scene__energy-aura--inner {
-  width: 18%;
-  aspect-ratio: 1;
-  border: 1px solid rgb(161 255 236 / 72%);
-  box-shadow: 0 0 0.8rem rgb(85 255 220 / 72%), inset 0 0 0.7rem rgb(105 255 226 / 52%);
-}
-
-.xiaohei-scene__energy-mote {
-  left: 33%;
-  top: 52%;
-  width: 0.34rem;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #A8FFEB;
-  box-shadow: 0 0 0.55rem rgb(91 255 219 / 92%);
-  opacity: 0;
-  will-change: transform, opacity;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-aura--outer {
-  animation: xiaohei-energy-outer 1.5s ease-in-out infinite;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-aura--inner {
-  animation: xiaohei-energy-inner 1.5s ease-out infinite;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-mote--one {
-  animation: xiaohei-energy-mote-one 1.35s ease-in infinite;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-mote--two {
-  animation: xiaohei-energy-mote-two 1.35s ease-in -0.45s infinite;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-mote--three {
-  animation: xiaohei-energy-mote-three 1.35s ease-in -0.9s infinite;
-}
-
-html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
-  opacity: 1;
-}
-
 @keyframes xiaohei-scene-aura {
   from { transform: scale(0.94); opacity: 0.44; }
   to { transform: scale(1.05); opacity: 0.78; }
+}
+
+@keyframes xiaohei-heixiu-blink {
+  0%, 87.9% { opacity: 0; }
+  88%, 90.4% { opacity: 1; }
+  90.5%, 100% { opacity: 0; }
+}
+
+@keyframes xiaohei-heixiu-open {
+  0%, 87.9% { opacity: 1; }
+  88%, 90.4% { opacity: 0; }
+  90.5%, 100% { opacity: 1; }
+}
+
+@keyframes xiaohei-heixiu-drift-one {
+  0%, 100% { transform: translate3d(0, 0.4rem, 0); }
+  28% { transform: translate3d(0.7rem, -0.2rem, 0); }
+  61% { transform: translate3d(-0.45rem, -0.9rem, 0); }
+  82% { transform: translate3d(0.28rem, -0.48rem, 0); }
+}
+
+@keyframes xiaohei-heixiu-drift-two {
+  0%, 100% { transform: translate3d(-0.35rem, 0.25rem, 0); }
+  34% { transform: translate3d(0.5rem, -0.72rem, 0); }
+  68% { transform: translate3d(-0.6rem, -1.15rem, 0); }
+}
+
+@keyframes xiaohei-heixiu-drift-three {
+  0%, 100% { transform: translate3d(0.25rem, 0.15rem, 0); }
+  37% { transform: translate3d(-0.65rem, 0.72rem, 0); }
+  72% { transform: translate3d(0.48rem, -0.55rem, 0); }
 }
 
 @keyframes xiaohei-spirit-one {
@@ -526,45 +968,49 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
   44% { transform: translate3d(0.45rem, -1.2rem, 0) scale(0.96); opacity: 0.7; }
 }
 
+@keyframes xiaohei-sidebar-aura {
+  from { opacity: 0.58; }
+  to { opacity: 0.88; }
+}
+
+@keyframes xiaohei-sidebar-current {
+  0%, 100% { opacity: 0.24; }
+  48% { opacity: 0.62; }
+}
+
+@keyframes xiaohei-sidebar-spirit-one {
+  0%, 100% { transform: translate3d(0, 1.1rem, 0) scale(0.72); opacity: 0.12; }
+  42% { transform: translate3d(0.75rem, -1.15rem, 0) scale(1); opacity: 0.92; }
+  68% { transform: translate3d(0.35rem, -2.15rem, 0) scale(0.82); opacity: 0.38; }
+}
+
+@keyframes xiaohei-sidebar-spirit-two {
+  0%, 100% { transform: translate3d(0.6rem, 0.9rem, 0) scale(0.68); opacity: 0.08; }
+  46% { transform: translate3d(-0.55rem, -1.35rem, 0) scale(0.94); opacity: 0.78; }
+  72% { transform: translate3d(-0.15rem, -2.35rem, 0) scale(0.78); opacity: 0.3; }
+}
+
+@keyframes xiaohei-sidebar-spirit-three {
+  0%, 100% { transform: translate3d(-0.35rem, 0.8rem, 0) scale(0.66); opacity: 0.06; }
+  38% { transform: translate3d(0.5rem, -1.2rem, 0) scale(0.9); opacity: 0.68; }
+  66% { transform: translate3d(0.15rem, -2rem, 0) scale(0.74); opacity: 0.24; }
+}
+
 @keyframes xiaohei-mascot-blink {
   0%, 91.9% { opacity: 0; }
   92%, 94.5% { opacity: 1; }
   94.6%, 100% { opacity: 0; }
 }
 
-@keyframes xiaohei-energy-outer {
-  0%, 100% { transform: translate(-50%, -50%) scale(0.82); opacity: 0.42; }
-  50% { transform: translate(-50%, -50%) scale(1.14); opacity: 0.9; }
+@keyframes xiaohei-thinking-dot {
+  0%, 18%, 100% { opacity: 0.28; }
+  42%, 62% { opacity: 0.96; }
 }
 
-@keyframes xiaohei-energy-inner {
-  from { transform: translate(-50%, -50%) scale(1.35); opacity: 0; }
-  34% { opacity: 0.88; }
-  to { transform: translate(-50%, -50%) scale(0.72); opacity: 0; }
-}
-
-@keyframes xiaohei-energy-mote-one {
-  from { transform: translate3d(-2.8rem, -2.1rem, 0) scale(0.55); opacity: 0; }
-  24% { opacity: 0.95; }
-  to { transform: translate3d(-0.1rem, -0.1rem, 0) scale(0.18); opacity: 0; }
-}
-
-@keyframes xiaohei-energy-mote-two {
-  from { transform: translate3d(3.1rem, -1.45rem, 0) scale(0.48); opacity: 0; }
-  24% { opacity: 0.86; }
-  to { transform: translate3d(0.1rem, -0.05rem, 0) scale(0.18); opacity: 0; }
-}
-
-@keyframes xiaohei-energy-mote-three {
-  from { transform: translate3d(-2.35rem, 2.55rem, 0) scale(0.52); opacity: 0; }
-  24% { opacity: 0.9; }
-  to { transform: translate3d(-0.08rem, 0.08rem, 0) scale(0.18); opacity: 0; }
-}
-
-@keyframes xiaohei-stream-mote {
-  from { transform: translate3d(0, 0.55rem, 0) scale(0.45); opacity: 0; }
-  28% { opacity: 0.92; }
-  to { transform: translate3d(-2.1rem, -1.05rem, 0) scale(1); opacity: 0; }
+@keyframes xiaohei-tail-write {
+  0%, 12% { transform: rotate(var(--tail-write-angle)) scaleX(0.08); opacity: 0; }
+  38%, 68% { transform: rotate(var(--tail-write-angle)) scaleX(1); opacity: 0.94; }
+  88%, 100% { transform: rotate(var(--tail-write-angle)) scaleX(1); opacity: 0; }
 }
 
 @keyframes xiaohei-tool-key {
@@ -595,9 +1041,18 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
 }
 
 @media (max-width: 768px) {
-  .xiaohei-scene__keyart {
+  .xiaohei-scene__keyart--night {
     object-position: 68% center;
     opacity: 0.82;
+  }
+
+  .xiaohei-scene__keyart--dawn { opacity: 0; }
+
+  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night { opacity: 0; }
+
+  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
+    object-position: 62% center;
+    opacity: 0.9;
   }
 
   .xiaohei-scene__veil {
@@ -606,28 +1061,57 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
 
   .xiaohei-scene__mascot {
     right: -1.5rem;
-    bottom: 0;
+    bottom: 5rem;
     width: clamp(10rem, 42vw, 14rem);
+  }
+
+  .xiaohei-scene__heixiu--mascot {
+    right: 8.5rem;
+    bottom: 7.5rem;
+    width: 3.8rem;
+  }
+
+  .xiaohei-scene__heixiu--sidebar { display: none; }
+
+  .xiaohei-scene__heixiu--composer {
+    left: 52%;
+    right: auto;
+    top: -1.45rem;
+    width: 2.8rem;
+  }
+
+  .xiaohei-scene__sidebar-aura,
+  .xiaohei-scene__sidebar-current,
+  .xiaohei-scene__sidebar-spirit {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .xiaohei-scene__aura,
   .xiaohei-scene__spirit,
+  .xiaohei-scene__sidebar-aura,
+  .xiaohei-scene__sidebar-current,
+  .xiaohei-scene__sidebar-spirit,
   .xiaohei-scene__mascot-sheet--blink,
-  .xiaohei-scene__energy-fx > span,
+  .xiaohei-scene__heixiu,
+  .xiaohei-scene__heixiu-open,
+  .xiaohei-scene__heixiu-blink,
+  .xiaohei-scene__thinking-dot,
   .xiaohei-scene__state-fx > span {
     animation: none;
     will-change: auto;
   }
 
   .xiaohei-scene__spirit { display: none; }
-  .xiaohei-scene__energy-mote { display: none; }
+  .xiaohei-scene__sidebar-current,
+  .xiaohei-scene__sidebar-spirit { display: none; }
   .xiaohei-scene__state-fx { display: none; }
 
-  html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx > span {
+  html[data-xiaohei-state='thinking'] .xiaohei-scene__thinking-dot {
     animation: none;
     will-change: auto;
+    opacity: 0.72;
   }
 }
 
@@ -635,28 +1119,51 @@ html[data-xiaohei-state='thinking'] .xiaohei-scene__energy-fx {
   #root [data-slot='sidebar'] > div {
     background: #07181B !important;
   }
+
+  html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
+    background: #EFF4EF !important;
+  }
 }
 
 @media (prefers-contrast: more) {
-  .xiaohei-scene__keyart { opacity: 0.48; }
+  .xiaohei-scene__keyart--night { opacity: 0.48; }
+  .xiaohei-scene__keyart--dawn { opacity: 0; }
+  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night { opacity: 0; }
+  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn { opacity: 0.5; }
   .xiaohei-scene__veil { background: rgb(5 12 15 / 48%); }
+  html[data-xiaohei-appearance='light'] .xiaohei-scene__veil { background: rgb(235 240 235 / 58%); }
   .xiaohei-scene__aura,
-  .xiaohei-scene__spirit { display: none; }
+  .xiaohei-scene__spirit,
+  .xiaohei-scene__sidebar-aura,
+  .xiaohei-scene__sidebar-current,
+  .xiaohei-scene__sidebar-spirit,
+  .xiaohei-scene__heixiu-field,
+  .xiaohei-scene__heixiu--sidebar,
+  .xiaohei-scene__heixiu--composer { display: none; }
 }
 
 @media (forced-colors: active), print {
-  #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} { display: none; }
+  #${cssEscape(XIAOHEI_SCENE_LAYER_ID)},
+  .xiaohei-scene__heixiu--sidebar,
+  .xiaohei-scene__heixiu--composer { display: none; }
 }
 `
 
 const PARTS = [
-  'xiaohei-scene__keyart',
+  'xiaohei-scene__keyart xiaohei-scene__keyart--night',
+  'xiaohei-scene__keyart xiaohei-scene__keyart--dawn',
   'xiaohei-scene__veil',
   'xiaohei-scene__aura',
   'xiaohei-scene__spirit xiaohei-scene__spirit--one',
   'xiaohei-scene__spirit xiaohei-scene__spirit--two',
   'xiaohei-scene__spirit xiaohei-scene__spirit--three',
+  'xiaohei-scene__sidebar-aura',
+  'xiaohei-scene__sidebar-current',
+  'xiaohei-scene__sidebar-spirit xiaohei-scene__sidebar-spirit--one',
+  'xiaohei-scene__sidebar-spirit xiaohei-scene__sidebar-spirit--two',
+  'xiaohei-scene__sidebar-spirit xiaohei-scene__sidebar-spirit--three',
   'xiaohei-scene__mascot',
+  'xiaohei-scene__heixiu-field',
 ] as const
 
 /** Number of top-level decorative parts installed into the ambient layer. */
@@ -673,6 +1180,7 @@ export function installXiaoheiScene(
 
   let disposed = false
   let removeMountedScene = (): void => {}
+  let removeHeixiuCompanions = (): void => {}
 
   const mount = (): void => {
     if (disposed) return
@@ -690,32 +1198,40 @@ export function installXiaoheiScene(
     layer.setAttribute('aria-hidden', 'true')
     layer.setAttribute('data-xiaohei-scene', '')
 
-    const keyArt = doc.createElement('img')
-    keyArt.className = PARTS[0]
-    keyArt.alt = ''
-    keyArt.decoding = 'async'
-    keyArt.fetchPriority = 'low'
-    keyArt.src = XIAOHEI_KEY_ART
-    layer.append(keyArt)
+    const keyArtSources = [XIAOHEI_NIGHT_KEY_ART, XIAOHEI_DAWN_KEY_ART] as const
+    for (const [index, source] of keyArtSources.entries()) {
+      const keyArt = doc.createElement('img')
+      keyArt.className = PARTS[index]!
+      keyArt.alt = ''
+      keyArt.decoding = 'async'
+      keyArt.fetchPriority = 'low'
+      keyArt.src = source
+      layer.append(keyArt)
+    }
 
-    for (const className of PARTS.slice(1)) {
+    for (const className of PARTS.slice(keyArtSources.length)) {
       if (className === 'xiaohei-scene__mascot') {
         const mascot = doc.createElement('div')
         mascot.className = className
-        mascot.append(
+        const idleViewport = doc.createElement('span')
+        idleViewport.className = 'xiaohei-scene__mascot-idle-viewport'
+        idleViewport.append(
           createIdleSheet(doc, 7, 'xiaohei-scene__mascot-sheet--open'),
           createIdleSheet(doc, 6, 'xiaohei-scene__mascot-sheet--blink'),
-          createStateImage(doc, 'thinking', XIAOHEI_ENERGY),
+        )
+        mascot.append(
+          idleViewport,
+          createStateImage(doc, 'thinking', XIAOHEI_THINKING),
           createStateImage(doc, 'streaming', XIAOHEI_STREAMING),
           createStateImage(doc, 'tool', XIAOHEI_TOOL),
           createStateImage(doc, 'waiting', XIAOHEI_WAITING),
           createStateImage(doc, 'complete', XIAOHEI_COMPLETE),
           createStateImage(doc, 'error', XIAOHEI_ERROR),
-          createEnergyEffects(doc),
+          createThinkingEffects(doc),
           createStateEffects(doc, 'streaming', [
-            'xiaohei-scene__stream-mote xiaohei-scene__stream-mote--one',
-            'xiaohei-scene__stream-mote xiaohei-scene__stream-mote--two',
-            'xiaohei-scene__stream-mote xiaohei-scene__stream-mote--three',
+            'xiaohei-scene__tail-write xiaohei-scene__tail-write--one',
+            'xiaohei-scene__tail-write xiaohei-scene__tail-write--two',
+            'xiaohei-scene__tail-write xiaohei-scene__tail-write--three',
           ]),
           createStateEffects(doc, 'tool', [
             'xiaohei-scene__tool-key xiaohei-scene__tool-key--one',
@@ -733,13 +1249,22 @@ export function installXiaoheiScene(
         continue
       }
 
+      if (className === 'xiaohei-scene__heixiu-field') {
+        layer.append(createHeixiuField(doc))
+        continue
+      }
+
       const part = doc.createElement('span')
       part.className = className
       layer.append(part)
     }
 
     doc.body.prepend(layer)
+    removeHeixiuCompanions()
+    removeHeixiuCompanions = installHeixiuCompanions(doc, layer)
     removeMountedScene = () => {
+      removeHeixiuCompanions()
+      removeHeixiuCompanions = () => {}
       layer.remove()
       style.remove()
     }
@@ -796,20 +1321,81 @@ function createStateImage(doc: Document, state: string, source: string): HTMLIma
   return image
 }
 
-function createEnergyEffects(doc: Document): HTMLSpanElement {
-  const effects = doc.createElement('span')
-  effects.className = 'xiaohei-scene__energy-fx'
-  for (const className of [
-    'xiaohei-scene__energy-aura xiaohei-scene__energy-aura--outer',
-    'xiaohei-scene__energy-aura xiaohei-scene__energy-aura--inner',
-    'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--one',
-    'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--two',
-    'xiaohei-scene__energy-mote xiaohei-scene__energy-mote--three',
-  ]) {
-    const part = doc.createElement('span')
-    part.className = className
-    effects.append(part)
+function createHeixiuField(doc: Document): HTMLDivElement {
+  const field = doc.createElement('div')
+  field.className = 'xiaohei-scene__heixiu-field'
+
+  field.append(
+    createHeixiuCreature(doc, 'mascot'),
+  )
+
+  return field
+}
+
+function createHeixiuCreature(doc: Document, name: string): HTMLSpanElement {
+  const creature = doc.createElement('span')
+  creature.className = `xiaohei-scene__heixiu xiaohei-scene__heixiu--${name}`
+  creature.setAttribute('aria-hidden', 'true')
+  creature.append(
+    createHeixiuImage(doc, XIAOHEI_HEIXIU_OPEN, 'xiaohei-scene__heixiu-open'),
+    createHeixiuImage(doc, XIAOHEI_HEIXIU_BLINK, 'xiaohei-scene__heixiu-blink'),
+  )
+  return creature
+}
+
+function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => void {
+  const companions = [
+    { slot: 'sidebar', creature: createHeixiuCreature(doc, 'sidebar') },
+    { slot: 'conversation.composer.bar', creature: createHeixiuCreature(doc, 'composer') },
+  ] as const
+  let attachQueued = false
+
+  const attach = (): void => {
+    attachQueued = false
+    for (const { slot, creature } of companions) {
+      const host = doc.querySelector<HTMLElement>(`[data-slot='${slot}']`)?.firstElementChild
+      if (host !== null && host !== undefined && creature.parentElement !== host) host.append(creature)
+    }
   }
+
+  const queueAttach = (): void => {
+    if (attachQueued) return
+    attachQueued = true
+    queueMicrotask(attach)
+  }
+
+  attach()
+  const Observer = doc.defaultView?.MutationObserver
+  const observer = Observer === undefined ? undefined : new Observer(queueAttach)
+  observer?.observe(doc.body, { childList: true, subtree: true })
+
+  return () => {
+    observer?.disconnect()
+    for (const { creature } of companions) creature.remove()
+  }
+}
+
+function createHeixiuImage(doc: Document, source: string, className: string): HTMLImageElement {
+  const image = doc.createElement('img')
+  image.className = className
+  image.alt = ''
+  image.decoding = 'async'
+  image.fetchPriority = 'low'
+  image.src = source
+  return image
+}
+
+function createThinkingEffects(doc: Document): HTMLSpanElement {
+  const effects = doc.createElement('span')
+  effects.className = 'xiaohei-scene__thinking-fx'
+  const bubble = doc.createElement('span')
+  bubble.className = 'xiaohei-scene__thinking-bubble'
+  for (const suffix of ['one', 'two', 'three']) {
+    const dot = doc.createElement('span')
+    dot.className = `xiaohei-scene__thinking-dot xiaohei-scene__thinking-dot--${suffix}`
+    bubble.append(dot)
+  }
+  effects.append(bubble)
   return effects
 }
 

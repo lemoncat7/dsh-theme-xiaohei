@@ -1,30 +1,26 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
-import type { ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
+import { bindXiaoheiAppearance } from './appearance.js'
+import { installXiaoheiChrome } from './chrome.js'
+import { installXiaoheiGaze } from './gaze.js'
+import { installXiaoheiPortalTransit } from './portal.js'
 import { installXiaoheiScene } from './scene.js'
 import { bindXiaoheiSessionState } from './state.js'
-import { XIAOHEI_NIGHT_THEME } from './theme.js'
+import { XIAOHEI_THEME_TOKEN_OVERRIDES } from './theme.js'
 
 /** The browser theme service must exist before this plugin applies. */
 export const inject = ['theme', 'sessions']
 
-/** Register and activate Xiaohei Night for the lifetime of this plugin. */
+/** Shade DSH's native appearance modes without replacing its preference UI. */
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => {
-    const dispose = ctx.theme.register(XIAOHEI_NIGHT_THEME)
-    const enforce = (snapshot: ThemeSnapshot): void => {
-      if (snapshot.preference !== XIAOHEI_NIGHT_THEME.id) {
-        ctx.theme.setTheme(XIAOHEI_NIGHT_THEME.id)
-      }
-    }
-    const off = ctx.on('theme/change', enforce)
-    ctx.theme.setTheme(XIAOHEI_NIGHT_THEME.id)
-    return () => {
-      off()
-      dispose()
-    }
-  }, 'xiaohei-theme: register Xiaohei Night theme')
+    return ctx.theme.overrideTokens('@lemoncat7/dsh-theme-xiaohei', XIAOHEI_THEME_TOKEN_OVERRIDES)
+  }, 'xiaohei-theme: shade native Light / Dark / System palettes')
 
+  ctx.effect(() => bindXiaoheiAppearance(ctx), 'xiaohei-theme: follow resolved appearance')
+  ctx.effect(installXiaoheiChrome, 'xiaohei-theme: install spirit control skin')
   ctx.effect(installXiaoheiScene, 'xiaohei-theme: install moonlit forest scene')
+  ctx.effect(installXiaoheiPortalTransit, 'xiaohei-theme: install random Heixiu portal visits')
+  ctx.effect(installXiaoheiGaze, 'xiaohei-theme: install proximity gaze')
   ctx.effect(
     () => bindXiaoheiSessionState(ctx.sessions),
     'xiaohei-theme: follow current session agent state',
