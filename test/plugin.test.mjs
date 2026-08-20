@@ -38,6 +38,7 @@ import {
 } from '../lib/heixiu-interactions.js'
 import {
   installXiaoheiIdleReactions,
+  resolveXiaoheiPointerEar,
   resolveXiaoheiIdleTailDelay,
   XIAOHEI_REACTION_STYLE_ID,
 } from '../lib/reactions.js'
@@ -252,8 +253,7 @@ test('idle gaze is proximity-bound, portal-aware, and motion-safe', () => {
   assert.match(XIAOHEI_GAZE_CSS, /xiaohei-gaze__pupil--left/)
   assert.match(XIAOHEI_GAZE_CSS, /xiaohei-gaze__pupil--right/)
   assert.match(XIAOHEI_GAZE_CSS, /data-xiaohei-state='idle'/)
-  assert.match(XIAOHEI_GAZE_CSS, /xiaohei-gaze-blink-guard/)
-  assert.match(XIAOHEI_GAZE_CSS, /visibility:\s*hidden/)
+  assert.doesNotMatch(XIAOHEI_GAZE_CSS, /blink-guard|visibility:\s*hidden/)
   assert.match(XIAOHEI_GAZE_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_GAZE_CSS, /hover:\s*none[\s\S]*pointer:\s*coarse/)
   assert.match(XIAOHEI_GAZE_CSS, /will-change:\s*transform/)
@@ -291,9 +291,7 @@ test('idle reactions are complete-frame, proximity-aware, state-safe, and indepe
   const greetingBlink = XIAOHEI_REACTION_CSS.match(/@keyframes xiaohei-heixiu-greeting-blink \{([\s\S]*?)\n\}/)?.[1] ?? ''
   assert.match(greetingBlink, /87%,\s*100%\s*\{\s*opacity:\s*0/)
   assert.doesNotMatch(greetingBlink, /transform|scale|translate/)
-  const greetingGazeGuard = XIAOHEI_REACTION_CSS.match(/@keyframes xiaohei-heixiu-greeting-gaze-guard \{([\s\S]*?)\n\}/)?.[1] ?? ''
-  assert.match(greetingGazeGuard, /visibility:\s*hidden/)
-  assert.doesNotMatch(greetingGazeGuard, /transform|scale|translate/)
+  assert.doesNotMatch(XIAOHEI_REACTION_CSS, /greeting-gaze-guard|visibility:\s*hidden/)
 
   const source = installXiaoheiIdleReactions.toString()
   assert.equal(resolveXiaoheiIdleTailDelay(0), 12_000)
@@ -306,10 +304,17 @@ test('idle reactions are complete-frame, proximity-aware, state-safe, and indepe
   assert.match(source, /xiaoheiEarLoop/)
   assert.match(source, /LEFT_EAR_CENTER_X/)
   assert.match(source, /RIGHT_EAR_CENTER_X/)
-  assert.match(source, /leftDistance <= rightDistance/)
+  assert.match(source, /resolveXiaoheiPointerEar/)
   assert.doesNotMatch(source, /cooldown/i)
   assert.doesNotMatch(source, /requestAnimationFrame/)
   assert.equal(typeof installXiaoheiIdleReactions(undefined), 'function')
+
+  const bounds = { left: 0, top: 0, width: 256, height: 256 }
+  assert.equal(resolveXiaoheiPointerEar(bounds, { x: 84, y: 62 }), 'ear-left')
+  assert.equal(resolveXiaoheiPointerEar(bounds, { x: 166, y: 82 }), 'ear-right')
+  assert.equal(resolveXiaoheiPointerEar(bounds, { x: 125, y: 72 }), undefined)
+  assert.equal(resolveXiaoheiPointerEar(bounds, { x: 84, y: 108 }), undefined)
+  assert.equal(resolveXiaoheiPointerEar(bounds, { x: 84, y: 108 }, 'ear-left'), 'ear-left')
 })
 
 test('resolved Light / Dark / System appearance drives the scene attribute', () => {

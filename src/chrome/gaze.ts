@@ -19,8 +19,9 @@ export const XIAOHEI_GAZE_CSS = `
 
 html[data-xiaohei-state='idle'] .xiaohei-gaze {
   opacity: 1;
-  animation: xiaohei-gaze-blink-guard 5.2s step-end infinite;
 }
+
+/* The complete blink frame owns eye occlusion; a second visibility clock can expose pupil-free frames. */
 
 .xiaohei-gaze__base {
   position: absolute;
@@ -71,16 +72,9 @@ html[data-xiaohei-appearance='light'] .xiaohei-gaze__base {
   height: 9.45%;
 }
 
-/* Hide the tracked eye layer only while the complete closed-eye frame is visible. */
-@keyframes xiaohei-gaze-blink-guard {
-  0%, 91.9%, 94.6%, 100% { visibility: visible; }
-  92%, 94.5% { visibility: hidden; }
-}
-
 @media (prefers-reduced-motion: reduce), (hover: none) and (pointer: coarse) {
   .xiaohei-gaze {
     display: none;
-    animation: none;
   }
 }
 `

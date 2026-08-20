@@ -15,8 +15,6 @@ import {
 
 export const XIAOHEI_REACTION_STYLE_ID = 'dsh-theme-xiaohei/reaction-style'
 
-const POINTER_ENTER_RADIUS_PX = 460
-const POINTER_EXIT_RADIUS_PX = 520
 const EAR_DELAY_MS = 190
 const HEIXIU_EAR_DELAY_MS = 180
 const HEIXIU_INTERACTION_DURATION_MS = 800
@@ -25,19 +23,66 @@ const TAIL_SLOW_DURATION_MS = 1280
 const TAIL_COMPLETE_DURATION_MS = 700
 const IDLE_TAIL_MIN_DELAY_MS = 12_000
 const IDLE_TAIL_DELAY_RANGE_MS = 12_000
-const EYE_CENTER_X = (69 + 109) / 2 / 256
-const EYE_CENTER_Y = (105 + 108) / 2 / 256
 const LEFT_EAR_CENTER_X = 84 / 256
 const LEFT_EAR_CENTER_Y = 62 / 256
 const RIGHT_EAR_CENTER_X = 166 / 256
 const RIGHT_EAR_CENTER_Y = 82 / 256
+const EAR_POINTER_ENTER_RADIUS_X = 34 / 256
+const EAR_POINTER_ENTER_RADIUS_Y = 42 / 256
+const EAR_POINTER_EXIT_RADIUS_X = 40 / 256
+const EAR_POINTER_EXIT_RADIUS_Y = 48 / 256
 
-type EarReaction = 'ear-left' | 'ear-right'
+export type EarReaction = 'ear-left' | 'ear-right'
 type XiaoheiReaction = EarReaction | 'tail-slow' | 'tail-complete'
 
 interface Point {
   x: number
   y: number
+}
+
+interface MascotBounds {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+/** Resolve a pointer only inside the two local, non-overlapping ear regions. */
+export function resolveXiaoheiPointerEar(
+  bounds: MascotBounds,
+  target: Point,
+  activeEar?: EarReaction,
+): EarReaction | undefined {
+  if (bounds.width <= 0 || bounds.height <= 0) return undefined
+
+  const normalizedDistance = (
+    ear: EarReaction,
+    radiusX: number,
+    radiusY: number,
+  ): number => {
+    const centerX = ear === 'ear-left' ? LEFT_EAR_CENTER_X : RIGHT_EAR_CENTER_X
+    const centerY = ear === 'ear-left' ? LEFT_EAR_CENTER_Y : RIGHT_EAR_CENTER_Y
+    const dx = (target.x - (bounds.left + bounds.width * centerX)) / (bounds.width * radiusX)
+    const dy = (target.y - (bounds.top + bounds.height * centerY)) / (bounds.height * radiusY)
+    return Math.hypot(dx, dy)
+  }
+
+  const entering = (['ear-left', 'ear-right'] as const)
+    .map((ear) => ({
+      ear,
+      distance: normalizedDistance(ear, EAR_POINTER_ENTER_RADIUS_X, EAR_POINTER_ENTER_RADIUS_Y),
+    }))
+    .filter(({ distance }) => distance <= 1)
+    .sort((left, right) => left.distance - right.distance)[0]
+  if (entering !== undefined) return entering.ear
+
+  if (
+    activeEar !== undefined
+    && normalizedDistance(activeEar, EAR_POINTER_EXIT_RADIUS_X, EAR_POINTER_EXIT_RADIUS_Y) <= 1
+  ) {
+    return activeEar
+  }
+  return undefined
 }
 
 /** Resolve the next sparse tail visit; exported to keep the timing contract testable. */
@@ -72,7 +117,7 @@ export function installXiaoheiIdleReactions(
   let mascot: HTMLElement | undefined
   let reactionLayer: HTMLImageElement | undefined
   let pointer: Point | undefined
-  let pointerInside = false
+  let pointerEar: EarReaction | undefined
   let previousState = currentState(doc)
   let reactionTimer = 0
   let pendingEarTimer = 0
@@ -169,16 +214,6 @@ export function installXiaoheiIdleReactions(
     reactionLayer = layer
   }
 
-  const eyeCenter = (): Point | undefined => {
-    if (mascot === undefined) return undefined
-    const rect = mascot.getBoundingClientRect()
-    if (rect.width <= 0 || rect.height <= 0) return undefined
-    return {
-      x: rect.left + rect.width * EYE_CENTER_X,
-      y: rect.top + rect.height * EYE_CENTER_Y,
-    }
-  }
-
   const earToward = (target: Point): EarReaction | undefined => {
     if (mascot === undefined) return undefined
     const rect = mascot.getBoundingClientRect()
@@ -197,19 +232,17 @@ export function installXiaoheiIdleReactions(
   }
 
   const startPointerEarLoop = (): void => {
-    if (!pointerInside || pointer === undefined || behaviorDisabled() || !isIdle()) return
-    const ear = earToward(pointer)
-    if (ear === undefined) return
+    if (pointerEar === undefined || behaviorDisabled() || !isIdle()) return
     clearHeixiuEar()
     clearHeixiuInteraction()
     clearReaction()
-    setEarFrame(ear)
+    setEarFrame(pointerEar)
     if (mascot !== undefined) mascot.dataset.xiaoheiEarLoop = 'true'
   }
 
   const schedulePointerEarLoop = (): void => {
     if (pendingEarTimer !== 0 || mascot?.dataset.xiaoheiEarLoop === 'true') return
-    if (!pointerInside || pointer === undefined || behaviorDisabled() || !isIdle()) return
+    if (pointerEar === undefined || behaviorDisabled() || !isIdle()) return
     pendingEarTimer = win.setTimeout(() => {
       pendingEarTimer = 0
       startPointerEarLoop()
@@ -217,20 +250,19 @@ export function installXiaoheiIdleReactions(
   }
 
   const refreshPointerEarDirection = (): void => {
-    if (mascot?.dataset.xiaoheiEarLoop !== 'true' || pointer === undefined) return
-    const ear = earToward(pointer)
-    if (ear === undefined || mascot.dataset.xiaoheiReaction === ear) return
-    setEarFrame(ear)
+    if (mascot?.dataset.xiaoheiEarLoop !== 'true' || pointerEar === undefined) return
+    if (mascot.dataset.xiaoheiReaction === pointerEar) return
+    setEarFrame(pointerEar)
   }
 
   const syncPointerEarLoop = (): void => {
-    const origin = pointer === undefined ? undefined : eyeCenter()
-    const inside = pointer !== undefined
-      && origin !== undefined
-      && Math.hypot(pointer.x - origin.x, pointer.y - origin.y) < POINTER_ENTER_RADIUS_PX
-    pointerInside = inside
-    if (inside) {
+    const rect = mascot?.getBoundingClientRect()
+    pointerEar = pointer !== undefined && rect !== undefined
+      ? resolveXiaoheiPointerEar(rect, pointer, pointerEar)
+      : undefined
+    if (pointerEar !== undefined) {
       schedulePointerEarLoop()
+      refreshPointerEarDirection()
     } else {
       stopPointerEarLoop()
     }
@@ -251,30 +283,18 @@ export function installXiaoheiIdleReactions(
   const onPointerMove = (event: PointerEvent): void => {
     if (event.pointerType === 'touch') {
       pointer = undefined
-      pointerInside = false
+      pointerEar = undefined
       stopPointerEarLoop()
       return
     }
 
     pointer = { x: event.clientX, y: event.clientY }
-    const origin = eyeCenter()
-    if (origin === undefined) return
-    const distance = Math.hypot(pointer.x - origin.x, pointer.y - origin.y)
-    if (!pointerInside && distance < POINTER_ENTER_RADIUS_PX) {
-      pointerInside = true
-      schedulePointerEarLoop()
-    } else if (pointerInside && distance > POINTER_EXIT_RADIUS_PX) {
-      pointerInside = false
-      stopPointerEarLoop()
-    } else if (pointerInside) {
-      schedulePointerEarLoop()
-      refreshPointerEarDirection()
-    }
+    syncPointerEarLoop()
   }
 
   const clearPointer = (): void => {
     pointer = undefined
-    pointerInside = false
+    pointerEar = undefined
     stopPointerEarLoop()
   }
 
@@ -287,13 +307,13 @@ export function installXiaoheiIdleReactions(
       return
     }
 
-    if (pointerInside || !isIdle() || detail.target === undefined || mascot === undefined) return
+    if (pointerEar !== undefined || !isIdle() || detail.target === undefined || mascot === undefined) return
     startHeixiuInteraction(detail.target, false)
   }
 
   const startHeixiuInteraction = (target: Point, supersedePointer: boolean): void => {
     if (!isIdle() || behaviorDisabled() || mascot === undefined) return
-    if (pointerInside && !supersedePointer) return
+    if (pointerEar !== undefined && !supersedePointer) return
     if (supersedePointer) stopPointerEarLoop()
     clearHeixiuInteraction()
     mascot.dataset.xiaoheiHeixiuInteraction = 'true'
@@ -329,7 +349,7 @@ export function installXiaoheiIdleReactions(
 
     if (nextState !== 'idle') {
       clearReaction()
-      pointerInside = false
+      pointerEar = undefined
       return
     }
 
@@ -345,7 +365,7 @@ export function installXiaoheiIdleReactions(
     clearTimer(idleTailTimer)
     idleTailTimer = 0
     if (doc.visibilityState === 'hidden') {
-      pointerInside = false
+      pointerEar = undefined
       clearReaction()
     } else {
       scheduleIdleTail()
