@@ -22,6 +22,10 @@ const IDLE_TAIL_MIN_DELAY_MS = 12_000
 const IDLE_TAIL_DELAY_RANGE_MS = 12_000
 const EYE_CENTER_X = (69 + 109) / 2 / 256
 const EYE_CENTER_Y = (105 + 108) / 2 / 256
+const LEFT_EAR_CENTER_X = 84 / 256
+const LEFT_EAR_CENTER_Y = 62 / 256
+const RIGHT_EAR_CENTER_X = 166 / 256
+const RIGHT_EAR_CENTER_Y = 82 / 256
 
 type EarReaction = 'ear-left' | 'ear-right'
 type XiaoheiReaction = EarReaction | 'tail-slow' | 'tail-complete'
@@ -164,9 +168,20 @@ export function installXiaoheiIdleReactions(
   }
 
   const earToward = (target: Point): EarReaction | undefined => {
-    const origin = eyeCenter()
-    if (origin === undefined) return undefined
-    return target.x < origin.x ? 'ear-left' : 'ear-right'
+    if (mascot === undefined) return undefined
+    const rect = mascot.getBoundingClientRect()
+    if (rect.width <= 0 || rect.height <= 0) return undefined
+    const leftEar = {
+      x: rect.left + rect.width * LEFT_EAR_CENTER_X,
+      y: rect.top + rect.height * LEFT_EAR_CENTER_Y,
+    }
+    const rightEar = {
+      x: rect.left + rect.width * RIGHT_EAR_CENTER_X,
+      y: rect.top + rect.height * RIGHT_EAR_CENTER_Y,
+    }
+    const leftDistance = Math.hypot(target.x - leftEar.x, target.y - leftEar.y)
+    const rightDistance = Math.hypot(target.x - rightEar.x, target.y - rightEar.y)
+    return leftDistance <= rightDistance ? 'ear-left' : 'ear-right'
   }
 
   const startPointerEarLoop = (): void => {
