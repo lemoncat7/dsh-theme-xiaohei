@@ -378,10 +378,11 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot::before {
 
 .xiaohei-scene__heixiu--sidebar {
   z-index: 3;
-  right: 0.7rem;
-  top: 49%;
-  width: 3.15rem;
-  --heixiu-opacity: 0.52;
+  left: 7.15rem;
+  right: auto;
+  top: 8.05rem;
+  width: 2.5rem;
+  --heixiu-opacity: 0.64;
   --heixiu-blink-duration: 8.9s;
   --heixiu-blink-delay: -4.7s;
   animation: xiaohei-heixiu-drift-two 16.2s cubic-bezier(0.37, 0, 0.63, 1) -5.2s infinite;
@@ -397,6 +398,20 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot::before {
   --heixiu-blink-duration: 9.4s;
   --heixiu-blink-delay: -6.2s;
   animation: xiaohei-heixiu-drift-three 17.2s cubic-bezier(0.37, 0, 0.63, 1) -8.1s infinite;
+}
+
+.xiaohei-scene__heixiu--sidebar::before,
+.xiaohei-scene__heixiu--composer::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -0.72rem;
+  width: 1px;
+  height: 0.85rem;
+  background: linear-gradient(180deg, transparent, var(--xiaohei-frame-line-strong));
+  box-shadow: 0 0 0.35rem var(--xiaohei-focus-shadow);
+  transform: translateX(-50%);
 }
 
 #root [data-slot='sidebar'] > div[class*='_collapsed'] .xiaohei-scene__heixiu--sidebar {

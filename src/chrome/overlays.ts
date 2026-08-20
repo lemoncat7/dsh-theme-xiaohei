@@ -7,13 +7,21 @@ export const XIAOHEI_OVERLAY_CSS = `
   color: var(--dsw-alias-label-primary);
   background-color: var(--xiaohei-surface) !important;
   box-shadow:
+    inset 0 0 0 1px var(--xiaohei-frame-inner),
     inset 0 1px rgb(255 255 255 / 7%),
     0 22px 64px var(--xiaohei-shadow) !important;
 }
 
 #root [role='dialog'] {
   border-radius: calc(var(--xiaohei-radius-panel) + 2px) !important;
-  background-image: linear-gradient(145deg, rgb(255 255 255 / 3%), transparent 34%) !important;
+  background-image:
+    linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)),
+    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)),
+    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)),
+    linear-gradient(145deg, rgb(255 255 255 / 3%), transparent 34%) !important;
+  background-position: 18px 0, 0 18px, 100% calc(100% - 18px), 0 0 !important;
+  background-size: 48px 1px, 1px 34px, 1px 34px, auto !important;
+  background-repeat: no-repeat !important;
 }
 
 #root [role='dialog'] > nav {

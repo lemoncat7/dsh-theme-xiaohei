@@ -7,15 +7,44 @@ export const XIAOHEI_COMPOSER_CSS = `
   border: 1px solid var(--xiaohei-edge) !important;
   border-radius: var(--xiaohei-radius-panel) !important;
   background:
+    linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)) 18px 0 / 46px 1px no-repeat,
+    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)) 0 15px / 1px 28px no-repeat,
+    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)) 100% calc(100% - 15px) / 1px 28px no-repeat,
     linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 32%),
     var(--dsw-specific-input-major) !important;
   box-shadow:
+    inset 0 0 0 1px var(--xiaohei-frame-inner),
     inset 0 1px rgb(255 255 255 / 7%),
     inset 0 -1px var(--xiaohei-spirit-faint),
     0 16px 38px var(--xiaohei-shadow) !important;
   transition:
     border-color var(--xiaohei-motion-base) ease,
     box-shadow var(--xiaohei-motion-base) ease;
+}
+
+#root [data-composer-card='true']::after {
+  content: '小黑 · 会话域';
+  position: absolute;
+  z-index: 2;
+  top: -9px;
+  right: auto;
+  bottom: auto;
+  left: clamp(132px, 19%, 152px);
+  width: max-content;
+  height: 17px;
+  padding-inline: 8px;
+  border: 1px solid var(--xiaohei-frame-line);
+  border-radius: 3px 8px 8px 3px;
+  color: var(--xiaohei-frame-label);
+  background: var(--xiaohei-frame-plaque);
+  box-shadow: inset 0 1px var(--xiaohei-frame-inner), 0 4px 10px var(--xiaohei-shadow);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 15px;
+  letter-spacing: 0.14em;
+  -webkit-mask-image: none;
+  mask-image: none;
+  pointer-events: none;
 }
 
 /* The spirit seam stays part of the control edge instead of reading as a pasted ornament. */

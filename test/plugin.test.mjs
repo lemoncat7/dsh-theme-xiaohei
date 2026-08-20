@@ -20,6 +20,7 @@ import {
 import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from '../lib/chrome/accessibility.js'
 import { XIAOHEI_COMPOSER_CSS } from '../lib/chrome/composer.js'
 import { XIAOHEI_CONVERSATION_CSS } from '../lib/chrome/conversation.js'
+import { XIAOHEI_FRAME_SYSTEM_CSS } from '../lib/chrome/frames.js'
 import { XIAOHEI_OVERLAY_CSS } from '../lib/chrome/overlays.js'
 import { XIAOHEI_SIDEBAR_CSS } from '../lib/chrome/sidebar.js'
 import { XIAOHEI_WORKSPACE_CSS } from '../lib/chrome/workspace.js'
@@ -152,6 +153,7 @@ test('spirit control skin stays semantic, accessible, and lifecycle safe', () =>
 test('control skin composes isolated responsibility layers in a stable order', () => {
   assert.equal(XIAOHEI_CHROME_CSS, [
     XIAOHEI_CHROME_TOKENS_CSS,
+    XIAOHEI_FRAME_SYSTEM_CSS,
     XIAOHEI_SIDEBAR_CSS,
     XIAOHEI_WORKSPACE_CSS,
     XIAOHEI_WORKSPACE_INTERACTION_CSS,
@@ -160,6 +162,16 @@ test('control skin composes isolated responsibility layers in a stable order', (
     XIAOHEI_OVERLAY_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
   ].join('\n'))
+})
+
+test('public Xiaohei frame contract supports future feature plugins', () => {
+  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame='module'/)
+  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame='compact'/)
+  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame-label/)
+  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame-ornament='spirit-knot'/)
+  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-module-kind/)
+  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame-header/)
+  assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /forced-colors:\s*active/)
 })
 
 test('workspace spirit feedback follows the pointer and releases only on folder activation', () => {
@@ -194,6 +206,12 @@ test('workspace folders own the sidebar spirit framing without ambient fog', () 
   assert.doesNotMatch(`${XIAOHEI_SIDEBAR_CSS}\n${XIAOHEI_WORKSPACE_CSS}`, /@keyframes|animation:/)
 })
 
+test('workspace plaque stays inside the host clipping boundary', () => {
+  assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*22px 7px 7px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /content:\s*'会馆 · 工作区'[\s\S]*top:\s*4px/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /content:\s*'会馆 · 工作区'[\s\S]{0,240}top:\s*-/)
+})
+
 test('sidebar material preserves the host geometry of fixed overlays', () => {
   const sidebarShellRule = XIAOHEI_SIDEBAR_CSS.match(
     /#root \[data-slot='sidebar'\] > div \{([^}]*)\}/,
@@ -210,8 +228,15 @@ test('sidebar material preserves the host geometry of fixed overlays', () => {
   )
   assert.doesNotMatch(
     dialogRule,
-    /\b(?:position|inset|width|height|transform)\s*:/,
+    /(?:^|\n)\s*(?:position|inset|width|height|transform)\s*:/,
   )
+})
+
+test('collapsed sidebar keeps workspace tools on the rail axis', () => {
+  assert.match(XIAOHEI_SIDEBAR_CSS, /div\[class\*='_collapsed'\] button/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /width:\s*36px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /div\[class\*='_collapsed'\][\s\S]*width:\s*35px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /justify-content:\s*center/)
 })
 
 test('random Heixiu portal visits are compact, ambient, and compositor safe', () => {

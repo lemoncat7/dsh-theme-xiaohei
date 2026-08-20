@@ -17,6 +17,14 @@ html {
   --xiaohei-sidebar-bottom: rgb(8 26 34 / 78%);
   --xiaohei-sidebar-edge: rgb(130 199 205 / 13%);
   --xiaohei-sidebar-fade: rgb(8 26 34 / 42%);
+  --xiaohei-frame-line: rgb(125 213 217 / 30%);
+  --xiaohei-frame-line-strong: rgb(146 226 228 / 58%);
+  --xiaohei-frame-fill: rgb(6 23 30 / 58%);
+  --xiaohei-frame-fill-raised: rgb(12 34 42 / 82%);
+  --xiaohei-frame-inner: rgb(231 252 252 / 6%);
+  --xiaohei-frame-plaque: #102D36;
+  --xiaohei-frame-label: #B9E5E7;
+  --xiaohei-frame-ink: #06151A;
   --xiaohei-shadow: rgb(1 8 11 / 36%);
   --xiaohei-focus-shadow: rgb(83 173 179 / 20%);
   --xiaohei-radius-panel: 16px;
@@ -44,6 +52,14 @@ html[data-xiaohei-appearance='light'] {
   --xiaohei-sidebar-bottom: rgb(226 235 231 / 72%);
   --xiaohei-sidebar-edge: rgb(54 105 109 / 14%);
   --xiaohei-sidebar-fade: rgb(226 235 231 / 42%);
+  --xiaohei-frame-line: rgb(40 101 106 / 28%);
+  --xiaohei-frame-line-strong: rgb(40 101 106 / 52%);
+  --xiaohei-frame-fill: rgb(247 250 247 / 54%);
+  --xiaohei-frame-fill-raised: rgb(250 252 249 / 84%);
+  --xiaohei-frame-inner: rgb(255 255 255 / 72%);
+  --xiaohei-frame-plaque: #17343B;
+  --xiaohei-frame-label: #DDF2F1;
+  --xiaohei-frame-ink: #14282D;
   --xiaohei-shadow: rgb(35 62 67 / 14%);
   --xiaohei-focus-shadow: rgb(46 116 122 / 15%);
 }

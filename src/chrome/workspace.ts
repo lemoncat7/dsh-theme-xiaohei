@@ -1,10 +1,54 @@
 /** Workspace navigation hierarchy and folder-owned spirit framing. */
 export const XIAOHEI_WORKSPACE_CSS = `
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div {
+  position: relative;
+  box-sizing: border-box;
+  width: auto !important;
+  margin: 0 4px 7px;
+  padding: 22px 7px 7px;
+  border: 1px solid var(--xiaohei-frame-line);
+  border-radius: 13px;
+  background:
+    linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)) 14px 0 / 34px 1px no-repeat,
+    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)) 0 14px / 1px 24px no-repeat,
+    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)) 100% calc(100% - 14px) / 1px 24px no-repeat,
+    var(--xiaohei-frame-fill);
+  box-shadow:
+    inset 0 0 0 1px var(--xiaohei-frame-inner),
+    0 10px 26px rgb(1 8 11 / 8%);
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::before {
+  content: '会馆 · 工作区';
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  left: 13px;
+  height: 16px;
+  padding-inline: 7px;
+  border: 1px solid var(--xiaohei-frame-line);
+  border-radius: 3px 7px 7px 3px;
+  color: var(--xiaohei-frame-label);
+  background: var(--xiaohei-frame-plaque);
+  box-shadow: inset 0 1px var(--xiaohei-frame-inner), 0 4px 9px var(--xiaohei-shadow);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 14px;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div > div:last-child {
+  width: auto;
+  margin-inline: 0;
+  padding-left: 0;
+}
+
 #root [data-slot='sidebar.workspaces'] > div > div:first-child {
   min-height: 38px;
-  margin-inline: 8px;
+  margin: 2px 2px 5px;
   padding-inline: 4px;
-  border-bottom: 1px solid var(--xiaohei-sidebar-edge);
+  border-bottom: 1px solid var(--xiaohei-frame-line);
   border-radius: 0;
   background: transparent;
 }
@@ -46,8 +90,10 @@ export const XIAOHEI_WORKSPACE_CSS = `
   overflow: hidden;
   border: 1px solid var(--xiaohei-edge);
   border-radius: var(--xiaohei-radius-control);
-  background: linear-gradient(100deg, var(--xiaohei-spirit-faint), rgb(255 255 255 / 2%) 72%, transparent) !important;
-  box-shadow: inset 0 1px rgb(255 255 255 / 5%);
+  background:
+    linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)) 10px 0 / 24px 1px no-repeat,
+    linear-gradient(100deg, var(--xiaohei-spirit-faint), rgb(255 255 255 / 2%) 72%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--xiaohei-frame-inner);
   transition:
     border-color var(--xiaohei-motion-base) ease,
     background-color var(--xiaohei-motion-base) ease,
@@ -86,11 +132,10 @@ export const XIAOHEI_WORKSPACE_CSS = `
 #root [data-slot='sidebar.workspaces'] [role='tree'] > [class*='_empty'] {
   margin: 2px 4px 0;
   padding: 14px 12px 15px;
-  border: 0;
-  border-left: 1px solid var(--xiaohei-sidebar-edge);
-  border-radius: 0;
+  border: 1px dashed var(--xiaohei-frame-line);
+  border-radius: var(--xiaohei-radius-small);
   color: var(--dsw-alias-label-tertiary);
-  background: transparent;
+  background: var(--xiaohei-spirit-faint);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -98,6 +143,43 @@ export const XIAOHEI_WORKSPACE_CSS = `
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded] {
   background: linear-gradient(100deg, rgb(255 255 255 / 46%), var(--xiaohei-spirit-faint) 76%, transparent) !important;
   box-shadow: inset 0 1px rgb(255 255 255 / 68%);
+}
+
+/* Rail mode is a strict 35px column; expanded frame spacing must not leak into it. */
+#root [data-slot='sidebar'] > div[class*='_collapsed'] [data-slot='sidebar.workspaces'] > div {
+  position: static;
+  width: 35px !important;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#root [data-slot='sidebar'] > div[class*='_collapsed'] [data-slot='sidebar.workspaces'] > div::before,
+#root [data-slot='sidebar'] > div[class*='_collapsed'] [data-slot='sidebar.workspaces'] > div::after {
+  display: none;
+}
+
+#root [data-slot='sidebar'] > div[class*='_collapsed'] [data-slot='sidebar.workspaces'] > div > div:first-child {
+  width: 35px;
+  min-width: 35px;
+  margin: 0 0 12px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  justify-content: center;
+}
+
+#root [data-slot='sidebar'] > div[class*='_collapsed'] [data-slot='sidebar.workspaces'] > div > div:first-child > div:first-child {
+  width: 35px;
+  min-width: 35px;
+  justify-content: center;
+}
+
+#root [data-slot='sidebar'] > div[class*='_collapsed'] [data-slot='sidebar.workspaces'] > div > div:first-child button {
+  margin-inline: auto;
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]:hover,
