@@ -78,8 +78,6 @@ import {
 import {
   XIAOHEI_IDENTITY_CAT_TAG,
   XIAOHEI_IDENTITY_CHARM,
-  XIAOHEI_IDENTITY_PLAQUE,
-  XIAOHEI_IDENTITY_SIDEBAR_WASH,
   XIAOHEI_IDENTITY_SPACE_RING,
   XIAOHEI_IDENTITY_SIGNATURE,
 } from '../lib/generated-identity.js'
@@ -177,7 +175,6 @@ test('control skin composes isolated responsibility layers in a stable order', (
 test('public Xiaohei frame contract supports future feature plugins', () => {
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame='module'/)
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame='compact'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /data-xiaohei-frame-label/)
   assert.match(XIAOHEI_IDENTITY_CSS, /data-xiaohei-frame-ornament='spirit-knot'/)
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-module-kind/)
   assert.match(XIAOHEI_FRAME_SYSTEM_CSS, /data-xiaohei-frame-header/)
@@ -185,20 +182,14 @@ test('public Xiaohei frame contract supports future feature plugins', () => {
   assert.match(XIAOHEI_IDENTITY_CSS, /forced-colors:\s*active/)
 })
 
-test('generated plaques and distinct regional ornaments share one identity layer', () => {
-  assert.match(XIAOHEI_IDENTITY_PLAQUE, /^data:image\/webp;base64,/)
+test('distinct regional ornaments share one identity layer without decorative plaques', () => {
   assert.match(XIAOHEI_IDENTITY_CHARM, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_SPACE_RING, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CAT_TAG, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDENTITY_SIDEBAR_WASH, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /background:\s*url\("data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'工作区'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'工具'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'会话'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /min-width:\s*104px;[\s\S]*height:\s*33px/)
   assert.match(XIAOHEI_IDENTITY_CSS, /width:\s*30px;[\s\S]*height:\s*48px/)
   assert.match(XIAOHEI_IDENTITY_CSS, /background-image:\s*url\("data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CSS, /data-composer-card='true'\]:focus-within::before/)
+  assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /data-xiaohei-frame-label|content:\s*'(?:工作区|工具|会话)'/)
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /@keyframes|animation:/)
 })
 
@@ -234,14 +225,9 @@ test('workspace folders own the sidebar spirit framing without ambient fog', () 
   assert.doesNotMatch(`${XIAOHEI_SIDEBAR_CSS}\n${XIAOHEI_WORKSPACE_CSS}`, /@keyframes|animation:/)
 })
 
-test('workspace plaque stays inside the host clipping boundary', () => {
-  const plaqueRule = XIAOHEI_IDENTITY_CSS.match(
-    /\[data-slot='sidebar\.workspaces'\] > div::before \{([^}]*)\}/,
-  )?.[1] ?? ''
-  assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*35px 7px 7px/)
-  assert.match(plaqueRule, /content:\s*'工作区'/)
-  assert.match(plaqueRule, /top:\s*2px/)
-  assert.doesNotMatch(plaqueRule, /top:\s*-/)
+test('workspace returns plaque space to native navigation', () => {
+  assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*8px 7px 7px/)
+  assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /\[data-slot='sidebar\.workspaces'\] > div::before/)
 })
 
 test('expanded workspace frame cannot cross the sidebar content edge', () => {
@@ -249,7 +235,7 @@ test('expanded workspace frame cannot cross the sidebar content edge', () => {
   assert.match(XIAOHEI_WORKSPACE_CSS, /max-width:\s*none/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /min-width:\s*0/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /margin:\s*0 14px 7px 4px/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /right:\s*0;[\s\S]*width:\s*12px/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /right:\s*0;[\s\S]*width:\s*40px/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /right:\s*-24px/)
 })
 
@@ -273,10 +259,9 @@ test('sidebar material preserves the host geometry of fixed overlays', () => {
   )
 })
 
-test('sidebar material embeds one coherent ink-wash field', () => {
-  assert.match(XIAOHEI_SIDEBAR_CSS, /background-blend-mode:\s*normal, soft-light, normal/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /background-blend-mode:\s*normal, multiply, normal/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /url\("data:image\/webp;base64,/)
+test('sidebar material fades into the shared forest scene without a separate illustration', () => {
+  assert.match(XIAOHEI_SIDEBAR_CSS, /transparent 100%/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /url\(/)
 })
 
 test('collapsed sidebar keeps workspace tools on the rail axis', () => {

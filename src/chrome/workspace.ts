@@ -7,7 +7,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
   min-width: 0;
   max-width: none;
   margin: 0 14px 7px 4px;
-  padding: 35px 7px 7px;
+  padding: 8px 7px 7px;
   border: 1px solid var(--xiaohei-frame-line);
   border-radius: 13px;
   background:

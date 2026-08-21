@@ -1,40 +1,20 @@
-import { XIAOHEI_IDENTITY_SIDEBAR_WASH } from '../generated-identity.js'
-
 /** Sidebar shell, primary action, and footer navigation. */
 export const XIAOHEI_SIDEBAR_CSS = `
 #root [data-slot='sidebar'] > div {
   position: relative;
   background:
-    linear-gradient(180deg, rgb(8 24 30 / 16%), rgb(6 20 26 / 30%)),
-    url("${XIAOHEI_IDENTITY_SIDEBAR_WASH}") center / 100% 100% no-repeat,
     linear-gradient(
-      180deg,
+      90deg,
       var(--xiaohei-sidebar-top) 0%,
-      var(--xiaohei-sidebar-middle) 52%,
-      var(--xiaohei-sidebar-bottom) 100%
+      var(--xiaohei-sidebar-middle) 68%,
+      rgb(8 26 34 / 18%) 88%,
+      transparent 100%
     ) !important;
-  background-blend-mode: normal, soft-light, normal;
   border-right: 0;
-  box-shadow:
-    inset -1px 0 var(--xiaohei-sidebar-edge),
-    12px 0 32px rgb(1 8 11 / 10%);
+  box-shadow: 18px 0 34px -34px rgb(1 8 11 / 34%);
 }
 
-/* The rail itself is the outer mount; feature regions own their inner frames. */
-#root [data-slot='sidebar'] > div::before {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  inset: 8px 7px;
-  border: 1px solid var(--xiaohei-frame-line);
-  border-block-color: rgb(125 213 217 / 12%);
-  border-radius: 8px;
-  box-shadow: inset 0 0 0 1px var(--xiaohei-frame-inner);
-  opacity: 0.66;
-  pointer-events: none;
-}
-
-/* Keep the material falloff inside the rail so it cannot create horizontal overflow. */
+/* A short internal falloff prevents a hard seam without crossing host geometry. */
 #root [data-slot='sidebar'] > div::after {
   content: '';
   position: absolute;
@@ -42,16 +22,17 @@ export const XIAOHEI_SIDEBAR_CSS = `
   top: 0;
   right: 0;
   bottom: 0;
-  width: 12px;
+  width: 40px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--xiaohei-sidebar-fade));
+  background: linear-gradient(90deg, transparent, var(--xiaohei-sidebar-fade) 44%, transparent);
+  opacity: 0.36;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
   position: relative;
   min-height: 72px;
   padding: 0 14px 15px;
-  border-bottom: 1px solid var(--xiaohei-frame-line);
+  border-bottom: 1px solid var(--xiaohei-sidebar-edge);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child::after {
@@ -149,7 +130,7 @@ export const XIAOHEI_SIDEBAR_CSS = `
   box-sizing: border-box;
   gap: 2px;
   margin: 9px 0 0;
-  padding: 9px 4px 3px;
+  padding: 4px 4px 3px;
   border: 1px solid var(--xiaohei-frame-line);
   border-radius: 12px;
   background:
@@ -187,18 +168,14 @@ export const XIAOHEI_SIDEBAR_CSS = `
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
   background:
-    linear-gradient(180deg, rgb(247 249 244 / 16%), rgb(228 236 230 / 26%)),
-    url("${XIAOHEI_IDENTITY_SIDEBAR_WASH}") center / 100% 100% no-repeat,
     linear-gradient(
-      180deg,
+      90deg,
       var(--xiaohei-sidebar-top) 0%,
-      var(--xiaohei-sidebar-middle) 52%,
-      var(--xiaohei-sidebar-bottom) 100%
+      var(--xiaohei-sidebar-middle) 66%,
+      rgb(226 235 231 / 15%) 88%,
+      transparent 100%
     ) !important;
-  background-blend-mode: normal, multiply, normal;
-  box-shadow:
-    inset -1px 0 var(--xiaohei-sidebar-edge),
-    12px 0 30px rgb(35 62 67 / 7%);
+  box-shadow: 18px 0 34px -34px rgb(35 62 67 / 24%);
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child {
@@ -254,7 +231,6 @@ html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([cla
 @media (prefers-reduced-transparency: reduce) {
   #root [data-slot='sidebar'] > div {
     background: #102A34 !important;
-    background-blend-mode: normal;
   }
   html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div { background: #E9EEEA !important; }
 }

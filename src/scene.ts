@@ -255,7 +255,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
   object-fit: contain;
   filter: invert(84%) sepia(16%) saturate(650%) hue-rotate(120deg) brightness(0.85);
   mix-blend-mode: screen;
-  opacity: 0.16;
+  opacity: 0.13;
   transform: rotate(-4deg);
   pointer-events: none;
   user-select: none;
@@ -264,7 +264,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
 html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-signature {
   filter: none;
   mix-blend-mode: multiply;
-  opacity: 0.18;
+  opacity: 0.14;
 }
 
 .xiaohei-scene__sidebar-spirit--one {
