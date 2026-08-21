@@ -7,7 +7,7 @@ export const XIAOHEI_SIDEBAR_CSS = `
       90deg,
       var(--xiaohei-sidebar-top) 0%,
       var(--xiaohei-sidebar-middle) 68%,
-      rgb(8 26 34 / 18%) 88%,
+      rgb(10 15 16 / 18%) 88%,
       transparent 100%
     ) !important;
   border-right: 0;
@@ -172,7 +172,7 @@ html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
       90deg,
       var(--xiaohei-sidebar-top) 0%,
       var(--xiaohei-sidebar-middle) 66%,
-      rgb(226 235 231 / 15%) 88%,
+      rgb(235 235 230 / 15%) 88%,
       transparent 100%
     ) !important;
   box-shadow: 18px 0 34px -34px rgb(35 62 67 / 24%);

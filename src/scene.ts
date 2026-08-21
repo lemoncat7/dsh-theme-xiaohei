@@ -27,11 +27,11 @@ export const XIAOHEI_SCENE_LAYER_ID = 'dsh-theme-xiaohei/scene-layer'
  */
 const XIAOHEI_SCENE_BASE_CSS = `
 body {
-  background: #19424A;
+  background: #111718;
 }
 
 html[data-xiaohei-appearance='light'] body {
-  background: #E6ECE6;
+  background: #ECECE7;
 }
 
 #root {
@@ -48,11 +48,11 @@ html[data-xiaohei-appearance='light'] body {
   isolation: isolate;
   pointer-events: none;
   user-select: none;
-  background: #19424A;
+  background: #111718;
 }
 
 html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
-  background: #E6ECE6;
+  background: #ECECE7;
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} > * {
@@ -73,13 +73,13 @@ html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
 }
 
 .xiaohei-scene__keyart--night {
-  opacity: 0.9;
-  filter: brightness(1.16) contrast(1.12) saturate(0.78);
+  opacity: 0.96;
+  filter: brightness(1.02) contrast(1.05) saturate(0.86);
 }
 
 .xiaohei-scene__keyart--dawn {
   opacity: 0;
-  filter: brightness(0.96) contrast(0.92) saturate(0.7);
+  filter: brightness(1.01) contrast(0.98) saturate(0.86);
 }
 
 html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night {
@@ -87,22 +87,22 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night {
 }
 
 html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
-  opacity: 0.94;
+  opacity: 0.96;
 }
 
 .xiaohei-scene__veil {
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(3 10 12 / 10%) 0%, rgb(3 10 12 / 5%) 48%, rgb(3 10 12 / 17%) 100%),
-    radial-gradient(ellipse at 82% 22%, rgb(3 10 12 / 12%) 0%, rgb(3 10 12 / 5%) 28%, transparent 56%),
-    linear-gradient(180deg, rgb(3 10 12 / 4%) 0%, transparent 54%, rgb(3 10 12 / 13%) 100%);
+    linear-gradient(90deg, rgb(3 6 7 / 8%) 0%, rgb(3 6 7 / 2%) 48%, rgb(3 6 7 / 8%) 100%),
+    radial-gradient(ellipse at 82% 78%, transparent 0%, transparent 24%, rgb(3 6 7 / 4%) 62%),
+    linear-gradient(180deg, rgb(3 6 7 / 3%) 0%, transparent 56%, rgb(3 6 7 / 7%) 100%);
 }
 
 html[data-xiaohei-appearance='light'] .xiaohei-scene__veil {
   background:
-    linear-gradient(90deg, rgb(226 233 226 / 30%) 0%, rgb(233 237 231 / 18%) 42%, rgb(219 228 220 / 24%) 100%),
-    radial-gradient(ellipse at 57% 43%, rgb(226 232 224 / 32%) 0%, rgb(226 232 224 / 14%) 34%, transparent 68%),
-    linear-gradient(180deg, rgb(229 234 227 / 14%) 0%, transparent 52%, rgb(205 216 207 / 22%) 100%);
+    linear-gradient(90deg, rgb(240 240 236 / 16%) 0%, rgb(244 244 240 / 8%) 44%, rgb(232 232 228 / 12%) 100%),
+    radial-gradient(ellipse at 82% 78%, transparent 0%, transparent 30%, rgb(226 228 224 / 8%) 66%),
+    linear-gradient(180deg, rgb(242 242 238 / 7%) 0%, transparent 54%, rgb(218 220 217 / 10%) 100%);
 }
 
 .xiaohei-scene__aura {
@@ -897,7 +897,7 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 @media (max-width: 768px) {
   .xiaohei-scene__keyart--night {
     object-position: 68% center;
-    opacity: 0.82;
+    opacity: 0.9;
   }
 
   .xiaohei-scene__keyart--dawn { opacity: 0; }
@@ -906,11 +906,11 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 
   html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
     object-position: 62% center;
-    opacity: 0.9;
+    opacity: 0.94;
   }
 
   .xiaohei-scene__veil {
-    background: linear-gradient(180deg, rgb(5 12 15 / 16%), rgb(5 12 15 / 40%));
+    background: linear-gradient(180deg, rgb(5 8 9 / 8%), rgb(5 8 9 / 22%));
   }
 
   .xiaohei-scene__mascot {
