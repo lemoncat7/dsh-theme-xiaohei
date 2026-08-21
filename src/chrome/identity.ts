@@ -1,6 +1,8 @@
 import {
+  XIAOHEI_IDENTITY_CAT_TAG,
   XIAOHEI_IDENTITY_CHARM,
   XIAOHEI_IDENTITY_PLAQUE,
+  XIAOHEI_IDENTITY_SPACE_RING,
 } from '../generated-identity.js'
 
 /**
@@ -16,9 +18,9 @@ export const XIAOHEI_IDENTITY_CSS = `
   z-index: 3;
   box-sizing: border-box;
   width: max-content;
-  min-width: 82px;
-  height: 27px;
-  padding: 5px 16px 6px 21px;
+  min-width: 104px;
+  height: 33px;
+  padding: 7px 20px 8px 26px;
   overflow: visible;
   border: 0;
   border-radius: 0;
@@ -26,9 +28,9 @@ export const XIAOHEI_IDENTITY_CSS = `
   background: url("${XIAOHEI_IDENTITY_PLAQUE}") center / 100% 100% no-repeat;
   box-shadow: none;
   font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
-  line-height: 16px;
+  line-height: 18px;
   letter-spacing: 0.12em;
   white-space: nowrap;
   text-shadow: 0 1px rgb(255 255 255 / 44%);
@@ -45,19 +47,19 @@ export const XIAOHEI_IDENTITY_CSS = `
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::before {
   content: '工作区';
-  top: 3px;
+  top: 2px;
   left: 13px;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::before {
   content: '工具';
-  top: -11px;
+  top: -14px;
   left: 13px;
 }
 
 #root [data-composer-card='true']::after {
   content: '会话';
-  top: -11px;
+  top: -14px;
   right: auto;
   bottom: auto;
   left: clamp(132px, 19%, 152px);
@@ -72,11 +74,13 @@ export const XIAOHEI_IDENTITY_CSS = `
   content: '';
   position: absolute;
   z-index: 3;
-  width: 28px;
-  height: 44px;
+  width: 30px;
+  height: 48px;
   border: 0;
   border-radius: 0;
-  background: url("${XIAOHEI_IDENTITY_CHARM}") center / contain no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
   box-shadow: none;
   filter: drop-shadow(0 3px 4px var(--xiaohei-shadow));
   opacity: 0.92;
@@ -86,23 +90,38 @@ export const XIAOHEI_IDENTITY_CSS = `
   transition: transform 320ms var(--xiaohei-motion-curve), filter var(--xiaohei-motion-base) ease;
 }
 
+:where([data-xiaohei-frame-ornament='spirit-knot'])::after,
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::after {
+  background-image: url("${XIAOHEI_IDENTITY_CHARM}");
+}
+
+#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::after {
+  background-image: url("${XIAOHEI_IDENTITY_SPACE_RING}");
+}
+
+#root [data-composer-card='true']::before {
+  width: 34px;
+  height: 50px;
+  background-image: url("${XIAOHEI_IDENTITY_CAT_TAG}");
+}
+
 :where([data-xiaohei-frame-ornament='spirit-knot'])::after {
   top: -6px;
   right: 16px;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::after {
-  top: -1px;
+  top: 0;
   right: 11px;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::after {
-  top: -9px;
+  top: -12px;
   right: 13px;
 }
 
 #root [data-composer-card='true']::before {
-  top: -7px;
+  top: -10px;
   right: 24px;
 }
 

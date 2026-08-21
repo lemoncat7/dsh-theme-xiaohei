@@ -248,15 +248,15 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
   position: absolute;
   display: block;
   z-index: 1;
-  left: 3.9rem;
-  top: 45%;
-  width: 11.5rem;
-  height: 5rem;
+  left: 4.25rem;
+  top: 21%;
+  width: 8.25rem;
+  height: 27rem;
   object-fit: contain;
   filter: invert(84%) sepia(16%) saturate(650%) hue-rotate(120deg) brightness(0.85);
   mix-blend-mode: screen;
-  opacity: 0.14;
-  transform: rotate(-7deg);
+  opacity: 0.16;
+  transform: rotate(-4deg);
   pointer-events: none;
   user-select: none;
 }
@@ -264,7 +264,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
 html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-signature {
   filter: none;
   mix-blend-mode: multiply;
-  opacity: 0.19;
+  opacity: 0.18;
 }
 
 .xiaohei-scene__sidebar-spirit--one {

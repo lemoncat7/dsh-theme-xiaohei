@@ -1,14 +1,19 @@
+import { XIAOHEI_IDENTITY_SIDEBAR_WASH } from '../generated-identity.js'
+
 /** Sidebar shell, primary action, and footer navigation. */
 export const XIAOHEI_SIDEBAR_CSS = `
 #root [data-slot='sidebar'] > div {
   position: relative;
   background:
+    linear-gradient(180deg, rgb(8 24 30 / 16%), rgb(6 20 26 / 30%)),
+    url("${XIAOHEI_IDENTITY_SIDEBAR_WASH}") center / 100% 100% no-repeat,
     linear-gradient(
       180deg,
       var(--xiaohei-sidebar-top) 0%,
       var(--xiaohei-sidebar-middle) 52%,
       var(--xiaohei-sidebar-bottom) 100%
     ) !important;
+  background-blend-mode: normal, soft-light, normal;
   border-right: 0;
   box-shadow:
     inset -1px 0 var(--xiaohei-sidebar-edge),
@@ -20,10 +25,12 @@ export const XIAOHEI_SIDEBAR_CSS = `
   content: '';
   position: absolute;
   z-index: 0;
-  inset: 7px 6px;
-  border-inline: 1px solid var(--xiaohei-frame-line);
-  border-radius: 5px;
-  opacity: 0.72;
+  inset: 8px 7px;
+  border: 1px solid var(--xiaohei-frame-line);
+  border-block-color: rgb(125 213 217 / 12%);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--xiaohei-frame-inner);
+  opacity: 0.66;
   pointer-events: none;
 }
 
@@ -44,20 +51,20 @@ export const XIAOHEI_SIDEBAR_CSS = `
   position: relative;
   min-height: 72px;
   padding: 0 14px 15px;
-  border-bottom: 1px solid var(--xiaohei-sidebar-edge);
+  border-bottom: 1px solid var(--xiaohei-frame-line);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child::after {
   content: '小黑 · 灵域';
   position: absolute;
-  left: 24px;
+  left: 25px;
   bottom: 5px;
   color: var(--xiaohei-spirit-strong);
   font-size: 9px;
   font-weight: 650;
   line-height: 1;
   letter-spacing: 0.18em;
-  opacity: 0.78;
+  opacity: 0.7;
   pointer-events: none;
 }
 
@@ -94,10 +101,12 @@ export const XIAOHEI_SIDEBAR_CSS = `
   padding-inline: 14px;
   justify-content: flex-start;
   gap: 10px;
-  border-color: var(--xiaohei-edge);
-  border-radius: var(--xiaohei-radius-control);
+  border-color: var(--xiaohei-frame-line);
+  border-radius: 11px;
   color: var(--dsw-alias-label-primary);
-  background: linear-gradient(180deg, rgb(255 255 255 / 5%), var(--xiaohei-spirit-faint)) !important;
+  background:
+    linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)) 12px 0 / 28px 1px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 5%), var(--xiaohei-frame-fill)) !important;
   box-shadow:
     inset 0 0 0 1px var(--xiaohei-frame-inner),
     inset 0 1px rgb(255 255 255 / 7%),
@@ -140,7 +149,7 @@ export const XIAOHEI_SIDEBAR_CSS = `
   box-sizing: border-box;
   gap: 2px;
   margin: 9px 0 0;
-  padding: 5px 4px 3px;
+  padding: 9px 4px 3px;
   border: 1px solid var(--xiaohei-frame-line);
   border-radius: 12px;
   background:
@@ -177,6 +186,16 @@ export const XIAOHEI_SIDEBAR_CSS = `
 }
 
 html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div {
+  background:
+    linear-gradient(180deg, rgb(247 249 244 / 16%), rgb(228 236 230 / 26%)),
+    url("${XIAOHEI_IDENTITY_SIDEBAR_WASH}") center / 100% 100% no-repeat,
+    linear-gradient(
+      180deg,
+      var(--xiaohei-sidebar-top) 0%,
+      var(--xiaohei-sidebar-middle) 52%,
+      var(--xiaohei-sidebar-bottom) 100%
+    ) !important;
+  background-blend-mode: normal, multiply, normal;
   box-shadow:
     inset -1px 0 var(--xiaohei-sidebar-edge),
     12px 0 30px rgb(35 62 67 / 7%);
@@ -235,6 +254,7 @@ html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div:not([cla
 @media (prefers-reduced-transparency: reduce) {
   #root [data-slot='sidebar'] > div {
     background: #102A34 !important;
+    background-blend-mode: normal;
   }
   html[data-xiaohei-appearance='light'] #root [data-slot='sidebar'] > div { background: #E9EEEA !important; }
 }

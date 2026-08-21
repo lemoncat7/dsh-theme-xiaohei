@@ -76,8 +76,11 @@ import {
   XIAOHEI_WAITING,
 } from '../lib/generated-keyart.js'
 import {
+  XIAOHEI_IDENTITY_CAT_TAG,
   XIAOHEI_IDENTITY_CHARM,
   XIAOHEI_IDENTITY_PLAQUE,
+  XIAOHEI_IDENTITY_SIDEBAR_WASH,
+  XIAOHEI_IDENTITY_SPACE_RING,
   XIAOHEI_IDENTITY_SIGNATURE,
 } from '../lib/generated-identity.js'
 import {
@@ -182,15 +185,19 @@ test('public Xiaohei frame contract supports future feature plugins', () => {
   assert.match(XIAOHEI_IDENTITY_CSS, /forced-colors:\s*active/)
 })
 
-test('generated plaques and cat-tail charms share one identity layer', () => {
+test('generated plaques and distinct regional ornaments share one identity layer', () => {
   assert.match(XIAOHEI_IDENTITY_PLAQUE, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CHARM, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDENTITY_SPACE_RING, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDENTITY_CAT_TAG, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDENTITY_SIDEBAR_WASH, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CSS, /background:\s*url\("data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'工作区'/)
   assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'工具'/)
   assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'会话'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /width:\s*28px;[\s\S]*height:\s*44px/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /background:\s*url\("data:image\/webp;base64,[\s\S]*center \/ contain no-repeat/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /min-width:\s*104px;[\s\S]*height:\s*33px/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /width:\s*30px;[\s\S]*height:\s*48px/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /background-image:\s*url\("data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CSS, /data-composer-card='true'\]:focus-within::before/)
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /@keyframes|animation:/)
 })
@@ -231,9 +238,9 @@ test('workspace plaque stays inside the host clipping boundary', () => {
   const plaqueRule = XIAOHEI_IDENTITY_CSS.match(
     /\[data-slot='sidebar\.workspaces'\] > div::before \{([^}]*)\}/,
   )?.[1] ?? ''
-  assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*28px 7px 7px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*35px 7px 7px/)
   assert.match(plaqueRule, /content:\s*'工作区'/)
-  assert.match(plaqueRule, /top:\s*3px/)
+  assert.match(plaqueRule, /top:\s*2px/)
   assert.doesNotMatch(plaqueRule, /top:\s*-/)
 })
 
@@ -264,6 +271,12 @@ test('sidebar material preserves the host geometry of fixed overlays', () => {
     dialogRule,
     /(?:^|\n)\s*(?:position|inset|width|height|transform)\s*:/,
   )
+})
+
+test('sidebar material embeds one coherent ink-wash field', () => {
+  assert.match(XIAOHEI_SIDEBAR_CSS, /background-blend-mode:\s*normal, soft-light, normal/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /background-blend-mode:\s*normal, multiply, normal/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /url\("data:image\/webp;base64,/)
 })
 
 test('collapsed sidebar keeps workspace tools on the rail axis', () => {

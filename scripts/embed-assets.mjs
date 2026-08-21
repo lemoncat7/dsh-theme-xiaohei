@@ -33,9 +33,12 @@ const embeddedCharacters = await Promise.all(characterAssets.map(async ([name, f
   return `export const ${name}: string = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
 }))
 const identityAssets = [
-  ['XIAOHEI_IDENTITY_SIGNATURE', 'luoxiaohei-signature-v1.webp'],
+  ['XIAOHEI_IDENTITY_SIGNATURE', 'luoxiaohei-signature-vertical-v2.webp'],
   ['XIAOHEI_IDENTITY_PLAQUE', 'luoxiaohei-plaque-v1.webp'],
   ['XIAOHEI_IDENTITY_CHARM', 'luoxiaohei-tail-charm-v1.webp'],
+  ['XIAOHEI_IDENTITY_SPACE_RING', 'luoxiaohei-space-ring-v1.webp'],
+  ['XIAOHEI_IDENTITY_CAT_TAG', 'luoxiaohei-cat-mouth-tag-v1.webp'],
+  ['XIAOHEI_IDENTITY_SIDEBAR_WASH', 'luoxiaohei-sidebar-wash-v1.webp'],
 ]
 const embeddedIdentity = await Promise.all(identityAssets.map(async ([name, filename]) => {
   const assetPath = new URL(`../src/assets/identity/${filename}`, import.meta.url)
