@@ -15,6 +15,7 @@ import {
 import { XIAOHEI_IDENTITY_SIGNATURE } from './generated-identity.js'
 import { XIAOHEI_HEIXIU_FEEDBACK_CSS } from './scene/heixiu-feedback.js'
 import { XIAOHEI_HEIXIU_INTERACTION_CSS } from './scene/heixiu-interactions.js'
+import { XIAOHEI_SPIRIT_STREAM_CSS } from './scene/spirit-stream.js'
 import { XIAOHEI_STATE_TRANSITION_CSS } from './scene/state-transitions.js'
 
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
@@ -73,13 +74,13 @@ html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
 }
 
 .xiaohei-scene__keyart--night {
-  opacity: 0.96;
-  filter: brightness(1.02) contrast(1.05) saturate(0.86);
+  opacity: 0.98;
+  filter: brightness(1.2) contrast(1.03) saturate(0.96);
 }
 
 .xiaohei-scene__keyart--dawn {
   opacity: 0;
-  filter: brightness(1.01) contrast(0.98) saturate(0.86);
+  filter: brightness(0.86) contrast(1.08) saturate(1.02);
 }
 
 html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night {
@@ -87,7 +88,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night {
 }
 
 html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
-  opacity: 0.96;
+  opacity: 0.98;
 }
 
 .xiaohei-scene__veil {
@@ -100,29 +101,9 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
 
 html[data-xiaohei-appearance='light'] .xiaohei-scene__veil {
   background:
-    linear-gradient(90deg, rgb(240 240 236 / 16%) 0%, rgb(244 244 240 / 8%) 44%, rgb(232 232 228 / 12%) 100%),
-    radial-gradient(ellipse at 82% 78%, transparent 0%, transparent 30%, rgb(226 228 224 / 8%) 66%),
-    linear-gradient(180deg, rgb(242 242 238 / 7%) 0%, transparent 54%, rgb(218 220 217 / 10%) 100%);
-}
-
-.xiaohei-scene__aura {
-  width: 48vmax;
-  aspect-ratio: 1.28;
-  right: -9vmax;
-  bottom: -18vmax;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 56% 54%, rgb(117 228 208 / 35%) 0%, rgb(58 161 151 / 15%) 36%, transparent 70%);
-  mix-blend-mode: screen;
-  opacity: 0.46;
-  transform: scale(0.96);
-  will-change: transform, opacity;
-  animation: xiaohei-scene-aura 7.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__aura {
-  background: radial-gradient(ellipse at 56% 54%, rgb(73 143 119 / 18%) 0%, rgb(87 137 116 / 9%) 38%, transparent 70%);
-  mix-blend-mode: multiply;
-  opacity: 0.28;
+    linear-gradient(90deg, rgb(147 158 156 / 7%) 0%, transparent 46%, rgb(132 147 144 / 6%) 100%),
+    radial-gradient(ellipse at 82% 78%, transparent 0%, transparent 34%, rgb(132 147 144 / 4%) 70%),
+    linear-gradient(180deg, rgb(164 172 169 / 4%) 0%, transparent 52%, rgb(128 143 140 / 6%) 100%);
 }
 
 .xiaohei-scene__spirit {
@@ -777,11 +758,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   animation: xiaohei-error-glow 2.2s ease-in-out infinite;
 }
 
-@keyframes xiaohei-scene-aura {
-  from { transform: scale(0.94); opacity: 0.44; }
-  to { transform: scale(1.05); opacity: 0.78; }
-}
-
 @keyframes xiaohei-heixiu-blink {
   0%, 87.9% { opacity: 0; }
   88%, 90.4% { opacity: 1; }
@@ -1008,6 +984,7 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 
 export const XIAOHEI_SCENE_CSS = [
   XIAOHEI_SCENE_BASE_CSS,
+  XIAOHEI_SPIRIT_STREAM_CSS,
   XIAOHEI_STATE_TRANSITION_CSS,
   XIAOHEI_HEIXIU_FEEDBACK_CSS,
   XIAOHEI_HEIXIU_INTERACTION_CSS,
