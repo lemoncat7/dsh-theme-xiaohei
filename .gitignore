@@ -3,6 +3,7 @@ lib/
 dist/
 output/
 src/generated-keyart.ts
+src/generated-identity.ts
 *.tgz
 .DS_Store
 tmp/

@@ -25,7 +25,6 @@ html {
   --xiaohei-frame-plaque: #102D36;
   --xiaohei-frame-label: #B9E5E7;
   --xiaohei-frame-ink: #06151A;
-  --xiaohei-signature-ink: rgb(150 225 218 / 72%);
   --xiaohei-shadow: rgb(1 8 11 / 36%);
   --xiaohei-focus-shadow: rgb(83 173 179 / 20%);
   --xiaohei-radius-panel: 16px;
@@ -61,7 +60,6 @@ html[data-xiaohei-appearance='light'] {
   --xiaohei-frame-plaque: rgb(239 245 240 / 94%);
   --xiaohei-frame-label: #17383E;
   --xiaohei-frame-ink: #14282D;
-  --xiaohei-signature-ink: rgb(38 91 82 / 66%);
   --xiaohei-shadow: rgb(35 62 67 / 14%);
   --xiaohei-focus-shadow: rgb(46 116 122 / 15%);
 }

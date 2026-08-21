@@ -76,6 +76,11 @@ import {
   XIAOHEI_WAITING,
 } from '../lib/generated-keyart.js'
 import {
+  XIAOHEI_IDENTITY_CHARM,
+  XIAOHEI_IDENTITY_PLAQUE,
+  XIAOHEI_IDENTITY_SIGNATURE,
+} from '../lib/generated-identity.js'
+import {
   bindXiaoheiSessionState,
   resolveXiaoheiState,
   XIAOHEI_STATE_ATTRIBUTE,
@@ -177,15 +182,15 @@ test('public Xiaohei frame contract supports future feature plugins', () => {
   assert.match(XIAOHEI_IDENTITY_CSS, /forced-colors:\s*active/)
 })
 
-test('handwritten plaques and cat-paw ink seals share one identity layer', () => {
-  assert.match(XIAOHEI_IDENTITY_CSS, /AR PL UKai CN.*STKaiti, KaiTi, FangSong/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /linear-gradient\(108deg/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /clip-path:\s*polygon/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'小黑手记'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'小黑随行'/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(ellipse at 50% 68%/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /radial-gradient\(circle at 50% 28%/)
-  assert.match(XIAOHEI_IDENTITY_CSS, /border-radius:\s*48% 52%/)
+test('generated plaques and cat-tail charms share one identity layer', () => {
+  assert.match(XIAOHEI_IDENTITY_PLAQUE, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDENTITY_CHARM, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /background:\s*url\("data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'工作区'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'工具'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /content:\s*'会话'/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /width:\s*28px;[\s\S]*height:\s*44px/)
+  assert.match(XIAOHEI_IDENTITY_CSS, /background:\s*url\("data:image\/webp;base64,[\s\S]*center \/ contain no-repeat/)
   assert.match(XIAOHEI_IDENTITY_CSS, /data-composer-card='true'\]:focus-within::before/)
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /@keyframes|animation:/)
 })
@@ -226,9 +231,9 @@ test('workspace plaque stays inside the host clipping boundary', () => {
   const plaqueRule = XIAOHEI_IDENTITY_CSS.match(
     /\[data-slot='sidebar\.workspaces'\] > div::before \{([^}]*)\}/,
   )?.[1] ?? ''
-  assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*22px 7px 7px/)
-  assert.match(plaqueRule, /content:\s*'小黑手记'/)
-  assert.match(plaqueRule, /top:\s*5px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /padding:\s*28px 7px 7px/)
+  assert.match(plaqueRule, /content:\s*'工作区'/)
+  assert.match(plaqueRule, /top:\s*3px/)
   assert.doesNotMatch(plaqueRule, /top:\s*-/)
 })
 
@@ -462,6 +467,7 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_IDLE_TAIL, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_HEIXIU_OPEN, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_HEIXIU_BLINK, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_IDENTITY_SIGNATURE, /^data:image\/webp;base64,/)
   for (const asset of [
     XIAOHEI_THINKING,
     XIAOHEI_STREAMING,
@@ -473,9 +479,8 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
   assert.match(installXiaoheiScene.toString(), /createIdleBlink/)
   assert.match(installXiaoheiScene.toString(), /installHeixiuCompanions/)
-  assert.match(XIAOHEI_SCENE_CSS, /z-index:\s*1;[\s\S]*xiaohei-signature-ink/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__sidebar-signature/)
-  assert.match(XIAOHEI_SCENE_CSS, /--xiaohei-signature-ink/)
+  assert.match(XIAOHEI_SCENE_CSS, /object-fit:\s*contain/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /@keyframes xiaohei-mascot-blink/)
   for (const state of ['thinking', 'streaming', 'tool', 'waiting', 'complete', 'error']) {
     assert.match(XIAOHEI_SCENE_CSS, new RegExp(`data-xiaohei-state='${state}'`))

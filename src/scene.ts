@@ -12,6 +12,7 @@ import {
   XIAOHEI_TOOL,
   XIAOHEI_WAITING,
 } from './generated-keyart.js'
+import { XIAOHEI_IDENTITY_SIGNATURE } from './generated-identity.js'
 import { XIAOHEI_HEIXIU_FEEDBACK_CSS } from './scene/heixiu-feedback.js'
 import { XIAOHEI_HEIXIU_INTERACTION_CSS } from './scene/heixiu-interactions.js'
 import { XIAOHEI_STATE_TRANSITION_CSS } from './scene/state-transitions.js'
@@ -249,43 +250,21 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
   z-index: 1;
   left: 3.9rem;
   top: 45%;
-  width: 11rem;
-  color: var(--xiaohei-signature-ink);
-  font-family: 'AR PL UKai CN', STKaiti, KaiTi, FangSong, serif;
-  font-size: 4.15rem;
-  font-weight: 400;
-  line-height: 0.92;
-  letter-spacing: -0.18em;
-  text-align: center;
-  text-shadow:
-    0.04em 0.025em 0 rgb(5 19 23 / 28%),
-    -0.025em 0.04em 0 rgb(111 211 196 / 14%);
+  width: 11.5rem;
+  height: 5rem;
+  object-fit: contain;
+  filter: invert(84%) sepia(16%) saturate(650%) hue-rotate(120deg) brightness(0.85);
   mix-blend-mode: screen;
-  opacity: 0.16;
-  transform: rotate(-9deg) skewX(-3deg) scaleY(1.06);
+  opacity: 0.14;
+  transform: rotate(-7deg);
   pointer-events: none;
   user-select: none;
 }
 
-.xiaohei-scene__sidebar-signature::after {
-  content: '';
-  position: absolute;
-  left: 1.8rem;
-  right: 0.9rem;
-  bottom: -0.38rem;
-  height: 0.34rem;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  opacity: 0.72;
-  transform: rotate(-4deg) skewX(-18deg);
-}
-
 html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-signature {
-  text-shadow:
-    0.04em 0.025em 0 rgb(25 61 58 / 16%),
-    -0.025em 0.04em 0 rgb(255 255 255 / 34%);
+  filter: none;
   mix-blend-mode: multiply;
-  opacity: 0.17;
+  opacity: 0.19;
 }
 
 .xiaohei-scene__sidebar-spirit--one {
@@ -1292,11 +1271,13 @@ function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => vo
   }
 }
 
-function createSidebarSignature(doc: Document): HTMLSpanElement {
-  const signature = doc.createElement('span')
+function createSidebarSignature(doc: Document): HTMLImageElement {
+  const signature = doc.createElement('img')
   signature.className = 'xiaohei-scene__sidebar-signature'
   signature.setAttribute('aria-hidden', 'true')
-  signature.textContent = '小黑'
+  signature.alt = ''
+  signature.decoding = 'async'
+  signature.src = XIAOHEI_IDENTITY_SIGNATURE
   return signature
 }
 
