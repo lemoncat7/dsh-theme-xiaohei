@@ -4,7 +4,7 @@ const targetPath = new URL('../src/generated-keyart.ts', import.meta.url)
 const identityTargetPath = new URL('../src/generated-identity.ts', import.meta.url)
 const backgroundAssets = [
   ['XIAOHEI_NIGHT_KEY_ART', 'xiaohei-ink-night-v1.webp'],
-  ['XIAOHEI_DAWN_KEY_ART', 'xiaohei-ink-dawn-v2.webp'],
+  ['XIAOHEI_DAWN_KEY_ART', 'xiaohei-ink-dawn-v3.webp'],
 ]
 const embeddedBackgrounds = await Promise.all(backgroundAssets.map(async ([name, filename]) => {
   const assetPath = new URL(`../src/assets/${filename}`, import.meta.url)

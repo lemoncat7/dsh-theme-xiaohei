@@ -15,7 +15,6 @@ import {
 import { XIAOHEI_IDENTITY_SIGNATURE } from './generated-identity.js'
 import { XIAOHEI_HEIXIU_FEEDBACK_CSS } from './scene/heixiu-feedback.js'
 import { XIAOHEI_HEIXIU_INTERACTION_CSS } from './scene/heixiu-interactions.js'
-import { XIAOHEI_SPIRIT_STREAM_CSS } from './scene/spirit-stream.js'
 import { XIAOHEI_STATE_TRANSITION_CSS } from './scene/state-transitions.js'
 
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
@@ -918,7 +917,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .xiaohei-scene__aura,
   .xiaohei-scene__spirit,
   .xiaohei-scene__sidebar-aura,
   .xiaohei-scene__sidebar-current,
@@ -964,7 +962,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn { opacity: 0.5; }
   .xiaohei-scene__veil { background: rgb(5 12 15 / 48%); }
   html[data-xiaohei-appearance='light'] .xiaohei-scene__veil { background: rgb(235 240 235 / 58%); }
-  .xiaohei-scene__aura,
   .xiaohei-scene__spirit,
   .xiaohei-scene__sidebar-aura,
   .xiaohei-scene__sidebar-current,
@@ -984,7 +981,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 
 export const XIAOHEI_SCENE_CSS = [
   XIAOHEI_SCENE_BASE_CSS,
-  XIAOHEI_SPIRIT_STREAM_CSS,
   XIAOHEI_STATE_TRANSITION_CSS,
   XIAOHEI_HEIXIU_FEEDBACK_CSS,
   XIAOHEI_HEIXIU_INTERACTION_CSS,
@@ -994,7 +990,6 @@ const PARTS = [
   'xiaohei-scene__keyart xiaohei-scene__keyart--night',
   'xiaohei-scene__keyart xiaohei-scene__keyart--dawn',
   'xiaohei-scene__veil',
-  'xiaohei-scene__aura',
   'xiaohei-scene__spirit xiaohei-scene__spirit--one',
   'xiaohei-scene__spirit xiaohei-scene__spirit--two',
   'xiaohei-scene__spirit xiaohei-scene__spirit--three',
