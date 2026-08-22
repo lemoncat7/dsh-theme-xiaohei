@@ -116,13 +116,15 @@ export const XIAOHEI_PLUGIN_LOADING_CSS = `
   animation-delay: calc(var(--xiaohei-loader-index) * -370ms);
 }
 
-html[data-xiaohei-appearance='light'] .xiaohei-plugin-loader__sprite {
+html[data-xiaohei-appearance='light'] .xiaohei-plugin-loader__sprite,
+html[data-xiaohei-boot-appearance='light'] .xiaohei-plugin-loader__sprite {
   filter:
     drop-shadow(0 0.16rem 0.32rem rgb(47 133 118 / 16%))
     drop-shadow(0 0.32rem 0.58rem rgb(45 64 56 / 12%));
 }
 
-html[data-xiaohei-appearance='light'] .xiaohei-plugin-loader__sprite > img {
+html[data-xiaohei-appearance='light'] .xiaohei-plugin-loader__sprite > img,
+html[data-xiaohei-boot-appearance='light'] .xiaohei-plugin-loader__sprite > img {
   filter: brightness(1.01) contrast(1.05) saturate(0.76);
 }
 

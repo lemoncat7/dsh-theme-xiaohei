@@ -3,11 +3,17 @@ import {
   XIAOHEI_LOADING_HEIXIU_OPEN,
 } from './generated-loading-assets.js'
 import { XIAOHEI_PLUGIN_LOADING_CSS } from './loading-heixiu.js'
+import {
+  XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE,
+  XIAOHEI_BOOT_APPEARANCE_CSS,
+  XIAOHEI_BOOT_APPEARANCE_STYLE_ID,
+} from './boot-appearance.js'
 
 export const XIAOHEI_BOOT_LOADER_SCRIPT_ID = 'dsh-theme-xiaohei/boot-loader-script'
 export const XIAOHEI_BOOT_LOADER_MARKER = 'data-xiaohei-boot-loader'
 
 interface XiaoheiBootLoaderConfig {
+  appearanceAttribute: string
   css: string
   openImage: string
   blinkImage: string
@@ -18,6 +24,7 @@ interface XiaoheiBootLoaderConfig {
 export function injectXiaoheiBootLoader(html: string): string {
   if (html.includes(`id="${XIAOHEI_BOOT_LOADER_SCRIPT_ID}"`)) return html
   const config: XiaoheiBootLoaderConfig = {
+    appearanceAttribute: XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE,
     css: XIAOHEI_PLUGIN_LOADING_CSS,
     openImage: XIAOHEI_LOADING_HEIXIU_OPEN,
     blinkImage: XIAOHEI_LOADING_HEIXIU_BLINK,
@@ -25,10 +32,36 @@ export function injectXiaoheiBootLoader(html: string): string {
   }
   const payload = escapeInlineScriptJson(config)
   const script = `<script id="${XIAOHEI_BOOT_LOADER_SCRIPT_ID}">(${runXiaoheiBootLoader.toString()})(${payload});</script>`
-  const body = /<body(?:\s[^>]*)?>/i.exec(html)
-  if (body === null) return `${html}${script}`
-  const insertionPoint = body.index + body[0].length
-  return `${html.slice(0, insertionPoint)}${script}${html.slice(insertionPoint)}`
+  const withAppearance = injectBootAppearanceStyle(html)
+  const body = /<body(?:\s[^>]*)?>/i.exec(withAppearance)
+  if (body === null) return `${withAppearance}${script}`
+  const insertionPoint = resolveBootLoaderInsertionPoint(
+    withAppearance,
+    body.index + body[0].length,
+  )
+  return `${withAppearance.slice(0, insertionPoint)}${script}${withAppearance.slice(insertionPoint)}`
+}
+
+/** Install the critical palette before the parser reaches the body. */
+function injectBootAppearanceStyle(html: string): string {
+  const style = `<style id="${XIAOHEI_BOOT_APPEARANCE_STYLE_ID}">${XIAOHEI_BOOT_APPEARANCE_CSS}</style>`
+  const headEnd = /<\/head\s*>/i.exec(html)
+  if (headEnd !== null) {
+    return `${html.slice(0, headEnd.index)}${style}${html.slice(headEnd.index)}`
+  }
+  return `${style}${html}`
+}
+
+/** Start after DSH has synchronously resolved its persisted theme preference. */
+function resolveBootLoaderInsertionPoint(html: string, bodyStart: number): number {
+  const themeMutation = html.indexOf('document.body.toggleAttribute', bodyStart)
+  const themeMarker = themeMutation < 0
+    ? -1
+    : html.indexOf('data-ds-dark-theme', themeMutation)
+  if (themeMarker < 0) return bodyStart
+
+  const themeScriptEnd = html.indexOf('</script>', themeMarker)
+  return themeScriptEnd < 0 ? bodyStart : themeScriptEnd + '</script>'.length
 }
 
 function escapeInlineScriptJson(value: XiaoheiBootLoaderConfig): string {
@@ -43,6 +76,14 @@ function runXiaoheiBootLoader(config: XiaoheiBootLoaderConfig): void {
   const root = document.documentElement
   if (root.getAttribute('data-xiaohei-boot-loader') === 'host') return
   root.setAttribute('data-xiaohei-boot-loader', 'host')
+
+  const syncAppearance = (): void => {
+    const dark = root.style.colorScheme === 'dark'
+      || document.body.hasAttribute('data-ds-dark-theme')
+    root.setAttribute(config.appearanceAttribute, dark ? 'dark' : 'light')
+  }
+
+  syncAppearance()
 
   const style = document.createElement('style')
   style.id = `${config.scriptId}/style`

@@ -17,6 +17,11 @@ import {
   bindXiaoheiAppearance,
   XIAOHEI_APPEARANCE_ATTRIBUTE,
 } from '../lib/appearance.js'
+import {
+  XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE,
+  XIAOHEI_BOOT_APPEARANCE_CSS,
+  XIAOHEI_BOOT_APPEARANCE_STYLE_ID,
+} from '../lib/boot-appearance.js'
 import { installXiaoheiBlink, XIAOHEI_BLINK_STYLE_ID } from '../lib/blink.js'
 import {
   installXiaoheiChrome,
@@ -127,10 +132,18 @@ test('Host bootstrap decorates the official loader before client plugins run', (
   const injected = injectXiaoheiBootLoader(source)
   assert.ok(injected.indexOf(XIAOHEI_BOOT_LOADER_SCRIPT_ID) > injected.indexOf('<body>'))
   assert.ok(injected.indexOf(XIAOHEI_BOOT_LOADER_SCRIPT_ID) < injected.indexOf('<div id="root">'))
+  assert.ok(injected.indexOf(XIAOHEI_BOOT_APPEARANCE_STYLE_ID) < injected.indexOf('<body>'))
   assert.match(injected, /data-xiaohei-boot-loader/)
+  assert.match(injected, /data-xiaohei-boot-appearance/)
+  assert.match(injected, /data-ds-dark-theme/)
+  assert.match(injected, /root\.style\.colorScheme === 'dark'/)
+  assert.doesNotMatch(injected, /attributeFilter|attributes:\s*true/)
   assert.match(injected, /xiaohei-plugin-loader__runner/)
   assert.match(injected, /data:image\/webp;base64,/)
   assert.equal(injectXiaoheiBootLoader(injected), injected)
+  assert.match(XIAOHEI_BOOT_APPEARANCE_CSS, /boot-appearance='light'[\s\S]*#E7ECEC/)
+  assert.match(XIAOHEI_BOOT_APPEARANCE_CSS, /boot-appearance='dark'[\s\S]*#151C1E/)
+  assert.match(XIAOHEI_BOOT_APPEARANCE_CSS, /body\[data-ds-dark-theme\][\s\S]*#151C1E/)
 
   const calls = []
   const dispose = () => calls.push(['dispose'])
@@ -157,6 +170,19 @@ test('Host bootstrap decorates the official loader before client plugins run', (
   assert.equal(calls[2][1], injectXiaoheiBootLoader)
   assert.equal(calls[3][0], 'tap')
   assert.equal(calls[3][1], dispose)
+})
+
+test('Host bootstrap waits for DSH first-frame appearance resolution', () => {
+  const officialTheme = `<script>(() => {
+    const dark = true
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+    document.body.toggleAttribute('data-ds-dark-theme', dark)
+  })()</script>`
+  const source = `<html><head></head><body>${officialTheme}<div id="root"></div></body></html>`
+  const injected = injectXiaoheiBootLoader(source)
+
+  assert.ok(injected.indexOf(officialTheme) < injected.indexOf(XIAOHEI_BOOT_LOADER_SCRIPT_ID))
+  assert.ok(injected.indexOf(XIAOHEI_BOOT_LOADER_SCRIPT_ID) < injected.indexOf('<div id="root">'))
 })
 
 test('shades DSH native palettes without forcing a theme preference', () => {
@@ -593,6 +619,8 @@ test('blinking atomically swaps live eyes for the complete closed frame', () => 
 
 test('resolved Light / Dark / System appearance drives the scene attribute', () => {
   const attributes = new Map()
+  attributes.set(XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE, 'light')
+  let bootStyleRemoved = false
   let listener
   const ctx = {
     theme: {
@@ -606,18 +634,57 @@ test('resolved Light / Dark / System appearance drives the scene attribute', () 
   }
   const doc = {
     documentElement: {
+      getAttribute: name => attributes.get(name) ?? null,
       setAttribute: (name, value) => attributes.set(name, value),
       removeAttribute: name => attributes.delete(name),
     },
+    getElementById: id => id === XIAOHEI_BOOT_APPEARANCE_STYLE_ID
+      ? { remove: () => { bootStyleRemoved = true } }
+      : null,
   }
 
   const dispose = bindXiaoheiAppearance(ctx, doc)
   assert.equal(attributes.get(XIAOHEI_APPEARANCE_ATTRIBUTE), 'light')
+  assert.equal(attributes.has(XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE), false)
+  assert.equal(bootStyleRemoved, true)
   listener(themeSnapshot('dark'))
   assert.equal(attributes.get(XIAOHEI_APPEARANCE_ATTRIBUTE), 'dark')
   dispose()
   assert.equal(attributes.has(XIAOHEI_APPEARANCE_ATTRIBUTE), false)
   assert.equal(attributes.get('off'), true)
+})
+
+test('persisted Host appearance remains authoritative during ThemeRuntime hydration', () => {
+  const attributes = new Map([[XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE, 'dark']])
+  let listener
+  let bootStyleRemoved = false
+  const ctx = {
+    theme: { getTheme: () => themeSnapshot('light') },
+    on(_event, next) {
+      listener = next
+      return () => {}
+    },
+  }
+  const doc = {
+    documentElement: {
+      getAttribute: name => attributes.get(name) ?? null,
+      setAttribute: (name, value) => attributes.set(name, value),
+      removeAttribute: name => attributes.delete(name),
+    },
+    getElementById: id => id === XIAOHEI_BOOT_APPEARANCE_STYLE_ID
+      ? { remove: () => { bootStyleRemoved = true } }
+      : null,
+  }
+
+  bindXiaoheiAppearance(ctx, doc)
+  assert.equal(attributes.get(XIAOHEI_APPEARANCE_ATTRIBUTE), 'dark')
+  assert.equal(attributes.get(XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE), 'dark')
+  assert.equal(bootStyleRemoved, false)
+
+  listener(themeSnapshot('dark'))
+  assert.equal(attributes.get(XIAOHEI_APPEARANCE_ATTRIBUTE), 'dark')
+  assert.equal(attributes.has(XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE), false)
+  assert.equal(bootStyleRemoved, true)
 })
 
 test('scene uses asynchronously decoded key art and compositor-safe motion', () => {

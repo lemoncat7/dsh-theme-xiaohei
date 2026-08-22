@@ -1,4 +1,8 @@
 import type { ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
+import {
+  releaseXiaoheiBootAppearance,
+  XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE,
+} from './boot-appearance.js'
 
 export const XIAOHEI_APPEARANCE_ATTRIBUTE = 'data-xiaohei-appearance'
 
@@ -17,7 +21,14 @@ export function bindXiaoheiAppearance(
   if (doc === undefined) return () => {}
 
   const sync = (snapshot: ThemeSnapshot): void => {
-    doc.documentElement.setAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE, snapshot.active.colorScheme)
+    const bootAppearance = doc.documentElement.getAttribute(XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE)
+    if (bootAppearance === 'light' || bootAppearance === 'dark') {
+      doc.documentElement.setAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE, bootAppearance)
+      if (snapshot.active.colorScheme !== bootAppearance) return
+    } else {
+      doc.documentElement.setAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE, snapshot.active.colorScheme)
+    }
+    releaseXiaoheiBootAppearance(doc)
   }
   const off = ctx.on('theme/change', sync)
   sync(ctx.theme.getTheme())
