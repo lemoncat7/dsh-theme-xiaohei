@@ -4,6 +4,8 @@ dist/
 output/
 src/generated-keyart.ts
 src/generated-identity.ts
+src/generated-loading-assets.ts
+src/generated-conversation.ts
 *.tgz
 .DS_Store
 tmp/

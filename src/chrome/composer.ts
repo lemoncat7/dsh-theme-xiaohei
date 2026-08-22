@@ -4,19 +4,23 @@ export const XIAOHEI_COMPOSER_CSS = `
   position: relative;
   isolation: isolate;
   overflow: visible;
-  border: 1px solid var(--xiaohei-edge) !important;
-  border-radius: var(--xiaohei-radius-panel) !important;
+  border: 1px solid var(--xiaohei-layer-content-edge) !important;
+  border-radius: 8px !important;
   background:
-    linear-gradient(var(--xiaohei-frame-line-strong), var(--xiaohei-frame-line-strong)) 18px 0 / 46px 1px no-repeat,
-    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)) 0 15px / 1px 28px no-repeat,
-    linear-gradient(var(--xiaohei-frame-line), var(--xiaohei-frame-line)) 100% calc(100% - 15px) / 1px 28px no-repeat,
-    linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 32%),
-    var(--dsw-specific-input-major) !important;
+    linear-gradient(
+      90deg,
+      transparent,
+      transparent 18%,
+      var(--xiaohei-spirit-faint) 52%,
+      transparent
+    ) 18px 0 / 104px 1px no-repeat,
+    linear-gradient(180deg, var(--xiaohei-layer-content-highlight), transparent 34%),
+    var(--xiaohei-layer-content) !important;
   box-shadow:
     inset 0 0 0 1px var(--xiaohei-frame-inner),
     inset 0 1px rgb(255 255 255 / 7%),
-    inset 0 -1px var(--xiaohei-spirit-faint),
-    0 16px 38px var(--xiaohei-shadow) !important;
+    inset 0 -1px var(--xiaohei-layer-panel-edge),
+    0 8px 22px var(--xiaohei-shadow) !important;
   transition:
     border-color var(--xiaohei-motion-base) ease,
     box-shadow var(--xiaohei-motion-base) ease;
@@ -26,7 +30,7 @@ export const XIAOHEI_COMPOSER_CSS = `
   border-color: var(--xiaohei-edge-strong) !important;
   box-shadow:
     inset 0 1px rgb(255 255 255 / 9%),
-    0 16px 40px var(--xiaohei-shadow),
+    0 10px 26px var(--xiaohei-shadow),
     0 0 0 4px var(--xiaohei-focus-shadow) !important;
 }
 
@@ -131,5 +135,11 @@ export const XIAOHEI_COMPOSER_CSS = `
 #root button[aria-label='发送消息']:disabled::after,
 #root button[aria-label='Send message']:disabled::after {
   opacity: 0.12;
+}
+
+@media (max-width: 700px) {
+  #root [data-composer-card='true'] {
+    border-radius: 7px !important;
+  }
 }
 `

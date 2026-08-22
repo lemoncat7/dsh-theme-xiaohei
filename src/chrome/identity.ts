@@ -10,7 +10,6 @@ import {
  */
 export const XIAOHEI_IDENTITY_CSS = `
 :where([data-xiaohei-frame-ornament='spirit-knot'])::after,
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::after,
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::after,
 #root [data-composer-card='true']::before {
   content: '';
@@ -32,8 +31,7 @@ export const XIAOHEI_IDENTITY_CSS = `
   transition: transform 320ms var(--xiaohei-motion-curve), filter var(--xiaohei-motion-base) ease;
 }
 
-:where([data-xiaohei-frame-ornament='spirit-knot'])::after,
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::after {
+:where([data-xiaohei-frame-ornament='spirit-knot'])::after {
   background-image: url("${XIAOHEI_IDENTITY_CHARM}");
 }
 
@@ -52,11 +50,6 @@ export const XIAOHEI_IDENTITY_CSS = `
   right: 16px;
 }
 
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::after {
-  top: 7px;
-  right: 11px;
-}
-
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::after {
   top: 5px;
   right: 13px;
@@ -68,7 +61,6 @@ export const XIAOHEI_IDENTITY_CSS = `
 }
 
 :where([data-xiaohei-frame-ornament='spirit-knot']):hover::after,
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div:hover::after,
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action']):hover::after,
 #root [data-composer-card='true']:focus-within::before {
   filter: drop-shadow(0 4px 6px var(--xiaohei-focus-shadow));
@@ -77,7 +69,6 @@ export const XIAOHEI_IDENTITY_CSS = `
 
 @media (forced-colors: active) {
   :where([data-xiaohei-frame-ornament])::after,
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) [data-slot='sidebar.workspaces'] > div::after,
   #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:has([data-slot='sidebar.footer.action'])::after,
   #root [data-composer-card='true']::before {
     display: none;
