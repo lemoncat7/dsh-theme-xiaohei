@@ -5,17 +5,35 @@ export const XIAOHEI_WORKSPACE_CSS = `
   min-width: 0;
 }
 
-/* The section heading belongs to the sidebar, not to a nested card. */
+/* The module frame is stitched from the header and the actual tree fragments.
+ * It therefore ends at the last rendered Space instead of following the
+ * official flex seat to the bottom of the sidebar. */
 #root [data-slot='sidebar.workspaces'] > div > div:first-child {
-  min-height: 38px;
+  min-height: 36px;
+  margin: 2px 2px 0;
   color: var(--dsw-alias-label-secondary);
+  border-radius: calc(var(--xiaohei-radius-control) + 3px)
+    calc(var(--xiaohei-radius-control) + 3px) 0 0;
+  box-shadow:
+    inset 1px 0 var(--xiaohei-space-frame-edge),
+    inset -1px 0 var(--xiaohei-space-frame-edge),
+    inset 0 1px var(--xiaohei-space-frame-edge),
+    inset 0 2px var(--xiaohei-space-frame-highlight);
 }
 
 #root [data-slot='sidebar.workspaces'] > div > div:first-child > span:first-child {
   color: var(--xiaohei-workspace-label);
-  font-size: 12px;
+  font-size: 0;
   font-weight: 600;
-  letter-spacing: 0.006em;
+  letter-spacing: 0.01em;
+}
+
+/* Xiaohei's visual vocabulary calls an official Workspace a “Space”. The
+ * original node remains in place, preserving layout and accessibility data. */
+#root [data-slot='sidebar.workspaces'] > div > div:first-child > span:first-child::after {
+  content: '空间';
+  font-size: 12px;
+  letter-spacing: 0.01em;
 }
 
 #root [data-slot='sidebar.workspaces'] > div > div:first-child button {
@@ -40,8 +58,28 @@ export const XIAOHEI_WORKSPACE_CSS = `
 #root [data-slot='sidebar.workspaces'] [role='tree'] > :has([role='treeitem'][aria-expanded]) {
   position: relative;
   min-width: 0;
-  margin-block-end: 3px;
+  margin-block: 0;
+  margin-inline: 2px;
   overflow: visible;
+  box-shadow:
+    inset 1px 0 var(--xiaohei-space-frame-edge),
+    inset -1px 0 var(--xiaohei-space-frame-edge);
+}
+
+#root [data-slot='sidebar.workspaces'] [role='tree']
+  > :has(> [role='treeitem'][aria-expanded]):not(:first-child) {
+  padding-top: 2px;
+}
+
+#root [data-slot='sidebar.workspaces'] [role='tree']
+  > :has(> [role='treeitem'][aria-expanded]):last-child {
+  padding-bottom: 3px;
+  border-radius: 0 0 calc(var(--xiaohei-radius-control) + 3px)
+    calc(var(--xiaohei-radius-control) + 3px);
+  box-shadow:
+    inset 1px 0 var(--xiaohei-space-frame-edge),
+    inset -1px 0 var(--xiaohei-space-frame-edge),
+    inset 0 -1px var(--xiaohei-space-frame-edge);
 }
 
 #root [data-slot='sidebar.workspaces'] [role='tree'] > :has([role='treeitem'][aria-expanded='true'])::before {
@@ -62,6 +100,46 @@ export const XIAOHEI_WORKSPACE_CSS = `
   );
 }
 
+/* The current space owns one restrained spatial seam. It is an overlay inside
+ * the official tree bounds, so it cannot alter hit targets or list geometry. */
+#root [data-slot='sidebar.workspaces'] [role='tree']
+  > :has(> [role='treeitem'][aria-expanded])::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 5px;
+  right: 2px;
+  width: 16px;
+  height: 28px;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 100% 50%,
+      transparent 0 43%,
+      var(--xiaohei-workspace-rift-spirit) 45% 47%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 82% 50%,
+      transparent 0 33%,
+      var(--xiaohei-workspace-rift-edge) 36% 39%,
+      var(--xiaohei-workspace-rift-ink) 42% 48%,
+      transparent 52%
+    );
+  opacity: 0;
+  transform: scaleX(.72) scaleY(.62);
+  transform-origin: right center;
+  transition:
+    opacity var(--xiaohei-motion-fast) ease,
+    transform var(--xiaohei-motion-base) var(--xiaohei-motion-curve);
+}
+
+#root [data-slot='sidebar.workspaces'] [role='tree']
+  > :has(> [role='treeitem'][aria-expanded='true'])::after {
+  opacity: .92;
+  transform: scaleX(1) scaleY(1);
+}
+
 /* Folder and session rows share one rhythm. Native text, drag targets, action
  * buttons, selection and accessible state remain untouched. */
 #root [data-slot='sidebar.workspaces'] [role='treeitem'] {
@@ -70,6 +148,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
   box-sizing: border-box;
   border: 1px solid transparent;
   border-radius: var(--xiaohei-radius-control);
+  font-weight: 400;
   transition:
     color var(--xiaohei-motion-fast) ease,
     border-color var(--xiaohei-motion-base) var(--xiaohei-motion-curve),
@@ -83,9 +162,20 @@ export const XIAOHEI_WORKSPACE_CSS = `
 }
 
 /* The expanded folder is lifted only enough to read as the path owner. */
+#root [data-slot='sidebar.workspaces'] [role='tree']
+  > :has([role='treeitem'][aria-expanded])
+  > span:first-child
+  > [role='treeitem'][aria-expanded] {
+  width: calc(100% - 4px);
+}
+
 #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
   color: var(--xiaohei-sidebar-emphasis);
-  background: transparent;
+  border-color: var(--xiaohei-workspace-folder-edge);
+  background:
+    linear-gradient(90deg, var(--xiaohei-workspace-folder-open), transparent 88%);
+  box-shadow: inset 2px 0 var(--xiaohei-workspace-active-line);
+  font-weight: 500;
   transform: translateX(2px);
 }
 
@@ -95,7 +185,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
   > :has([role='treeitem'][aria-expanded])
   > span:not(:first-child)
   > [role='treeitem'] {
-  width: calc(100% - 12px);
+  width: calc(100% - 16px);
   margin-inline-start: 12px;
 }
 
@@ -105,7 +195,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
   color: var(--xiaohei-sidebar-emphasis);
   border-color: var(--xiaohei-workspace-row-active-edge);
   background: var(--xiaohei-workspace-row-active);
-  box-shadow: inset 2px 0 var(--xiaohei-workspace-active-line);
+  font-weight: 500;
 }
 
 #root [data-slot='sidebar.workspaces'] [role='treeitem'] button {
@@ -127,9 +217,20 @@ export const XIAOHEI_WORKSPACE_CSS = `
   #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
     transform: none;
   }
+
+  #root [data-slot='sidebar.workspaces'] [role='tree']
+    > :has(> [role='treeitem'][aria-expanded])::after {
+    transition-duration: 0ms !important;
+  }
 }
 
 @media (forced-colors: active) {
+  #root [data-slot='sidebar.workspaces'] > div > div:first-child,
+  #root [data-slot='sidebar.workspaces'] [role='tree']
+    > :has(> [role='treeitem'][aria-expanded]) {
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+
   #root [data-slot='sidebar.workspaces'] [role='tree'] > :has([role='treeitem'][aria-expanded='true'])::before {
     background: CanvasText;
   }
@@ -137,7 +238,16 @@ export const XIAOHEI_WORKSPACE_CSS = `
   #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
     border-color: Highlight;
     background: Canvas;
+  }
+
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
+    border-color: Highlight;
     box-shadow: inset 2px 0 Highlight;
+  }
+
+  #root [data-slot='sidebar.workspaces'] [role='tree']
+    > :has(> [role='treeitem'][aria-expanded])::after {
+    display: none;
   }
 }
 `
