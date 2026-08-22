@@ -10,6 +10,7 @@ export { XIAOHEI_PORTAL_CSS } from './chrome/portal.js'
 export { XIAOHEI_BLINK_CSS } from './chrome/blink.js'
 export { XIAOHEI_GAZE_CSS } from './chrome/gaze.js'
 export { XIAOHEI_REACTION_CSS } from './chrome/reactions.js'
+export { XIAOHEI_WORKSPACE_CSS } from './chrome/workspace.js'
 export { installXiaoheiGaze, XIAOHEI_GAZE_STYLE_ID } from './gaze.js'
 export {
   installXiaoheiHeixiuInteractions,

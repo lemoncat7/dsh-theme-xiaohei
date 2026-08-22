@@ -82,11 +82,14 @@ function runXiaoheiBootLoader(config: XiaoheiBootLoaderConfig): void {
       const runner = document.createElement('span')
       runner.className = 'xiaohei-plugin-loader__runner'
       runner.style.setProperty('--xiaohei-loader-index', String(index))
-      runner.style.setProperty('--xiaohei-loader-delay', `${index * 130}ms`)
-      runner.append(
+      runner.style.setProperty('--xiaohei-loader-delay', `${index * -700}ms`)
+      const sprite = document.createElement('span')
+      sprite.className = 'xiaohei-plugin-loader__sprite'
+      sprite.append(
         createImage(config.openImage, 'xiaohei-plugin-loader__runner-open'),
         createImage(config.blinkImage, 'xiaohei-plugin-loader__runner-blink'),
       )
+      runner.append(sprite)
       track.append(runner)
     }
     return track

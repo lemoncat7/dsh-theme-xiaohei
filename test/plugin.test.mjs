@@ -32,6 +32,7 @@ import { XIAOHEI_IDENTITY_CSS } from '../lib/chrome/identity.js'
 import { XIAOHEI_OVERLAY_CSS } from '../lib/chrome/overlays.js'
 import { XIAOHEI_CONVERSATION_SURFACE_CSS } from '../lib/chrome/conversation-surface.js'
 import { XIAOHEI_SIDEBAR_CSS } from '../lib/chrome/sidebar.js'
+import { XIAOHEI_WORKSPACE_CSS } from '../lib/chrome/workspace.js'
 import {
   installXiaoheiSidebarGlass,
   resolveXiaoheiSidebarGlassBounds,
@@ -215,9 +216,19 @@ test('plugin boot replaces only the normal spinner with compositor-safe hopping 
   assert.match(XIAOHEI_PLUGIN_LOADING_STYLE_ID, /plugin-loading-style$/)
   assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /xiaohei-plugin-loader-hop/)
   assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /--xiaohei-loader-index/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /xiaohei-plugin-loader-travel/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /translate3d\(12rem, -50%, 0\)/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /animation:[^;]*2\.8s linear infinite/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /xiaohei-plugin-loader__sprite/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /data-dsh-boot-spinner/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /\[data-dsh-boot-spinner\]::after[\s\S]*content:\s*none\s*!important/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /\[data-dsh-boot-spinner\]::after[\s\S]*background:\s*none\s*!important/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, />\s*:first-child:not\(\[data-dsh-boot-spinner\]\)[\s\S]*display:\s*none/)
+  assert.match(XIAOHEI_PLUGIN_LOADING_CSS, />\s*\[data-dsh-boot-spinner\] \+ \*/)
   assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /\[data-xiaohei-plugin-loading='true'\][\s\S]*position:\s*relative/)
   assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /xiaohei-plugin-loader__track[\s\S]*position:\s*absolute/)
-  assert.doesNotMatch(XIAOHEI_PLUGIN_LOADING_CSS, /\[data-xiaohei-plugin-loading='true'\][^{]*\{[^}]*display:\s*none/)
+  assert.match(injectXiaoheiBootLoader('<body></body>'), /setAttribute\('aria-hidden', 'true'\)/)
+  assert.match(injectXiaoheiBootLoader('<body></body>'), /index \* -700/)
   assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_PLUGIN_LOADING_CSS, /forced-colors:\s*active/)
   assert.doesNotMatch(
@@ -279,6 +290,7 @@ test('control skin composes isolated responsibility layers in a stable order', (
     XIAOHEI_FRAME_SYSTEM_CSS,
     XIAOHEI_IDENTITY_CSS,
     XIAOHEI_SIDEBAR_CSS,
+    XIAOHEI_WORKSPACE_CSS,
     XIAOHEI_CONVERSATION_CSS,
     XIAOHEI_CONVERSATION_SURFACE_CSS,
     XIAOHEI_CONVERSATION_MESSAGES_CSS,
@@ -336,20 +348,31 @@ test('distinct regional ornaments share one identity layer without decorative pl
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /@keyframes|animation:/)
 })
 
-test('workspace visuals stay native while the theme owns only sidebar material and colour', () => {
+test('workspace skin follows official tree state without replacing native behaviour', () => {
   assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar'/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /prefers-reduced-transparency:\s*reduce/)
   assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-emphasis:\s*#3F454C/)
   assert.doesNotMatch(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-(?:material|hover|control|emphasis):[^;]*(?:84 125 120|99 193 199|#547D78|#63C1C7)/)
-  assert.doesNotMatch(XIAOHEI_CHROME_CSS, /role='treeitem'|_folderActive|space-rift-mask/)
-  assert.doesNotMatch(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /data-slot='sidebar\.workspaces'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-expanded='true'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-selected='true'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /translateX\(2px\)/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-path/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /span:not\(:first-child\)/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /forced-colors:\s*active/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /_folderActive|space-rift-mask|data:image\/|workspace-frame/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /(?:onclick|addEventListener|MutationObserver)/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /isolation:\s*isolate/)
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /\[data-slot='sidebar\.workspaces'\] > div::(?:before|after)/)
 })
 
-test('expanded workspace frame cannot cross the sidebar content edge', () => {
+test('workspace path stays in the native sidebar flow without a group card', () => {
   assert.match(XIAOHEI_SIDEBAR_CSS, /xiaohei-sidebar-glass-width/)
-  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /right:\s*-24px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /left:\s*19px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 12px\)/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /box-shadow:[\s\S]{0,160}xiaohei-sidebar-shadow/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /right:\s*-[1-9][0-9]*px/)
 })
 
 test('sidebar material preserves the host geometry of fixed overlays', () => {
