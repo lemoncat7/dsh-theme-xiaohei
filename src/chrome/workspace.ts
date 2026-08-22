@@ -15,7 +15,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
   color: var(--xiaohei-workspace-label);
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.012em;
+  letter-spacing: 0.006em;
 }
 
 #root [data-slot='sidebar.workspaces'] > div > div:first-child button {
@@ -85,7 +85,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
 /* The expanded folder is lifted only enough to read as the path owner. */
 #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
   color: var(--xiaohei-sidebar-emphasis);
-  background: var(--xiaohei-workspace-folder-open);
+  background: transparent;
   transform: translateX(2px);
 }
 

@@ -337,13 +337,14 @@ test('public Xiaohei frame contract supports future feature plugins', () => {
   assert.match(XIAOHEI_IDENTITY_CSS, /forced-colors:\s*active/)
 })
 
-test('distinct regional ornaments share one identity layer without decorative plaques', () => {
+test('content ornaments share one identity layer without decorating navigation', () => {
   assert.match(XIAOHEI_IDENTITY_CHARM, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_SPACE_RING, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CAT_TAG, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CSS, /width:\s*30px;[\s\S]*height:\s*48px/)
   assert.match(XIAOHEI_IDENTITY_CSS, /background-image:\s*url\("data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDENTITY_CSS, /data-composer-card='true'\]:focus-within::before/)
+  assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /sidebar\.footer\.action/)
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /data-xiaohei-frame-label|content:\s*'(?:工作区|工具|会话)'/)
   assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /@keyframes|animation:/)
 })
@@ -423,7 +424,7 @@ test('sidebar glass is a scene-owned visual layer with observable native bounds'
   assert.match(XIAOHEI_SIDEBAR_GLASS_ID, /sidebar-glass$/)
   assert.deepEqual(
     resolveXiaoheiSidebarGlassBounds({ left: 0, top: 0, width: 280, height: 900 }),
-    { left: 7, top: 8, width: 268, height: 884 },
+    { left: 7, top: 8, width: 266, height: 884 },
   )
   const source = installXiaoheiSidebarGlass.toString()
   assert.match(source, /XIAOHEI_SCENE_LAYER_ID/)
@@ -703,9 +704,10 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--dawn/)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'/)
-  assert.match(XIAOHEI_SCENE_CSS, /brightness\(1\.2\) contrast\(1\.03\) saturate\(0\.96\)/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--night[\s\S]*filter:\s*none/)
+  assert.match(XIAOHEI_SCENE_CSS, /--xiaohei-sidebar-aura-opacity-min/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--dawn[\s\S]*filter:\s*none/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--dawn[\s\S]*object-position:\s*center bottom/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart\s*\{[\s\S]*object-position:\s*center bottom/)
   assert.match(XIAOHEI_SCENE_CSS, /max-aspect-ratio:\s*4\s*\/\s*3[\s\S]*object-position:\s*66% bottom/)
   assert.match(XIAOHEI_SCENE_CSS, /max-width:\s*768px[\s\S]*object-position:\s*62% bottom/)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'[\s\S]*background:\s*#E7ECEC/)
@@ -850,7 +852,7 @@ test('core light and dark opaque pairs meet WCAG AA contrast', () => {
   const pairs = []
   for (const [mode, tokens, background] of [
     ['dawn', XIAOHEI_DAWN_THEME.tokens, '#F4F7F3'],
-    ['night', XIAOHEI_NIGHT_THEME.tokens, '#081014'],
+    ['night', XIAOHEI_NIGHT_THEME.tokens, '#151C1E'],
   ]) {
     pairs.push(
       [`${mode} primary text`, tokens['--dsw-alias-label-primary'], background],

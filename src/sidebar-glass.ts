@@ -5,7 +5,7 @@ export const XIAOHEI_SIDEBAR_GLASS_ID = 'dsh-theme-xiaohei/sidebar-glass'
 
 const SIDEBAR_SHELL_SELECTOR = "#root [data-slot='sidebar'] > div"
 const HORIZONTAL_INSET_START = 7
-const HORIZONTAL_INSET_END = 5
+const HORIZONTAL_INSET_END = 7
 const VERTICAL_INSET = 8
 
 export interface XiaoheiSidebarGlassBounds {

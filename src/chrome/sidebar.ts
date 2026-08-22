@@ -23,6 +23,7 @@ export const XIAOHEI_SIDEBAR_CSS = `
 
 #dsh-theme-xiaohei\\/sidebar-glass {
   position: absolute;
+  box-sizing: border-box;
   left: var(--xiaohei-sidebar-glass-left, 7px);
   top: var(--xiaohei-sidebar-glass-top, 8px);
   width: var(--xiaohei-sidebar-glass-width, 0px);
@@ -31,12 +32,13 @@ export const XIAOHEI_SIDEBAR_CSS = `
   border: 1px solid var(--xiaohei-sidebar-glass-edge);
   border-radius: var(--xiaohei-radius-panel);
   background:
-    linear-gradient(145deg, var(--xiaohei-sidebar-glass-refraction), transparent 38%),
+    linear-gradient(180deg, var(--xiaohei-sidebar-glass-highlight), transparent 15%),
+    linear-gradient(145deg, var(--xiaohei-sidebar-glass-refraction), transparent 40%),
     var(--xiaohei-sidebar-glass-fill);
   box-shadow:
     inset 0 0 0 1px var(--xiaohei-sidebar-glass-inner-edge),
-    inset 0 1px 0 var(--xiaohei-sidebar-glass-highlight),
-    0 18px 40px -30px var(--xiaohei-sidebar-shadow);
+    0 16px 38px -28px var(--xiaohei-sidebar-shadow),
+    0 1px 2px -1px var(--xiaohei-sidebar-shadow);
   -webkit-backdrop-filter: blur(22px) saturate(108%);
   backdrop-filter: blur(22px) saturate(108%);
 }
@@ -62,6 +64,10 @@ export const XIAOHEI_SIDEBAR_CSS = `
   border-color: var(--xiaohei-sidebar-control-edge);
   background: var(--xiaohei-sidebar-control) !important;
   box-shadow: inset 0 1px 0 var(--xiaohei-sidebar-control-highlight);
+  justify-content: flex-start;
+  gap: 8px;
+  padding-inline: 12px;
+  text-align: start;
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']:hover,
@@ -73,6 +79,15 @@ export const XIAOHEI_SIDEBAR_CSS = `
 
 /* Footer occupants keep their native layout. Only their interaction surface
  * is shaded, avoiding a second card inside the sidebar glass. */
+#root [data-slot='sidebar'] > div:not([class*='_collapsed'])
+  > :has(> div > [data-slot='sidebar.footer.action']) {
+  border-radius: calc(var(--xiaohei-radius-control) + 2px);
+  background: var(--xiaohei-sidebar-control);
+  box-shadow:
+    inset 0 0 0 1px var(--xiaohei-sidebar-control-edge),
+    inset 0 1px 0 var(--xiaohei-sidebar-control-highlight);
+}
+
 #root [data-slot='sidebar.footer.action'] > button,
 #root [data-slot='sidebar.settings'] > button {
   color: var(--dsw-alias-label-secondary);
