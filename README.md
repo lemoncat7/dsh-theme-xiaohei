@@ -24,10 +24,10 @@
 
 ## 安装
 
-安装本地构建包：
+从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0-alpha.15` 的完整构建包后安装：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.6.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.15.tgz
 ```
 
 卸载：
