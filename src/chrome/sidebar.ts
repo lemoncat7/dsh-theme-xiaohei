@@ -102,6 +102,28 @@ export const XIAOHEI_SIDEBAR_CSS = `
     inset 0 -20px 30px -30px var(--xiaohei-sidebar-shadow);
 }
 
+/* Generated ink-space artwork supplies the complex Xiaohei identity. It is a
+ * paint-only layer inside the glass and never participates in host layout. */
+#dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left bottom;
+  pointer-events: none;
+  user-select: none;
+  opacity: var(--xiaohei-sidebar-atmosphere-opacity);
+  mix-blend-mode: screen;
+}
+
+html[data-xiaohei-appearance='light']
+  #dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
+  mix-blend-mode: multiply;
+}
+
 /* Header toggle and the primary action keep the host's dimensions. */
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child,
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],
@@ -244,6 +266,10 @@ export const XIAOHEI_SIDEBAR_CSS = `
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+
+  #dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
+    opacity: var(--xiaohei-sidebar-atmosphere-solid-opacity);
+  }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -259,6 +285,10 @@ export const XIAOHEI_SIDEBAR_CSS = `
     box-shadow: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+
+  #dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
+    display: none;
   }
 
   #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],

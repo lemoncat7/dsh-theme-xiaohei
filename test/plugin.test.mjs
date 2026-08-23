@@ -79,6 +79,11 @@ import {
   XIAOHEI_SIDEBAR_ROAMING_STYLE_ID,
 } from '../lib/sidebar-heixiu-roaming.js'
 import {
+  chooseXiaoheiSidebarEscapeDestination,
+  isXiaoheiSidebarPointerNear,
+  XIAOHEI_SIDEBAR_ESCAPE_CSS,
+} from '../lib/sidebar-heixiu-escape.js'
+import {
   installXiaoheiPortalTransit,
   resolveXiaoheiPortalInteraction,
   XIAOHEI_PORTAL_ACTIVITY_EVENT,
@@ -119,6 +124,10 @@ import {
   XIAOHEI_NIGHT_THEME,
   XIAOHEI_THEME_TOKEN_OVERRIDES,
 } from '../lib/theme.js'
+import {
+  XIAOHEI_SIDEBAR_ATMOSPHERE,
+  XIAOHEI_WORKSPACE_RIFT_COLOR,
+} from '../lib/generated-sidebar-assets.js'
 
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
 
@@ -288,6 +297,30 @@ test('sidebar Heixiu roaming chooses safe endpoints and scales duration with tra
   assert.equal(typeof installXiaoheiSidebarHeixiuRoaming(undefined), 'function')
 })
 
+test('sidebar Heixiu escapes nearby pointers through compositor-safe portals', () => {
+  assert.equal(isXiaoheiSidebarPointerNear({ x: 80, y: 80 }, { x: 100, y: 100 }), true)
+  assert.equal(isXiaoheiSidebarPointerNear({ x: 0, y: 0 }, { x: 100, y: 100 }), false)
+
+  const pointer = { x: 36, y: 90 }
+  const destination = chooseXiaoheiSidebarEscapeDestination({
+    width: 240,
+    height: 600,
+    creatureWidth: 40,
+    creatureHeight: 40,
+    controls: [{ left: 0, top: 0, right: 110, bottom: 600 }],
+  }, pointer, { x: 20, y: 70 }, () => .75)
+  assert.ok(destination.x >= 110)
+  assert.ok(Math.hypot(destination.x + 20 - pointer.x, destination.y + 20 - pointer.y) >= 138)
+
+  assert.match(XIAOHEI_SIDEBAR_ESCAPE_CSS, /sidebar-escape-portal--entry/)
+  assert.match(XIAOHEI_SIDEBAR_ESCAPE_CSS, /sidebar-escape-portal--exit/)
+  assert.match(XIAOHEI_SIDEBAR_ESCAPE_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.doesNotMatch(
+    extractKeyframes(XIAOHEI_SIDEBAR_ESCAPE_CSS),
+    /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/,
+  )
+})
+
 test('spirit control skin stays semantic, accessible, and lifecycle safe', () => {
   assert.match(XIAOHEI_CHROME_STYLE_ID, /chrome-style$/)
   assert.match(XIAOHEI_CHROME_CSS, /data-composer-card/)
@@ -390,12 +423,25 @@ test('workspace skin follows official tree state without replacing native behavi
   assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-selected='true'/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /translateX\(2px\)/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-path/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-rift-spirit/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /:has\(> \[role='treeitem'\]\[aria-expanded='true'\]\)::after/)
+  assert.match(XIAOHEI_WORKSPACE_RIFT_COLOR, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /background:[^;]*url\("data:image\/webp;base64,/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*20px;[\s\S]*height:\s*52px;[\s\S]*background:\s*center \/ contain no-repeat/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-rift-glow:/)
+  assert.doesNotMatch(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-rift-(?:ink|edge|spirit):/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-active-line-glow:/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /\[role='treeitem'\]\[aria-expanded\]::before/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /\[role='treeitem'\]\[aria-expanded\]::after/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /:not\(\[aria-expanded='true'\]\):hover::after\s*\{[\s\S]*?opacity:\s*\.26/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /\[aria-expanded='true'\]::before\s*\{[\s\S]*?opacity:\s*1/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /\[aria-expanded='true'\]::after\s*\{[\s\S]*?opacity:\s*\.98/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*20px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /height:\s*52px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /transform-origin:\s*right center/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /:has\([^)]*aria-expanded[^)]*\)::after/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /span:not\(:first-child\)/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /forced-colors:\s*active/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /_folderActive|space-rift-mask|data:image\/|workspace-frame/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /clip-path|_folderActive|space-rift-mask|workspace-frame/)
   assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /animation\s*:/)
   assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /(?:onclick|addEventListener|MutationObserver)/)
   const workspaceRootRule = XIAOHEI_WORKSPACE_CSS.match(
@@ -414,7 +460,7 @@ test('workspace skin follows official tree state without replacing native behavi
 test('workspace path stays in the native sidebar flow without a group card', () => {
   assert.match(XIAOHEI_SIDEBAR_CSS, /xiaohei-sidebar-glass-width/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /left:\s*19px/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /right:\s*2px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /right:\s*0/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 4px\)/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 16px\)/)
   assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /box-shadow:[\s\S]{0,160}xiaohei-sidebar-shadow/)
@@ -465,6 +511,9 @@ test('sidebar glass replaces the native opaque underlay instead of stacking over
   assert.match(XIAOHEI_SIDEBAR_CSS, /blur\(28px\)/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /sidebar-glass::before/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /sidebar-glass::after/)
+  assert.match(XIAOHEI_SIDEBAR_ATMOSPHERE, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /xiaohei-sidebar-atmosphere/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-atmosphere-opacity:/)
   assert.doesNotMatch(`${XIAOHEI_CHROME_TOKENS_CSS}\n${XIAOHEI_SIDEBAR_CSS}`, /--xiaohei-sidebar-material/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /div:has\(\[data-slot='sidebar\.footer\.action'\]\)/)
@@ -478,6 +527,8 @@ test('sidebar glass is a scene-owned visual layer with observable native bounds'
   )
   const source = installXiaoheiSidebarGlass.toString()
   assert.match(source, /XIAOHEI_SCENE_LAYER_ID/)
+  assert.match(source, /XIAOHEI_SIDEBAR_ATMOSPHERE/)
+  assert.match(source, /decoding = ['"]async['"]/)
   assert.match(source, /ResizeObserver/)
   assert.match(source, /MutationObserver/)
   assert.match(source, /resizeObserver\?\.disconnect\(\)/)
@@ -712,7 +763,7 @@ test('persisted Host appearance remains authoritative during ThemeRuntime hydrat
 })
 
 test('scene uses asynchronously decoded key art and compositor-safe motion', () => {
-  assert.equal(XIAOHEI_SCENE_PART_COUNT, 13)
+  assert.equal(XIAOHEI_SCENE_PART_COUNT, 8)
   assert.match(XIAOHEI_KEY_ART, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_NIGHT_KEY_ART, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_DAWN_KEY_ART, /^data:image\/webp;base64,/)
@@ -756,9 +807,7 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-waiting-ring/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-complete-spark/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-error-glow/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-sidebar-current/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-sidebar-spirit-one/)
-  assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion[\s\S]*xiaohei-scene__sidebar-spirit/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__sidebar-(?:aura|current|spirit)/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__heixiu-field/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__heixiu-body/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-heixiu-open/)
@@ -790,13 +839,12 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(installXiaoheiScene.toString(), /installHeixiuCompanions/)
   assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: true }]), false)
   assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: false }]), true)
-  assert.match(XIAOHEI_SCENE_CSS, /update:\s*slow/)
   assert.match(XIAOHEI_SCENE_CSS, /pointer-events:\s*none/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--dawn/)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--night[\s\S]*filter:\s*none/)
-  assert.match(XIAOHEI_SCENE_CSS, /--xiaohei-sidebar-aura-opacity-min/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /--xiaohei-sidebar-(?:aura|current)/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--dawn[\s\S]*filter:\s*none/)
   assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart\s*\{[\s\S]*object-position:\s*center bottom/)
   assert.match(XIAOHEI_SCENE_CSS, /max-aspect-ratio:\s*4\s*\/\s*3[\s\S]*object-position:\s*66% bottom/)

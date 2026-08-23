@@ -1,4 +1,5 @@
 import { XIAOHEI_SCENE_LAYER_ID } from './scene.js'
+import { XIAOHEI_SIDEBAR_ATMOSPHERE } from './generated-sidebar-assets.js'
 
 /** Stable id for the paint-only glass surface behind DSH's native sidebar. */
 export const XIAOHEI_SIDEBAR_GLASS_ID = 'dsh-theme-xiaohei/sidebar-glass'
@@ -81,6 +82,14 @@ export function installXiaoheiSidebarGlass(
       glass = doc.createElement('div')
       glass.id = XIAOHEI_SIDEBAR_GLASS_ID
       glass.setAttribute('aria-hidden', 'true')
+
+      const atmosphere = doc.createElement('img')
+      atmosphere.className = 'xiaohei-sidebar-atmosphere'
+      atmosphere.alt = ''
+      atmosphere.decoding = 'async'
+      atmosphere.fetchPriority = 'low'
+      atmosphere.src = XIAOHEI_SIDEBAR_ATMOSPHERE
+      glass.append(atmosphere)
 
       const veil = sceneLayer.querySelector('.xiaohei-scene__veil')
       sceneLayer.insertBefore(glass, veil?.nextSibling ?? sceneLayer.firstChild)

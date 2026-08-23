@@ -1,3 +1,8 @@
+import {
+  createXiaoheiSidebarEscapeController,
+  XIAOHEI_SIDEBAR_ESCAPE_CSS,
+} from './sidebar-heixiu-escape.js'
+
 export const XIAOHEI_SIDEBAR_ROAMING_STYLE_ID = 'dsh-theme-xiaohei/sidebar-heixiu-roaming-style'
 
 const SIDEBAR_HEIXIU_SELECTOR = '.xiaohei-scene__heixiu--sidebar'
@@ -124,7 +129,7 @@ export function installXiaoheiSidebarHeixiuRoaming(
   doc.getElementById(XIAOHEI_SIDEBAR_ROAMING_STYLE_ID)?.remove()
   const style = doc.createElement('style')
   style.id = XIAOHEI_SIDEBAR_ROAMING_STYLE_ID
-  style.textContent = XIAOHEI_SIDEBAR_ROAMING_CSS
+  style.textContent = `${XIAOHEI_SIDEBAR_ROAMING_CSS}\n${XIAOHEI_SIDEBAR_ESCAPE_CSS}`
   doc.head.append(style)
 
   const behaviorDisabled = (): boolean => (
@@ -170,6 +175,42 @@ export function installXiaoheiSidebarHeixiuRoaming(
     }
   }
 
+  const freezeAt = (position: Point): void => {
+    clearTimer()
+    current = position
+    creature?.setAttribute('data-xiaohei-sidebar-roaming-paused', 'true')
+    creature?.style.setProperty('--xiaohei-sidebar-heixiu-duration', '0ms')
+    creature?.style.setProperty('--xiaohei-sidebar-heixiu-x', `${position.x.toFixed(1)}px`)
+    creature?.style.setProperty('--xiaohei-sidebar-heixiu-y', `${position.y.toFixed(1)}px`)
+  }
+
+  const teleportTo = (destination: Point): void => {
+    current = destination
+    creature?.style.setProperty('--xiaohei-sidebar-heixiu-duration', '0ms')
+    creature?.style.setProperty('--xiaohei-sidebar-heixiu-x', `${destination.x.toFixed(1)}px`)
+    creature?.style.setProperty('--xiaohei-sidebar-heixiu-y', `${destination.y.toFixed(1)}px`)
+  }
+
+  const escapeController = createXiaoheiSidebarEscapeController({
+    doc,
+    isDisabled: behaviorDisabled,
+    resolveTarget: () => {
+      const space = measureSpace()
+      return creature === undefined || host === undefined || space === undefined
+        ? undefined
+        : { creature, host, space }
+    },
+    onFreeze: freezeAt,
+    onTeleport: teleportTo,
+    onComplete: () => {
+      if (behaviorDisabled()) pause()
+      else {
+        creature?.removeAttribute('data-xiaohei-sidebar-roaming-paused')
+        scheduleRoam(1400)
+      }
+    },
+  })
+
   const scheduleRoam = (delay = MIN_PAUSE_MS + Math.round(Math.random() * PAUSE_RANGE_MS)): void => {
     clearTimer()
     if (disposed || behaviorDisabled()) {
@@ -209,6 +250,7 @@ export function installXiaoheiSidebarHeixiuRoaming(
     const nextHostElement = nextHost instanceof win.HTMLElement ? nextHost : undefined
     if (nextCreature === creature && nextHostElement === host) return
 
+    escapeController.cancel()
     if (creature !== undefined) {
       creature.removeAttribute('data-xiaohei-sidebar-roaming')
       creature.removeAttribute('data-xiaohei-sidebar-roaming-paused')
@@ -242,6 +284,13 @@ export function installXiaoheiSidebarHeixiuRoaming(
   }
 
   const resumeOrPause = (): void => {
+    if (escapeController.isRunning()) {
+      if (behaviorDisabled()) {
+        escapeController.cancel()
+        pause()
+      }
+      return
+    }
     if (behaviorDisabled()) pause()
     else scheduleRoam(600)
   }
@@ -271,6 +320,7 @@ export function installXiaoheiSidebarHeixiuRoaming(
 
   return () => {
     disposed = true
+    escapeController.dispose()
     clearTimer()
     observer.disconnect()
     hostStateObserver.disconnect()

@@ -39,10 +39,6 @@ html[data-xiaohei-appearance='light'] body {
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
-  --xiaohei-sidebar-aura-opacity-min: 0.42;
-  --xiaohei-sidebar-aura-opacity-max: 0.58;
-  --xiaohei-sidebar-current-opacity-min: 0.18;
-  --xiaohei-sidebar-current-opacity-max: 0.42;
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -55,10 +51,6 @@ html[data-xiaohei-appearance='light'] body {
 }
 
 html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
-  --xiaohei-sidebar-aura-opacity-min: 0.58;
-  --xiaohei-sidebar-aura-opacity-max: 0.88;
-  --xiaohei-sidebar-current-opacity-min: 0.24;
-  --xiaohei-sidebar-current-opacity-max: 0.62;
   background: #E7ECEC;
 }
 
@@ -147,116 +139,6 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__spirit {
   right: 13%;
   bottom: 45%;
   animation: xiaohei-spirit-three 7.7s cubic-bezier(0.37, 0, 0.63, 1) -4.1s infinite;
-}
-
-.xiaohei-scene__sidebar-aura {
-  left: -7rem;
-  top: 30%;
-  width: 24rem;
-  height: 32rem;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 44% 52%,
-    rgb(102 210 193 / 60%) 0%,
-    rgb(51 137 130 / 25%) 34%,
-    transparent 70%
-  );
-  mix-blend-mode: screen;
-  opacity: var(--xiaohei-sidebar-aura-opacity-max);
-  will-change: opacity;
-  animation: xiaohei-sidebar-aura 9.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
-}
-
-.xiaohei-scene__sidebar-current {
-  left: 2.2rem;
-  top: 35%;
-  width: 11rem;
-  height: 21rem;
-  border-left: 1px solid rgb(144 224 210 / 72%);
-  border-radius: 56% 0 0 48%;
-  box-shadow: -0.45rem 0 1.4rem rgb(88 197 181 / 30%);
-  opacity: var(--xiaohei-sidebar-current-opacity-max);
-  transform: rotate(-9deg);
-  will-change: opacity;
-  -webkit-mask-image: linear-gradient(180deg, transparent, black 18%, black 76%, transparent);
-  mask-image: linear-gradient(180deg, transparent, black 18%, black 76%, transparent);
-  animation: xiaohei-sidebar-current 8.8s ease-in-out infinite;
-}
-
-.xiaohei-scene__sidebar-spirit {
-  width: 0.48rem;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #D0FFF4;
-  box-shadow:
-    0 0 0.55rem rgb(159 255 235 / 100%),
-    0 0 1.5rem rgb(70 217 194 / 90%);
-  mix-blend-mode: screen;
-  opacity: 0;
-  will-change: transform, opacity;
-}
-
-.xiaohei-scene__sidebar-spirit::after {
-  content: '';
-  position: absolute;
-  inset: -0.48rem;
-  border: 1px solid rgb(151 255 233 / 58%);
-  border-radius: 50%;
-  box-shadow: 0 0 0.8rem rgb(86 229 203 / 32%);
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-aura {
-  background: radial-gradient(
-    ellipse at 44% 52%,
-    rgb(75 139 116 / 24%) 0%,
-    rgb(91 137 117 / 11%) 34%,
-    transparent 70%
-  );
-  mix-blend-mode: multiply;
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-current {
-  border-left-color: rgb(49 114 94 / 46%);
-  box-shadow: -0.45rem 0 1.55rem rgb(75 130 108 / 18%);
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit {
-  background: #397E69;
-  box-shadow:
-    0 0 0.45rem rgb(67 126 106 / 52%),
-    0 0 1.2rem rgb(91 139 120 / 30%);
-  mix-blend-mode: multiply;
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__sidebar-spirit::after {
-  border-color: rgb(49 114 94 / 38%);
-  box-shadow: 0 0 0.7rem rgb(75 130 108 / 18%);
-}
-
-.xiaohei-scene__sidebar-spirit--one {
-  left: 4.1rem;
-  top: 46%;
-  animation: xiaohei-sidebar-spirit-one 10.5s ease-in-out infinite;
-}
-
-.xiaohei-scene__sidebar-spirit--two {
-  left: 9.2rem;
-  top: 57%;
-  width: 0.38rem;
-  animation: xiaohei-sidebar-spirit-two 12.4s ease-in-out -4.3s infinite;
-}
-
-.xiaohei-scene__sidebar-spirit--three {
-  left: 5.8rem;
-  top: 67%;
-  width: 0.32rem;
-  animation: xiaohei-sidebar-spirit-three 11.6s ease-in-out -7.1s infinite;
-}
-
-html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-aura,
-html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-current,
-html:has(#root [data-slot='sidebar'] > div[class*='_collapsed']) .xiaohei-scene__sidebar-spirit {
-  display: none;
 }
 
 .xiaohei-scene__mascot {
@@ -796,34 +678,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   44% { transform: translate3d(0.45rem, -1.2rem, 0) scale(0.96); opacity: 0.7; }
 }
 
-@keyframes xiaohei-sidebar-aura {
-  from { opacity: var(--xiaohei-sidebar-aura-opacity-min); }
-  to { opacity: var(--xiaohei-sidebar-aura-opacity-max); }
-}
-
-@keyframes xiaohei-sidebar-current {
-  0%, 100% { opacity: var(--xiaohei-sidebar-current-opacity-min); }
-  48% { opacity: var(--xiaohei-sidebar-current-opacity-max); }
-}
-
-@keyframes xiaohei-sidebar-spirit-one {
-  0%, 100% { transform: translate3d(0, 1.1rem, 0) scale(0.72); opacity: 0.12; }
-  42% { transform: translate3d(0.75rem, -1.15rem, 0) scale(1); opacity: 0.92; }
-  68% { transform: translate3d(0.35rem, -2.15rem, 0) scale(0.82); opacity: 0.38; }
-}
-
-@keyframes xiaohei-sidebar-spirit-two {
-  0%, 100% { transform: translate3d(0.6rem, 0.9rem, 0) scale(0.68); opacity: 0.08; }
-  46% { transform: translate3d(-0.55rem, -1.35rem, 0) scale(0.94); opacity: 0.78; }
-  72% { transform: translate3d(-0.15rem, -2.35rem, 0) scale(0.78); opacity: 0.3; }
-}
-
-@keyframes xiaohei-sidebar-spirit-three {
-  0%, 100% { transform: translate3d(-0.35rem, 0.8rem, 0) scale(0.66); opacity: 0.06; }
-  38% { transform: translate3d(0.5rem, -1.2rem, 0) scale(0.9); opacity: 0.68; }
-  66% { transform: translate3d(0.15rem, -2rem, 0) scale(0.74); opacity: 0.24; }
-}
-
 @keyframes xiaohei-thinking-dot {
   0%, 18%, 100% { opacity: 0.28; }
   42%, 62% { opacity: 0.96; }
@@ -901,18 +755,10 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
     width: 2.8rem;
   }
 
-  .xiaohei-scene__sidebar-aura,
-  .xiaohei-scene__sidebar-current,
-  .xiaohei-scene__sidebar-spirit {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .xiaohei-scene__spirit,
-  .xiaohei-scene__sidebar-aura,
-  .xiaohei-scene__sidebar-current,
-  .xiaohei-scene__sidebar-spirit,
   .xiaohei-scene__heixiu,
   .xiaohei-scene__heixiu-open,
   .xiaohei-scene__heixiu-blink,
@@ -923,27 +769,12 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   }
 
   .xiaohei-scene__spirit { display: none; }
-  .xiaohei-scene__sidebar-current,
-  .xiaohei-scene__sidebar-spirit { display: none; }
   .xiaohei-scene__state-fx { display: none; }
 
   html[data-xiaohei-state='thinking'] .xiaohei-scene__thinking-dot {
     animation: none;
     will-change: auto;
     opacity: 0.72;
-  }
-}
-
-@media (update: slow) {
-  .xiaohei-scene__sidebar-current,
-  .xiaohei-scene__sidebar-spirit {
-    display: none;
-  }
-
-  .xiaohei-scene__sidebar-aura {
-    animation: none;
-    will-change: auto;
-    opacity: var(--xiaohei-sidebar-aura-opacity-max);
   }
 }
 
@@ -955,9 +786,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   .xiaohei-scene__veil { background: rgb(5 12 15 / 48%); }
   html[data-xiaohei-appearance='light'] .xiaohei-scene__veil { background: rgb(235 240 235 / 58%); }
   .xiaohei-scene__spirit,
-  .xiaohei-scene__sidebar-aura,
-  .xiaohei-scene__sidebar-current,
-  .xiaohei-scene__sidebar-spirit,
   .xiaohei-scene__heixiu-field,
   .xiaohei-scene__heixiu--sidebar,
   .xiaohei-scene__heixiu--composer { display: none; }
@@ -984,11 +812,6 @@ const PARTS = [
   'xiaohei-scene__spirit xiaohei-scene__spirit--one',
   'xiaohei-scene__spirit xiaohei-scene__spirit--two',
   'xiaohei-scene__spirit xiaohei-scene__spirit--three',
-  'xiaohei-scene__sidebar-aura',
-  'xiaohei-scene__sidebar-current',
-  'xiaohei-scene__sidebar-spirit xiaohei-scene__sidebar-spirit--one',
-  'xiaohei-scene__sidebar-spirit xiaohei-scene__sidebar-spirit--two',
-  'xiaohei-scene__sidebar-spirit xiaohei-scene__sidebar-spirit--three',
   'xiaohei-scene__mascot',
   'xiaohei-scene__heixiu-field',
 ] as const
