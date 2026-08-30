@@ -2,11 +2,12 @@ import {
   createXiaoheiSidebarEscapeController,
   XIAOHEI_SIDEBAR_ESCAPE_CSS,
 } from './sidebar-heixiu-escape.js'
+import { subscribeXiaoheiHostDom } from './host-dom.js'
+import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
 
 export const XIAOHEI_SIDEBAR_ROAMING_STYLE_ID = 'dsh-theme-xiaohei/sidebar-heixiu-roaming-style'
 
 const SIDEBAR_HEIXIU_SELECTOR = '.xiaohei-scene__heixiu--sidebar'
-const SIDEBAR_SELECTOR = "[data-slot='sidebar']"
 const INTERACTIVE_SELECTOR = [
   'button',
   'a[href]',
@@ -246,7 +247,7 @@ export function installXiaoheiSidebarHeixiuRoaming(
     attachQueued = false
     if (disposed) return
     const nextCreature = doc.querySelector<HTMLElement>(SIDEBAR_HEIXIU_SELECTOR) ?? undefined
-    const nextHost = doc.querySelector<HTMLElement>(SIDEBAR_SELECTOR)?.firstElementChild
+    const nextHost = doc.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.sidebar)?.firstElementChild
     const nextHostElement = nextHost instanceof win.HTMLElement ? nextHost : undefined
     if (nextCreature === creature && nextHostElement === host) return
 
@@ -311,8 +312,7 @@ export function installXiaoheiSidebarHeixiuRoaming(
   }
 
   bind()
-  const observer = new win.MutationObserver(queueBind)
-  observer.observe(doc.body, { childList: true, subtree: true })
+  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, queueBind)
   doc.addEventListener('visibilitychange', resumeOrPause)
   win.addEventListener('resize', resumeOrPause, { passive: true })
   reducedMotion.addEventListener('change', resumeOrPause)
@@ -322,7 +322,7 @@ export function installXiaoheiSidebarHeixiuRoaming(
     disposed = true
     escapeController.dispose()
     clearTimer()
-    observer.disconnect()
+    unsubscribeHostDom()
     hostStateObserver.disconnect()
     hostResizeObserver?.disconnect()
     doc.removeEventListener('visibilitychange', resumeOrPause)

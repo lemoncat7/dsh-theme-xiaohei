@@ -26,6 +26,8 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
   #root [role='menu'],
   #root [role='listbox'] {
     background: var(--xiaohei-surface-raised) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 
   #root [data-composer-card='true']::before,
@@ -38,6 +40,11 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #root [role='dialog'],
+  #root [role='menu'],
+  #root [role='listbox'] {
+    background: var(--xiaohei-surface-raised) !important;
+  }
   #root [data-composer-card='true']::before,
   #root [role='dialog']::before {
     background: transparent;

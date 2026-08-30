@@ -1,8 +1,8 @@
 import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from './chrome/accessibility.js'
 import { XIAOHEI_COMPOSER_CSS } from './chrome/composer.js'
+import { XIAOHEI_CONTROL_PRIMITIVES_CSS } from './chrome/controls.js'
 import { XIAOHEI_CONVERSATION_CSS } from './chrome/conversation.js'
 import { XIAOHEI_CONVERSATION_MESSAGES_CSS } from './chrome/conversation-messages.js'
-import { XIAOHEI_CONVERSATION_SURFACE_CSS } from './chrome/conversation-surface.js'
 import { XIAOHEI_FRAME_SYSTEM_CSS } from './chrome/frames.js'
 import { XIAOHEI_IDENTITY_CSS } from './chrome/identity.js'
 import { XIAOHEI_OVERLAY_CSS } from './chrome/overlays.js'
@@ -19,12 +19,12 @@ export const XIAOHEI_CHROME_STYLE_ID = 'dsh-theme-xiaohei/chrome-style'
  */
 export const XIAOHEI_CHROME_CSS = [
   XIAOHEI_CHROME_TOKENS_CSS,
+  XIAOHEI_CONTROL_PRIMITIVES_CSS,
   XIAOHEI_FRAME_SYSTEM_CSS,
   XIAOHEI_IDENTITY_CSS,
   XIAOHEI_SIDEBAR_CSS,
   XIAOHEI_WORKSPACE_CSS,
   XIAOHEI_CONVERSATION_CSS,
-  XIAOHEI_CONVERSATION_SURFACE_CSS,
   XIAOHEI_CONVERSATION_MESSAGES_CSS,
   XIAOHEI_COMPOSER_CSS,
   XIAOHEI_OVERLAY_CSS,

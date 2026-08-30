@@ -61,8 +61,6 @@ html {
   --xiaohei-layer-panel: rgb(20 27 29 / 76%);
   --xiaohei-layer-panel-edge: rgb(124 189 192 / 12%);
   --xiaohei-layer-panel-shadow: rgb(0 5 8 / 26%);
-  --xiaohei-conversation-edge-veil: transparent;
-  --xiaohei-conversation-reading-veil: rgb(20 27 29 / 22%);
   --xiaohei-conversation-text: #E0E6E4;
   --xiaohei-conversation-meta: rgb(195 205 204 / 58%);
   --xiaohei-conversation-user: rgb(117 158 154 / 13%);
@@ -72,6 +70,15 @@ html {
   --xiaohei-layer-content-highlight: rgb(239 255 255 / 4%);
   --xiaohei-shadow: rgb(0 5 7 / 30%);
   --xiaohei-focus-shadow: rgb(105 182 186 / 14%);
+  --xiaohei-overlay-fill: rgb(22 29 31 / 88%);
+  --xiaohei-overlay-blur: 18px;
+  --xiaohei-overlay-saturation: 108%;
+  --xiaohei-plugin-workspace-fill: rgb(20 27 29 / 62%);
+  --xiaohei-plugin-pane-fill: rgb(27 35 37 / 46%);
+  --xiaohei-plugin-raised-fill: rgb(29 37 39 / 72%);
+  --xiaohei-plugin-control-fill: rgb(33 42 44 / 86%);
+  --xiaohei-plugin-surface-blur: 32px;
+  --xiaohei-plugin-surface-saturation: 112%;
   --xiaohei-radius-panel: 16px;
   --xiaohei-radius-control: 10px;
   --xiaohei-radius-small: 8px;
@@ -81,17 +88,17 @@ html {
 }
 
 html[data-xiaohei-appearance='light'] {
-  --xiaohei-ink: #242A28;
-  --xiaohei-ink-soft: rgb(36 42 40 / 72%);
+  --xiaohei-ink: #252C35;
+  --xiaohei-ink-soft: rgb(37 44 53 / 72%);
   --xiaohei-spirit: #547D78;
   --xiaohei-spirit-strong: #426A65;
   --xiaohei-spirit-soft: rgb(84 125 120 / 10%);
   --xiaohei-spirit-faint: rgb(84 125 120 / 5%);
   --xiaohei-edge: rgb(84 125 120 / 19%);
   --xiaohei-edge-strong: rgb(84 125 120 / 38%);
-  --xiaohei-surface: rgb(244 248 248 / 95%);
-  --xiaohei-surface-raised: rgb(249 251 251 / 97%);
-  --xiaohei-surface-muted: rgb(229 236 235 / 74%);
+  --xiaohei-surface: rgb(232 237 243 / 94%);
+  --xiaohei-surface-raised: rgb(241 244 248 / 97%);
+  --xiaohei-surface-muted: rgb(220 227 234 / 78%);
   --xiaohei-sidebar-emphasis: #3F454C;
   --xiaohei-sidebar-icon: rgb(48 54 61 / 68%);
   --xiaohei-sidebar-hover: rgb(48 54 61 / 6%);
@@ -132,25 +139,32 @@ html[data-xiaohei-appearance='light'] {
   --xiaohei-workspace-rift-glow: rgb(84 125 120 / 8%);
   --xiaohei-frame-line: rgb(84 125 120 / 22%);
   --xiaohei-frame-line-strong: rgb(84 125 120 / 43%);
-  --xiaohei-frame-fill: rgb(244 248 248 / 50%);
-  --xiaohei-frame-fill-raised: rgb(249 251 251 / 82%);
+  --xiaohei-frame-fill: rgb(224 231 238 / 58%);
+  --xiaohei-frame-fill-raised: rgb(238 242 247 / 88%);
   --xiaohei-frame-inner: rgb(255 255 255 / 72%);
   --xiaohei-frame-plaque: rgb(235 241 240 / 94%);
   --xiaohei-frame-label: #294A46;
   --xiaohei-frame-ink: #243633;
-  --xiaohei-layer-panel: rgb(244 248 248 / 70%);
+  --xiaohei-layer-panel: rgb(226 232 239 / 78%);
   --xiaohei-layer-panel-edge: rgb(84 125 120 / 11%);
   --xiaohei-layer-panel-shadow: rgb(43 55 51 / 8%);
-  --xiaohei-conversation-edge-veil: transparent;
-  --xiaohei-conversation-reading-veil: transparent;
-  --xiaohei-conversation-text: #353C39;
-  --xiaohei-conversation-meta: rgb(75 86 82 / 52%);
+  --xiaohei-conversation-text: #303842;
+  --xiaohei-conversation-meta: rgb(76 87 99 / 56%);
   --xiaohei-conversation-user: rgb(84 125 120 / 10%);
   --xiaohei-conversation-user-edge: rgb(84 125 120 / 10%);
-  --xiaohei-layer-content: rgb(249 252 252 / 92%);
+  --xiaohei-layer-content: rgb(238 242 247 / 94%);
   --xiaohei-layer-content-edge: rgb(84 125 120 / 20%);
   --xiaohei-layer-content-highlight: rgb(255 255 255 / 62%);
   --xiaohei-shadow: rgb(43 55 51 / 11%);
   --xiaohei-focus-shadow: rgb(84 125 120 / 13%);
+  --xiaohei-overlay-fill: rgb(232 237 243 / 90%);
+  --xiaohei-overlay-blur: 18px;
+  --xiaohei-overlay-saturation: 106%;
+  --xiaohei-plugin-workspace-fill: rgb(232 237 243 / 64%);
+  --xiaohei-plugin-pane-fill: rgb(238 242 247 / 46%);
+  --xiaohei-plugin-raised-fill: rgb(244 247 250 / 72%);
+  --xiaohei-plugin-control-fill: rgb(248 250 252 / 86%);
+  --xiaohei-plugin-surface-blur: 32px;
+  --xiaohei-plugin-surface-saturation: 106%;
 }
 `

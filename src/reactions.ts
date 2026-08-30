@@ -4,6 +4,7 @@ import {
   XIAOHEI_IDLE_TAIL,
 } from './generated-keyart.js'
 import { XIAOHEI_REACTION_CSS } from './chrome/reactions.js'
+import { subscribeXiaoheiHostDom } from './host-dom.js'
 import {
   XIAOHEI_HEIXIU_GREETING_EVENT,
   type XiaoheiHeixiuGreetingDetail,
@@ -382,8 +383,7 @@ export function installXiaoheiIdleReactions(
     syncPointerEarLoop()
   }
 
-  const mountObserver = new win.MutationObserver(attach)
-  mountObserver.observe(doc.body, { childList: true, subtree: true })
+  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, attach)
   const stateObserver = new win.MutationObserver(onStateChange)
   stateObserver.observe(doc.documentElement, {
     attributes: true,
@@ -407,7 +407,7 @@ export function installXiaoheiIdleReactions(
     clearHeixiuInteraction()
     clearTimer(idleTailTimer)
     clearReaction()
-    mountObserver.disconnect()
+    unsubscribeHostDom()
     stateObserver.disconnect()
     doc.removeEventListener('pointermove', onPointerMove)
     doc.removeEventListener('pointerleave', clearPointer)

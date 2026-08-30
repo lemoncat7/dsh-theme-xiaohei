@@ -1,10 +1,11 @@
 import { XIAOHEI_SCENE_LAYER_ID } from './scene.js'
 import { XIAOHEI_SIDEBAR_ATMOSPHERE } from './generated-sidebar-assets.js'
+import { subscribeXiaoheiHostDom } from './host-dom.js'
+import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
 
 /** Stable id for the paint-only glass surface behind DSH's native sidebar. */
 export const XIAOHEI_SIDEBAR_GLASS_ID = 'dsh-theme-xiaohei/sidebar-glass'
 
-const SIDEBAR_SHELL_SELECTOR = "#root [data-slot='sidebar'] > div"
 const HORIZONTAL_INSET_START = 7
 const HORIZONTAL_INSET_END = 7
 const VERTICAL_INSET = 8
@@ -63,7 +64,7 @@ export function installXiaoheiSidebarGlass(
     if (disposed) return
 
     const sceneLayer = doc.getElementById(XIAOHEI_SCENE_LAYER_ID)
-    const nextSidebarShell = doc.querySelector<HTMLElement>(SIDEBAR_SHELL_SELECTOR) ?? undefined
+    const nextSidebarShell = doc.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.sidebarShell) ?? undefined
 
     if (nextSidebarShell !== sidebarShell) {
       resizeObserver?.disconnect()
@@ -91,8 +92,8 @@ export function installXiaoheiSidebarGlass(
       atmosphere.src = XIAOHEI_SIDEBAR_ATMOSPHERE
       glass.append(atmosphere)
 
-      const veil = sceneLayer.querySelector('.xiaohei-scene__veil')
-      sceneLayer.insertBefore(glass, veil?.nextSibling ?? sceneLayer.firstChild)
+      const dawnKeyArt = sceneLayer.querySelector('.xiaohei-scene__keyart--dawn')
+      sceneLayer.insertBefore(glass, dawnKeyArt?.nextSibling ?? sceneLayer.firstChild)
     }
 
     applyBounds()
@@ -106,11 +107,7 @@ export function installXiaoheiSidebarGlass(
     })
   }
 
-  const mutationObserver = typeof win.MutationObserver === 'function'
-    ? new win.MutationObserver(scheduleReconcile)
-    : undefined
-
-  mutationObserver?.observe(doc.body, { childList: true, subtree: true })
+  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, scheduleReconcile)
   win.addEventListener('resize', scheduleReconcile, { passive: true })
   scheduleReconcile()
 
@@ -118,7 +115,7 @@ export function installXiaoheiSidebarGlass(
     disposed = true
     if (animationFrame !== undefined) win.cancelAnimationFrame(animationFrame)
     animationFrame = undefined
-    mutationObserver?.disconnect()
+    unsubscribeHostDom()
     resizeObserver?.disconnect()
     win.removeEventListener('resize', scheduleReconcile)
     glass?.remove()

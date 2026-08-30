@@ -2,6 +2,7 @@ import {
   XIAOHEI_LOADING_HEIXIU_BLINK,
   XIAOHEI_LOADING_HEIXIU_OPEN,
 } from './generated-loading-assets.js'
+import { subscribeXiaoheiHostDom } from './host-dom.js'
 
 export const XIAOHEI_PLUGIN_LOADING_STYLE_ID = 'dsh-theme-xiaohei/plugin-loading-style'
 export const XIAOHEI_PLUGIN_LOADING_CLASS = 'xiaohei-plugin-loader__track'
@@ -260,12 +261,11 @@ export function installXiaoheiPluginLoading(
   }
 
   sync()
-  const observer = new win.MutationObserver(queueSync)
-  observer.observe(doc.body, { childList: true, subtree: true })
+  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, queueSync)
 
   return () => {
     disposed = true
-    observer.disconnect()
+    unsubscribeHostDom()
     clearCard()
     style.remove()
   }

@@ -1,5 +1,6 @@
 import { XIAOHEI_BLINK_CSS } from './chrome/blink.js'
 import { XIAOHEI_HEIXIU_GREETING_EVENT } from './heixiu-interactions.js'
+import { subscribeXiaoheiHostDom } from './host-dom.js'
 
 export const XIAOHEI_BLINK_STYLE_ID = 'dsh-theme-xiaohei/blink-style'
 
@@ -99,8 +100,7 @@ export function installXiaoheiBlink(
   }
 
   const onEnvironmentChange = (): void => restartIdleBlink()
-  const mountObserver = new win.MutationObserver(attach)
-  mountObserver.observe(doc.body, { childList: true, subtree: true })
+  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, attach)
   const stateObserver = new win.MutationObserver(onEnvironmentChange)
   stateObserver.observe(doc.documentElement, {
     attributes: true,
@@ -114,7 +114,7 @@ export function installXiaoheiBlink(
   return () => {
     disposed = true
     clearTimers()
-    mountObserver.disconnect()
+    unsubscribeHostDom()
     stateObserver.disconnect()
     doc.removeEventListener('visibilitychange', onEnvironmentChange)
     doc.removeEventListener(XIAOHEI_HEIXIU_GREETING_EVENT, onHeixiuGreeting)

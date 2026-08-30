@@ -1,5 +1,11 @@
 /** Conversation-level controls and quiet Xiaohei identity details. */
 export const XIAOHEI_CONVERSATION_CSS = `
+/* Identify the resident conversation root through the host's stable scroll
+   contract, without coupling the theme to generated CSS-module class names. */
+#root :has(> [data-conversation-scroll]) {
+  background: transparent;
+}
+
 #root [data-slot='conversation.composer'] button[aria-label='选择工作区'],
 #root [data-slot='conversation.composer'] button[aria-label='Select workspace'] {
   min-height: 32px;

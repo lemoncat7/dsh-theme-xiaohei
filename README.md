@@ -18,16 +18,16 @@
 - 左侧栏直接共享全局水墨灵域，仅使用向主场景渐隐的半透明同色材质组织品牌区、主操作、工作区与底部工具，并以潦草竖写的生图“罗小黑”签名占据纵向留白，不新增无功能入口。
 - 工作区、工具区和会话输入区不使用额外铭牌，分别以猫尾灵珠、空间裂环、蓝嘴黑猫牌作为轻量识别点；工作区右侧额外内收，收起后所有工具回到同一条 35px 视觉轴。
 - 支持减少动态、增强对比度、强制颜色和打印模式降级。
-- 插件加载后自动启用 `xiaohei-night`，卸载后由 DSH 主题服务恢复系统主题。
+- 主题通过 DSH Theme Runtime 覆盖 Light / Dark / System 的语义 token，不替换用户的主题偏好；卸载后由 DSH 恢复原始 token。
 
 状态优先级为：错误 → 等待用户 → 工具执行 → 流式回答 → 聚能思考 → 完成 → 待机。完成态仅在同一个当前会话结束后显示约 1.6 秒。
 
 ## 安装
 
-从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0-alpha.15` 的完整构建包后安装：
+从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0-alpha.24` 的完整构建包后安装：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.15.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.24.tgz
 ```
 
 卸载：
@@ -51,6 +51,13 @@ npm run pack:check
 ```bash
 npm run pack:docker
 ```
+
+### 代码边界
+
+- `src/index.ts` 只负责 Host 首帧加载装饰，保持自包含并在客户端插件启动前运行。
+- `src/plugin.ts` 通过 DSH 生命周期装配主题 token、Chrome、场景与交互行为。
+- `src/chrome/` 管理控件和公共插件表面；`src/scene/` 分离场景样式与运行时 DOM。
+- `src/host-contract.ts` 集中维护宿主插槽选择器；`src/host-dom.ts` 为运行期模块共享一个批处理 DOM 观察器。
 
 ## 扩展工具接入主题
 

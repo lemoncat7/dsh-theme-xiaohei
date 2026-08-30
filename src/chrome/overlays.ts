@@ -3,9 +3,12 @@ export const XIAOHEI_OVERLAY_CSS = `
 #root [role='dialog'],
 #root [role='menu'],
 #root [role='listbox'] {
+  isolation: isolate;
   border: 1px solid var(--xiaohei-edge) !important;
   color: var(--dsw-alias-label-primary);
-  background-color: var(--xiaohei-surface) !important;
+  background-color: var(--xiaohei-overlay-fill) !important;
+  -webkit-backdrop-filter: blur(var(--xiaohei-overlay-blur)) saturate(var(--xiaohei-overlay-saturation));
+  backdrop-filter: blur(var(--xiaohei-overlay-blur)) saturate(var(--xiaohei-overlay-saturation));
   box-shadow:
     inset 0 0 0 1px var(--xiaohei-frame-inner),
     inset 0 1px rgb(255 255 255 / 7%),
@@ -32,6 +35,14 @@ export const XIAOHEI_OVERLAY_CSS = `
 #root [role='menu'],
 #root [role='listbox'] {
   border-radius: var(--xiaohei-radius-control) !important;
+}
+
+@media (max-width: 700px) {
+  #root [role='dialog'],
+  #root [role='menu'],
+  #root [role='listbox'] {
+    --xiaohei-overlay-blur: 12px;
+  }
 }
 
 #root [role='menuitem'],

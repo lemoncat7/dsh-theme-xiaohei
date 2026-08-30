@@ -1,5 +1,6 @@
 import { XIAOHEI_IDLE_EYE_BASE } from './generated-keyart.js'
 import { XIAOHEI_GAZE_CSS } from './chrome/gaze.js'
+import { subscribeXiaoheiHostDom } from './host-dom.js'
 import {
   XIAOHEI_PORTAL_ACTIVITY_EVENT,
   XIAOHEI_PORTAL_LAYER_ID,
@@ -135,8 +136,7 @@ export function installXiaoheiGaze(
   const onPreferenceChange = (): void => wake()
   const onStateChange = (): void => wake()
 
-  const mountObserver = new win.MutationObserver(attach)
-  mountObserver.observe(doc.body, { childList: true, subtree: true })
+  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, attach)
   const stateObserver = new win.MutationObserver(onStateChange)
   stateObserver.observe(doc.documentElement, {
     attributes: true,
@@ -154,7 +154,7 @@ export function installXiaoheiGaze(
   return () => {
     disposed = true
     if (frameId !== 0) win.cancelAnimationFrame(frameId)
-    mountObserver.disconnect()
+    unsubscribeHostDom()
     stateObserver.disconnect()
     doc.removeEventListener('pointermove', onPointerMove)
     doc.removeEventListener('pointerleave', clearPointer)

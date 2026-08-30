@@ -1,5 +1,7 @@
 import { XIAOHEI_HEIXIU_BLINK, XIAOHEI_HEIXIU_OPEN } from './generated-keyart.js'
 import { XIAOHEI_PORTAL_CSS } from './chrome/portal.js'
+import { subscribeXiaoheiHostDom } from './host-dom.js'
+import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
 import { XIAOHEI_SCENE_LAYER_ID } from './scene.js'
 
 export const XIAOHEI_PORTAL_STYLE_ID = 'dsh-theme-xiaohei/portal-style'
@@ -111,9 +113,9 @@ export function installXiaoheiPortalTransit(
   const mount = (): boolean => {
     const scene = doc.getElementById(XIAOHEI_SCENE_LAYER_ID)
     if (scene === null) return false
-    const veil = scene.querySelector('.xiaohei-scene__veil')
     if (layer.parentElement !== scene) {
-      scene.insertBefore(layer, veil?.nextSibling ?? null)
+      const dawnKeyArt = scene.querySelector('.xiaohei-scene__keyart--dawn')
+      scene.insertBefore(layer, dawnKeyArt?.nextSibling ?? scene.firstChild)
     }
     return true
   }
@@ -193,16 +195,15 @@ export function installXiaoheiPortalTransit(
     scheduleVisit(true)
   }
 
-  let mountObserver: MutationObserver | undefined
+  let unsubscribeHostDom = (): void => {}
   if (mount()) {
     startVisits()
   } else {
-    mountObserver = new MutationObserver(() => {
+    unsubscribeHostDom = subscribeXiaoheiHostDom(doc, () => {
       if (!mount()) return
-      mountObserver?.disconnect()
+      unsubscribeHostDom()
       startVisits()
     })
-    mountObserver.observe(doc.body, { childList: true })
   }
 
   return () => {
@@ -210,7 +211,7 @@ export function installXiaoheiPortalTransit(
     clearTimer(animationTimer)
     clearTimer(visitTimer)
     endInteraction()
-    mountObserver?.disconnect()
+    unsubscribeHostDom()
     if (layer.dataset.running === 'true') dispatchPortalActivity(doc, false)
     layer.remove()
     style.remove()
@@ -252,8 +253,8 @@ function choosePortalPoints(doc: Document): [PortalPoint, PortalPoint] {
   const win = doc.defaultView
   const width = Math.max(640, win?.innerWidth ?? 1280)
   const height = Math.max(480, win?.innerHeight ?? 720)
-  const sidebarRight = doc.querySelector("#root [data-slot='sidebar']")?.getBoundingClientRect().right ?? 0
-  const composerRect = doc.querySelector("#root [data-composer-card='true']")?.getBoundingClientRect()
+  const sidebarRight = doc.querySelector(XIAOHEI_HOST_SELECTORS.sidebar)?.getBoundingClientRect().right ?? 0
+  const composerRect = doc.querySelector(XIAOHEI_HOST_SELECTORS.composerCard)?.getBoundingClientRect()
   const contentLeft = composerRect?.left ?? width * 0.37
   const contentRight = composerRect?.right ?? width * 0.77
   const leftMin = Math.max(sidebarRight + 80, 90)
