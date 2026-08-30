@@ -1,4 +1,6 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import { bindXiaoheiAppearance } from './appearance.js'
 import { installXiaoheiBlink } from './blink.js'
 import { installXiaoheiChrome } from './chrome.js'
@@ -12,6 +14,7 @@ import { installXiaoheiSidebarGlass } from './sidebar-glass.js'
 import { installXiaoheiSidebarHeixiuRoaming } from './sidebar-heixiu-roaming.js'
 import { bindXiaoheiSessionState } from './state.js'
 import { XIAOHEI_THEME_TOKEN_OVERRIDES } from './theme.js'
+import { XiaoheiBrandName, XiaoheiMetallicBrandMark } from './metallic-brand-mark.js'
 
 /** Boot decoration has no service dependency; the full theme waits below. */
 export const inject: string[] = []
@@ -19,6 +22,28 @@ export const inject: string[] = []
 /** Shade DSH's native appearance modes without replacing its preference UI. */
 export function apply(ctx: ClientContext): void {
   ctx.effect(installXiaoheiPluginLoading, 'xiaohei-theme: replace plugin spinner with hopping Heixiu')
+  ctx.inject(['slots'], readyCtx => {
+    const disposeSidebarMark = readyCtx.slots.inject('sidebar.brand.mark', () => readyCtx.slots.register({
+      name: 'sidebar.brand.mark',
+      priority: -20,
+    }, XiaoheiMetallicBrandMark))
+    const disposeSidebarName = readyCtx.slots.inject('sidebar.brand.name', () => readyCtx.slots.register({
+      name: 'sidebar.brand.name',
+      priority: -20,
+    }, XiaoheiBrandName))
+    const disposeHeroMark = readyCtx.slots.inject(
+      'conversation.hero.brand.mark',
+      () => readyCtx.slots.register({
+        name: 'conversation.hero.brand.mark',
+        priority: -20,
+      }, XiaoheiMetallicBrandMark),
+    )
+    return () => {
+      disposeHeroMark()
+      disposeSidebarName()
+      disposeSidebarMark()
+    }
+  })
   ctx.inject(['theme', 'sessions'], (readyCtx) => installXiaoheiTheme(readyCtx))
 }
 

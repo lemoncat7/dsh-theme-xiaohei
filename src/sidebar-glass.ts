@@ -1,5 +1,4 @@
 import { XIAOHEI_SCENE_LAYER_ID } from './scene.js'
-import { XIAOHEI_SIDEBAR_ATMOSPHERE } from './generated-sidebar-assets.js'
 import { subscribeXiaoheiHostDom } from './host-dom.js'
 import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
 
@@ -9,6 +8,7 @@ export const XIAOHEI_SIDEBAR_GLASS_ID = 'dsh-theme-xiaohei/sidebar-glass'
 const HORIZONTAL_INSET_START = 7
 const HORIZONTAL_INSET_END = 7
 const VERTICAL_INSET = 8
+const RESIZE_SETTLE_MS = 120
 
 export interface XiaoheiSidebarGlassBounds {
   left: number
@@ -46,18 +46,54 @@ export function installXiaoheiSidebarGlass(
   let glass: HTMLElement | undefined
   let sidebarShell: HTMLElement | undefined
   let animationFrame: number | undefined
+  let resizeSettleTimer: number | undefined
+  let resizing = false
+  let appliedBounds: XiaoheiSidebarGlassBounds | undefined
+
+  const clearResizeState = (): void => {
+    if (resizeSettleTimer !== undefined) win.clearTimeout(resizeSettleTimer)
+    resizeSettleTimer = undefined
+    resizing = false
+    doc.documentElement.removeAttribute('data-xiaohei-sidebar-resizing')
+  }
+
+  const markResizeActivity = (): void => {
+    if (glass === undefined) return
+    if (!resizing) {
+      resizing = true
+      doc.documentElement.setAttribute('data-xiaohei-sidebar-resizing', '')
+    }
+    if (resizeSettleTimer !== undefined) win.clearTimeout(resizeSettleTimer)
+    resizeSettleTimer = win.setTimeout(() => {
+      resizeSettleTimer = undefined
+      resizing = false
+      doc.documentElement.removeAttribute('data-xiaohei-sidebar-resizing')
+    }, RESIZE_SETTLE_MS)
+  }
 
   const resizeObserver = typeof win.ResizeObserver === 'function'
-    ? new win.ResizeObserver(() => scheduleReconcile())
+    ? new win.ResizeObserver(() => {
+        markResizeActivity()
+        scheduleReconcile()
+      })
     : undefined
 
   const applyBounds = (): void => {
     if (glass === undefined || sidebarShell === undefined) return
     const bounds = resolveXiaoheiSidebarGlassBounds(sidebarShell.getBoundingClientRect())
-    glass.style.setProperty('--xiaohei-sidebar-glass-left', `${bounds.left}px`)
-    glass.style.setProperty('--xiaohei-sidebar-glass-top', `${bounds.top}px`)
-    glass.style.setProperty('--xiaohei-sidebar-glass-width', `${bounds.width}px`)
-    glass.style.setProperty('--xiaohei-sidebar-glass-height', `${bounds.height}px`)
+    if (bounds.left !== appliedBounds?.left) {
+      glass.style.setProperty('--xiaohei-sidebar-glass-left', `${bounds.left}px`)
+    }
+    if (bounds.top !== appliedBounds?.top) {
+      glass.style.setProperty('--xiaohei-sidebar-glass-top', `${bounds.top}px`)
+    }
+    if (bounds.width !== appliedBounds?.width) {
+      glass.style.setProperty('--xiaohei-sidebar-glass-width', `${bounds.width}px`)
+    }
+    if (bounds.height !== appliedBounds?.height) {
+      glass.style.setProperty('--xiaohei-sidebar-glass-height', `${bounds.height}px`)
+    }
+    appliedBounds = bounds
   }
 
   const reconcile = (): void => {
@@ -73,8 +109,10 @@ export function installXiaoheiSidebarGlass(
     }
 
     if (sceneLayer === null || sidebarShell === undefined) {
+      clearResizeState()
       glass?.remove()
       glass = undefined
+      appliedBounds = undefined
       return
     }
 
@@ -83,14 +121,7 @@ export function installXiaoheiSidebarGlass(
       glass = doc.createElement('div')
       glass.id = XIAOHEI_SIDEBAR_GLASS_ID
       glass.setAttribute('aria-hidden', 'true')
-
-      const atmosphere = doc.createElement('img')
-      atmosphere.className = 'xiaohei-sidebar-atmosphere'
-      atmosphere.alt = ''
-      atmosphere.decoding = 'async'
-      atmosphere.fetchPriority = 'low'
-      atmosphere.src = XIAOHEI_SIDEBAR_ATMOSPHERE
-      glass.append(atmosphere)
+      appliedBounds = undefined
 
       const dawnKeyArt = sceneLayer.querySelector('.xiaohei-scene__keyart--dawn')
       sceneLayer.insertBefore(glass, dawnKeyArt?.nextSibling ?? sceneLayer.firstChild)
@@ -118,8 +149,10 @@ export function installXiaoheiSidebarGlass(
     unsubscribeHostDom()
     resizeObserver?.disconnect()
     win.removeEventListener('resize', scheduleReconcile)
+    clearResizeState()
     glass?.remove()
     glass = undefined
     sidebarShell = undefined
+    appliedBounds = undefined
   }
 }

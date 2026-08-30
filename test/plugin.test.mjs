@@ -111,6 +111,7 @@ import {
   XIAOHEI_WAITING,
 } from '../lib/generated-keyart.js'
 import {
+  XIAOHEI_BRAND_AVATAR,
   XIAOHEI_IDENTITY_CAT_TAG,
   XIAOHEI_IDENTITY_CHARM,
   XIAOHEI_IDENTITY_SPACE_RING,
@@ -125,10 +126,6 @@ import {
   XIAOHEI_NIGHT_THEME,
   XIAOHEI_THEME_TOKEN_OVERRIDES,
 } from '../lib/theme.js'
-import {
-  XIAOHEI_SIDEBAR_ATMOSPHERE,
-  XIAOHEI_WORKSPACE_RIFT_COLOR,
-} from '../lib/generated-sidebar-assets.js'
 
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
 
@@ -208,6 +205,16 @@ test('shades DSH native palettes without forcing a theme preference', () => {
       calls.push(['inject', services])
       setup(ctx)
     },
+    slots: {
+      inject(name, setup) {
+        calls.push(['slotInject', name])
+        return setup()
+      },
+      register(config) {
+        calls.push(['slotRegister', config])
+        return () => calls.push(['slotDispose'])
+      },
+    },
     theme: {
       overrideTokens(source, tokens) {
         calls.push(['overrideTokens', source, tokens])
@@ -219,14 +226,30 @@ test('shades DSH native palettes without forcing a theme preference', () => {
   apply(ctx)
 
   assert.deepEqual(calls[0], ['effect', 'xiaohei-theme: replace plugin spinner with hopping Heixiu'])
-  assert.deepEqual(calls[1], ['inject', ['theme', 'sessions']])
-  assert.equal(calls[2][0], 'effect')
-  assert.deepEqual(calls[3], [
+  assert.deepEqual(calls[1], ['inject', ['slots']])
+  assert.deepEqual(calls[2], ['slotInject', 'sidebar.brand.mark'])
+  assert.deepEqual(calls[3], ['slotRegister', {
+    name: 'sidebar.brand.mark',
+    priority: -20,
+  }])
+  assert.deepEqual(calls[4], ['slotInject', 'sidebar.brand.name'])
+  assert.deepEqual(calls[5], ['slotRegister', {
+    name: 'sidebar.brand.name',
+    priority: -20,
+  }])
+  assert.deepEqual(calls[6], ['slotInject', 'conversation.hero.brand.mark'])
+  assert.deepEqual(calls[7], ['slotRegister', {
+    name: 'conversation.hero.brand.mark',
+    priority: -20,
+  }])
+  assert.deepEqual(calls[8], ['inject', ['theme', 'sessions']])
+  assert.equal(calls[9][0], 'effect')
+  assert.deepEqual(calls[10], [
     'overrideTokens',
     '@lemoncat7/dsh-theme-xiaohei',
     XIAOHEI_THEME_TOKEN_OVERRIDES,
   ])
-  assert.deepEqual(calls.slice(4).map(call => call[1]), [
+  assert.deepEqual(calls.slice(11).map(call => call[1]), [
     'xiaohei-theme: follow resolved appearance',
     'xiaohei-theme: install spirit control skin',
     'xiaohei-theme: install moonlit forest scene',
@@ -243,6 +266,25 @@ test('shades DSH native palettes without forcing a theme preference', () => {
 
   for (const cleanup of cleanups.reverse()) cleanup()
   assert.deepEqual(calls.at(-1), ['dispose'])
+})
+
+test('Xiaohei brand mark replaces the official slot with lifecycle-safe MetallicPaint', () => {
+  assert.ok(packageJson.dsh.client.inject.includes('@deepseek-ai/dsh-client-ui-sidebar'))
+  assert.ok(packageJson.dsh.client.inject.includes('@deepseek-ai/dsh-client-ui-conversation'))
+  assert.match(XIAOHEI_BRAND_AVATAR, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /\.xiaohei-brand-mark/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /data-metallic-ready='true'/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /万物有灵，自在同行/)
+
+  const source = readFileSync(new URL('../src/metallic-brand-mark.tsx', import.meta.url), 'utf8')
+  assert.match(source, /罗小黑 · 妖灵会馆/)
+  assert.match(source, /getContext\('webgl2'/)
+  assert.match(source, /powerPreference:\s*'low-power'/)
+  assert.match(source, /IntersectionObserver/)
+  assert.match(source, /prefers-reduced-motion:\s*reduce/)
+  assert.match(source, /cancelAnimationFrame/)
+  assert.match(source, /deleteTexture/)
+  assert.doesNotMatch(source, /1000\s*\*\s*devicePixelRatio/)
 })
 
 test('plugin boot replaces only the normal spinner with compositor-safe hopping Heixiu', () => {
@@ -429,23 +471,20 @@ test('workspace skin follows official tree state without replacing native behavi
   assert.match(XIAOHEI_WORKSPACE_CSS, /:last-child/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-expanded='true'/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-selected='true'/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /translateX\(2px\)/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-space-frame-fill/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-path/)
-  assert.match(XIAOHEI_WORKSPACE_RIFT_COLOR, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /background:[^;]*url\("data:image\/webp;base64,/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*20px;[\s\S]*height:\s*52px;[\s\S]*background:\s*center \/ contain no-repeat/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-rift-glow:/)
-  assert.doesNotMatch(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-rift-(?:ink|edge|spirit):/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-active-line-glow:/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /\[role='treeitem'\]\[aria-expanded\]::before/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /\[role='treeitem'\]\[aria-expanded\]::after/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /:not\(\[aria-expanded='true'\]\):hover::after\s*\{[\s\S]*?opacity:\s*\.26/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /\[aria-expanded='true'\]::before\s*\{[\s\S]*?opacity:\s*1/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /\[aria-expanded='true'\]::after\s*\{[\s\S]*?opacity:\s*\.98/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*20px/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /height:\s*52px/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /transform-origin:\s*right center/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /:has\([^)]*aria-expanded[^)]*\)::after/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-row-highlight/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-folder-shadow/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /blur\(var\(--xiaohei-workspace-glass-blur\)\)/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /prefers-reduced-transparency:\s*reduce/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /@supports not \(\(backdrop-filter:/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-active-solid:/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /translateY\(-1px\)/)
+  assert.doesNotMatch(
+    `${XIAOHEI_CHROME_TOKENS_CSS}\n${XIAOHEI_WORKSPACE_CSS}`,
+    /workspace-rift|WORKSPACE_RIFT|workspace-active-line|data:image\/webp;base64|drop-shadow/,
+  )
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /\[role='treeitem'\]\[aria-expanded\]::(?:before|after)/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /span:not\(:first-child\)/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /prefers-reduced-motion:\s*reduce/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /forced-colors:\s*active/)
@@ -468,7 +507,6 @@ test('workspace skin follows official tree state without replacing native behavi
 test('workspace path stays in the native sidebar flow without a group card', () => {
   assert.match(XIAOHEI_SIDEBAR_CSS, /xiaohei-sidebar-glass-width/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /left:\s*19px/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /right:\s*0/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 4px\)/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 16px\)/)
   assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /box-shadow:[\s\S]{0,160}xiaohei-sidebar-shadow/)
@@ -493,9 +531,9 @@ test('sidebar material preserves the host geometry of fixed overlays', () => {
     sidebarShellRule,
     /\b(?:backdrop-filter|filter|transform|perspective|contain)\s*:/,
   )
-  assert.match(sidebarMaterialRule, /blur\(28px\)/)
+  assert.match(sidebarMaterialRule, /blur\(var\(--xiaohei-sidebar-glass-blur\)\)/)
   assert.match(sidebarMaterialRule, /saturate\(var\(--xiaohei-sidebar-glass-saturation\)\)/)
-  assert.match(sidebarMaterialRule, /border-radius:\s*var\(--xiaohei-radius-panel\)/)
+  assert.match(sidebarMaterialRule, /border-radius:\s*var\(--xiaohei-sidebar-glass-radius\)/)
   assert.doesNotMatch(sidebarMaterialRule, /(?:z-index|isolation|transform|perspective|contain)\s*:/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /> div > \* \{[\s\S]*z-index:/)
   assert.doesNotMatch(
@@ -504,7 +542,7 @@ test('sidebar material preserves the host geometry of fixed overlays', () => {
   )
 })
 
-test('sidebar glass replaces the native opaque underlay instead of stacking over it', () => {
+test('sidebar glass uses the quiet Realm material without stacking over the host', () => {
   assert.equal(XIAOHEI_DAWN_THEME.tokens['--dsw-specific-sidebar-fill'], 'transparent')
   assert.equal(XIAOHEI_NIGHT_THEME.tokens['--dsw-specific-sidebar-fill'], 'transparent')
   assert.match(XIAOHEI_SIDEBAR_CSS, /:has\(> \[data-slot='sidebar'\]\)/)
@@ -512,16 +550,17 @@ test('sidebar glass replaces the native opaque underlay instead of stacking over
   assert.match(XIAOHEI_SIDEBAR_CSS, /#dsh-theme-xiaohei\\\/sidebar-glass/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /var\(--xiaohei-sidebar-glass-fill\)/)
   assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-solid:/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-outline:/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-saturation:\s*76%/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-fill:\s*rgb\(236 240 242 \/ 18%\)/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-saturation:\s*102%/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-blur:\s*18px/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-radius:\s*18px/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /--xiaohei-sidebar-glass-edge/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /--xiaohei-sidebar-glass-highlight/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /blur\(28px\)/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /sidebar-glass::before/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /blur\(var\(--xiaohei-sidebar-glass-blur\)\)/)
+  assert.match(XIAOHEI_SIDEBAR_CSS, /data-xiaohei-sidebar-resizing[\s\S]*backdrop-filter:\s*none/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /sidebar-glass::before/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /sidebar-glass::after/)
-  assert.match(XIAOHEI_SIDEBAR_ATMOSPHERE, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /xiaohei-sidebar-atmosphere/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-atmosphere-opacity:/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /xiaohei-sidebar-atmosphere/)
   assert.doesNotMatch(`${XIAOHEI_CHROME_TOKENS_CSS}\n${XIAOHEI_SIDEBAR_CSS}`, /--xiaohei-sidebar-material/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /div:has\(\[data-slot='sidebar\.footer\.action'\]\)/)
@@ -535,9 +574,12 @@ test('sidebar glass is a scene-owned visual layer with observable native bounds'
   )
   const source = installXiaoheiSidebarGlass.toString()
   assert.match(source, /XIAOHEI_SCENE_LAYER_ID/)
-  assert.match(source, /XIAOHEI_SIDEBAR_ATMOSPHERE/)
-  assert.match(source, /decoding = ['"]async['"]/)
+  assert.doesNotMatch(source, /XIAOHEI_SIDEBAR_ATMOSPHERE|createElement\(['"]img['"]\)/)
   assert.match(source, /ResizeObserver/)
+  assert.match(source, /data-xiaohei-sidebar-resizing/)
+  assert.match(source, /RESIZE_SETTLE_MS/)
+  assert.match(source, /clearTimeout/)
+  assert.match(source, /bounds\.width !== appliedBounds\?\.width/)
   assert.match(source, /subscribeXiaoheiHostDom/)
   assert.match(source, /resizeObserver\?\.disconnect\(\)/)
   assert.match(source, /unsubscribeHostDom\(\)/)

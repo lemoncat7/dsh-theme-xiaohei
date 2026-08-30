@@ -1,5 +1,3 @@
-import { XIAOHEI_WORKSPACE_RIFT_COLOR } from '../generated-sidebar-assets.js'
-
 /** Visual hierarchy for DSH's native workspace tree. No behaviour is replaced. */
 export const XIAOHEI_WORKSPACE_CSS = `
 /* Keep the official workspace root in charge of scrolling and sizing. */
@@ -7,15 +5,14 @@ export const XIAOHEI_WORKSPACE_CSS = `
   min-width: 0;
 }
 
-/* The module frame is stitched from the header and the actual tree fragments.
- * It therefore ends at the last rendered Space instead of following the
- * official flex seat to the bottom of the sidebar. */
+/* Header and tree fragments form one quiet inset surface. */
 #root [data-slot='sidebar.workspaces'] > div > div:first-child {
   min-height: 36px;
   margin: 2px 2px 0;
   color: var(--dsw-alias-label-secondary);
   border-radius: calc(var(--xiaohei-radius-control) + 3px)
     calc(var(--xiaohei-radius-control) + 3px) 0 0;
+  background: var(--xiaohei-space-frame-fill);
   box-shadow:
     inset 1px 0 var(--xiaohei-space-frame-edge),
     inset -1px 0 var(--xiaohei-space-frame-edge),
@@ -45,24 +42,27 @@ export const XIAOHEI_WORKSPACE_CSS = `
   transition:
     color var(--xiaohei-motion-fast) ease,
     border-color var(--xiaohei-motion-fast) ease,
-    background-color var(--xiaohei-motion-fast) ease;
+    background-color var(--xiaohei-motion-fast) ease,
+    box-shadow var(--xiaohei-motion-fast) ease;
 }
 
 #root [data-slot='sidebar.workspaces'] > div > div:first-child button:hover,
 #root [data-slot='sidebar.workspaces'] > div > div:first-child button[aria-expanded='true'] {
   color: var(--xiaohei-sidebar-emphasis);
   border-color: var(--xiaohei-workspace-control-edge);
-  background: var(--xiaohei-workspace-row-hover);
+  background: var(--xiaohei-workspace-action-hover);
+  box-shadow: inset 0 1px var(--xiaohei-workspace-row-highlight);
 }
 
-/* A workspace group stays flat. When open, a quiet ink path links the folder
- * to its sessions without changing the official tree geometry. */
+/* Workspace groups remain in the native tree flow. Their stitched surface
+ * stops at the last rendered Space rather than filling the sidebar. */
 #root [data-slot='sidebar.workspaces'] [role='tree'] > :has([role='treeitem'][aria-expanded]) {
   position: relative;
   min-width: 0;
   margin-block: 0;
   margin-inline: 2px;
   overflow: visible;
+  background: var(--xiaohei-space-frame-fill);
   box-shadow:
     inset 1px 0 var(--xiaohei-space-frame-edge),
     inset -1px 0 var(--xiaohei-space-frame-edge);
@@ -84,6 +84,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
     inset 0 -1px var(--xiaohei-space-frame-edge);
 }
 
+/* A neutral hairline quietly links an open folder with its sessions. */
 #root [data-slot='sidebar.workspaces'] [role='tree'] > :has([role='treeitem'][aria-expanded='true'])::before {
   content: '';
   position: absolute;
@@ -96,111 +97,63 @@ export const XIAOHEI_WORKSPACE_CSS = `
   background: linear-gradient(
     to bottom,
     transparent,
-    var(--xiaohei-workspace-path) 12%,
-    var(--xiaohei-workspace-path-active) 72%,
+    var(--xiaohei-workspace-path) 14%,
+    var(--xiaohei-workspace-path) 80%,
     transparent
   );
 }
 
-/* Folder and session rows share one rhythm. Native text, drag targets, action
- * buttons, selection and accessible state remain untouched. */
+/* Folder and session rows share one material language. Native text, drag
+ * targets, actions, selection and accessible state remain untouched. */
 #root [data-slot='sidebar.workspaces'] [role='treeitem'] {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
   border: 1px solid transparent;
   border-radius: var(--xiaohei-radius-control);
+  background: transparent;
+  box-shadow: none;
   font-weight: 400;
   transition:
     color var(--xiaohei-motion-fast) ease,
     border-color var(--xiaohei-motion-base) var(--xiaohei-motion-curve),
     background-color var(--xiaohei-motion-base) var(--xiaohei-motion-curve),
-    transform var(--xiaohei-motion-base) var(--xiaohei-motion-curve);
-}
-
-/* The folder row owns both spatial overlays. They follow the host's native
- * aria-expanded state and never participate in layout or hit testing. */
-#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded] {
-  overflow: visible;
-}
-
-#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded] > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* A narrow spirit mark identifies only the open Space. */
-#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]::before {
-  content: '';
-  position: absolute;
-  z-index: 2;
-  left: -1px;
-  top: 9px;
-  bottom: 9px;
-  width: 3px;
-  border-radius: 999px;
-  pointer-events: none;
-  background: var(--xiaohei-workspace-active-line);
-  box-shadow:
-    0 0 6px var(--xiaohei-workspace-active-line-glow),
-    0 0 14px color-mix(
-      in srgb,
-      var(--xiaohei-workspace-active-line-glow) 30%,
-      transparent
-    );
-  opacity: 0;
-  transform: scaleY(.72);
-  transition:
-    opacity var(--xiaohei-motion-fast) ease,
-    transform var(--xiaohei-motion-base) var(--xiaohei-motion-curve);
-}
-
-/* The supplied vertical artwork owns the rift's ink, jade depth and feathered
- * edge. It keeps its original narrow ratio instead of widening across the row. */
-#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]::after {
-  content: '';
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  top: 50%;
-  width: 20px;
-  height: 52px;
-  pointer-events: none;
-  background: center / contain no-repeat url("${XIAOHEI_WORKSPACE_RIFT_COLOR}");
-  filter:
-    saturate(.72)
-    contrast(1.04)
-    drop-shadow(0 0 2px var(--xiaohei-workspace-rift-glow));
-  opacity: 0;
-  transform: translateY(-50%) scaleX(.58) scaleY(.9);
-  transform-origin: right center;
-  transition:
-    opacity var(--xiaohei-motion-fast) ease,
+    box-shadow var(--xiaohei-motion-base) var(--xiaohei-motion-curve),
     transform var(--xiaohei-motion-base) var(--xiaohei-motion-curve);
 }
 
 #root [data-slot='sidebar.workspaces'] [role='treeitem']:hover {
   color: var(--xiaohei-sidebar-emphasis);
+  border-color: var(--xiaohei-workspace-row-hover-edge);
   background: var(--xiaohei-workspace-row-hover);
+  box-shadow: inset 0 1px var(--xiaohei-workspace-row-highlight);
 }
 
-#root [data-slot='sidebar.workspaces']
-  [role='treeitem'][aria-expanded]:not([aria-expanded='true']):hover {
-  background: radial-gradient(
-    circle at 20% 50%,
-    var(--xiaohei-workspace-folder-open),
-    var(--xiaohei-workspace-row-hover) 55%,
-    transparent 85%
-  );
+/* Only interactive and selected rows own a local glass pass. Keeping default
+ * rows filter-free avoids a permanent compositor layer for every session. */
+#root [data-slot='sidebar.workspaces'] [role='treeitem']:hover,
+#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'],
+#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
+  -webkit-backdrop-filter:
+    blur(var(--xiaohei-workspace-glass-blur))
+    saturate(var(--xiaohei-workspace-glass-saturation));
+  backdrop-filter:
+    blur(var(--xiaohei-workspace-glass-blur))
+    saturate(var(--xiaohei-workspace-glass-saturation));
 }
 
-#root [data-slot='sidebar.workspaces']
-  [role='treeitem'][aria-expanded]:not([aria-expanded='true']):hover::after {
-  opacity: .26;
-  transform: translateY(-50%) scaleX(.72) scaleY(.94);
+html[data-xiaohei-sidebar-resizing]
+  #root [data-slot='sidebar.workspaces'] [role='treeitem']:hover,
+html[data-xiaohei-sidebar-resizing]
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'],
+html[data-xiaohei-sidebar-resizing]
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
-/* The expanded folder is lifted only enough to read as the path owner. */
+/* The open folder reads as a lightly raised glass control, without spatial
+ * rifts, accent glows or geometry shifts. */
 #root [data-slot='sidebar.workspaces'] [role='tree']
   > :has([role='treeitem'][aria-expanded])
   > span:first-child
@@ -211,35 +164,16 @@ export const XIAOHEI_WORKSPACE_CSS = `
 #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
   color: var(--xiaohei-sidebar-emphasis);
   border-color: var(--xiaohei-workspace-folder-edge);
-  background: linear-gradient(
-    90deg,
-    var(--xiaohei-workspace-folder-open),
-    var(--xiaohei-workspace-row-active) 72%,
-    transparent 100%
-  );
+  background: var(--xiaohei-workspace-folder-open);
   box-shadow:
-    0 2px 6px var(--xiaohei-workspace-folder-shadow),
-    0 7px 18px var(--xiaohei-workspace-folder-shadow);
+    inset 0 1px var(--xiaohei-workspace-row-highlight),
+    0 4px 12px var(--xiaohei-workspace-folder-shadow);
   font-weight: 500;
-  transform: translateX(2px);
+  transform: translateY(-1px);
 }
 
-#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true']::before {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-#root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true']::after {
-  filter:
-    saturate(1.18)
-    contrast(1.08)
-    drop-shadow(0 0 3px var(--xiaohei-workspace-rift-glow));
-  opacity: .98;
-  transform: translateY(-50%) scaleX(1) scaleY(1);
-}
-
-/* Session rows sit one step deeper on the ink path. This adjusts only their
- * visual box and leaves the host tree and event handlers intact. */
+/* Sessions sit one step deeper on the tree path. This changes only their
+ * visual box and leaves host event handlers and drag geometry untouched. */
 #root [data-slot='sidebar.workspaces'] [role='tree']
   > :has([role='treeitem'][aria-expanded])
   > span:not(:first-child)
@@ -248,12 +182,13 @@ export const XIAOHEI_WORKSPACE_CSS = `
   margin-inline-start: 12px;
 }
 
-/* The selected session is the strongest navigation state. Most of the fill
- * remains neutral; the narrow spirit line carries the theme accent. */
 #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
   color: var(--xiaohei-sidebar-emphasis);
   border-color: var(--xiaohei-workspace-row-active-edge);
   background: var(--xiaohei-workspace-row-active);
+  box-shadow:
+    inset 0 1px var(--xiaohei-workspace-row-highlight),
+    0 3px 9px var(--xiaohei-workspace-row-shadow);
   font-weight: 500;
 }
 
@@ -265,12 +200,46 @@ export const XIAOHEI_WORKSPACE_CSS = `
 #root [data-slot='sidebar.workspaces'] [role='treeitem'] button[aria-expanded='true'] {
   color: var(--xiaohei-sidebar-emphasis);
   background: var(--xiaohei-workspace-action-hover);
+  box-shadow: inset 0 1px var(--xiaohei-workspace-row-highlight);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  #root [data-slot='sidebar.workspaces'] [role='treeitem']:hover {
+    background: var(--xiaohei-workspace-hover-solid);
+  }
+
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
+    background: var(--xiaohei-workspace-folder-solid);
+  }
+
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
+    background: var(--xiaohei-workspace-active-solid);
+  }
+
+  #root [data-slot='sidebar.workspaces'] [role='treeitem']:hover,
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'],
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #root [data-slot='sidebar.workspaces'] [role='treeitem']:hover {
+    background: var(--xiaohei-workspace-hover-solid);
+  }
+
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
+    background: var(--xiaohei-workspace-folder-solid);
+  }
+
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
+    background: var(--xiaohei-workspace-active-solid);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   #root [data-slot='sidebar.workspaces'] [role='treeitem'],
-  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]::before,
-  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]::after,
   #root [data-slot='sidebar.workspaces'] > div > div:first-child button {
     transition-duration: 0ms !important;
   }
@@ -284,6 +253,7 @@ export const XIAOHEI_WORKSPACE_CSS = `
   #root [data-slot='sidebar.workspaces'] > div > div:first-child,
   #root [data-slot='sidebar.workspaces'] [role='tree']
     > :has(> [role='treeitem'][aria-expanded]) {
+    background: Canvas;
     box-shadow: inset 0 0 0 1px CanvasText;
   }
 
@@ -291,23 +261,11 @@ export const XIAOHEI_WORKSPACE_CSS = `
     background: CanvasText;
   }
 
-  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'] {
-    border-color: Highlight;
-    background: Canvas;
-  }
-
+  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-selected='true'],
   #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded='true'] {
     border-color: Highlight;
+    background: Canvas;
     box-shadow: none;
-  }
-
-  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]::before {
-    background: Highlight;
-    box-shadow: none;
-  }
-
-  #root [data-slot='sidebar.workspaces'] [role='treeitem'][aria-expanded]::after {
-    display: none;
   }
 }
 `

@@ -9,8 +9,11 @@ await build({
   format: 'cjs',
   platform: 'browser',
   target: 'es2022',
+  jsx: 'automatic',
   sourcemap: true,
   external: [
+    'react',
+    'react/jsx-runtime',
     '@deepseek-ai/dsh-client-runtime/client',
     '@deepseek-ai/dsh-client-ui-theme/client',
   ],

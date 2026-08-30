@@ -31,97 +31,110 @@ export const XIAOHEI_SIDEBAR_CSS = `
   pointer-events: none;
   overflow: hidden;
   border: 1px solid var(--xiaohei-sidebar-glass-edge);
-  border-radius: var(--xiaohei-radius-panel);
-  background:
-    radial-gradient(96% 16% at 14% 0%, var(--xiaohei-sidebar-glass-highlight), transparent 64%),
-    linear-gradient(
-      90deg,
-      var(--xiaohei-sidebar-glass-refraction),
-      transparent 6%,
-      transparent 95%,
-      var(--xiaohei-sidebar-glass-inner-edge)
-    ),
-    linear-gradient(
-      180deg,
-      var(--xiaohei-sidebar-glass-refraction),
-      transparent 9%,
-      transparent 88%,
-      var(--xiaohei-sidebar-glass-inner-edge)
-    ),
-    var(--xiaohei-sidebar-glass-fill);
+  border-radius: var(--xiaohei-sidebar-glass-radius);
+  background: var(--xiaohei-sidebar-glass-fill);
   box-shadow:
-    0 0 0 1px var(--xiaohei-sidebar-glass-outline),
-    inset 0 1px 0 var(--xiaohei-sidebar-glass-highlight),
-    inset 1px 0 0 var(--xiaohei-sidebar-glass-refraction),
-    inset -1px 0 0 var(--xiaohei-sidebar-glass-inner-edge),
-    inset 0 -1px 0 var(--xiaohei-sidebar-glass-inner-edge),
-    0 1px 1px rgb(255 255 255 / 4%),
-    10px 0 30px -22px var(--xiaohei-sidebar-shadow),
-    0 24px 52px -30px var(--xiaohei-sidebar-shadow);
+    inset 0 1px var(--xiaohei-sidebar-glass-highlight),
+    inset 1px 0 var(--xiaohei-sidebar-glass-refraction),
+    0 18px 50px -32px var(--xiaohei-sidebar-shadow);
   -webkit-backdrop-filter:
-    blur(28px)
-    saturate(var(--xiaohei-sidebar-glass-saturation))
-    brightness(var(--xiaohei-sidebar-glass-brightness));
+    blur(var(--xiaohei-sidebar-glass-blur))
+    saturate(var(--xiaohei-sidebar-glass-saturation));
   backdrop-filter:
-    blur(28px)
-    saturate(var(--xiaohei-sidebar-glass-saturation))
-    brightness(var(--xiaohei-sidebar-glass-brightness));
+    blur(var(--xiaohei-sidebar-glass-blur))
+    saturate(var(--xiaohei-sidebar-glass-saturation));
 }
 
-/* Specular light and the inner lens rim are independent from the tint. This
- * keeps the surface recognisably glass without reducing control contrast. */
-#dsh-theme-xiaohei\\/sidebar-glass::before,
+/* Width dragging changes the full-height glass raster every frame. Suspend
+ * only the filters while geometry is moving; the translucent surface remains
+ * visible and the settled glass returns after the resize gesture ends. */
+html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* One restrained inner rim completes the glass edge without tinting content. */
 #dsh-theme-xiaohei\\/sidebar-glass::after {
   content: '';
   position: absolute;
   pointer-events: none;
-}
-
-#dsh-theme-xiaohei\\/sidebar-glass::before {
-  inset: 0;
-  border-radius: inherit;
-  background:
-    linear-gradient(
-      112deg,
-      var(--xiaohei-sidebar-glass-specular),
-      transparent 14%,
-      transparent 78%,
-      var(--xiaohei-sidebar-glass-refraction)
-    );
-  opacity: .72;
-  -webkit-mask-image: linear-gradient(180deg, black, rgb(0 0 0 / 18%) 26%, transparent 58%);
-  mask-image: linear-gradient(180deg, black, rgb(0 0 0 / 18%) 26%, transparent 58%);
-}
-
-#dsh-theme-xiaohei\\/sidebar-glass::after {
   inset: 1px;
-  border-radius: calc(var(--xiaohei-radius-panel) - 1px);
+  border-radius: calc(var(--xiaohei-sidebar-glass-radius) - 1px);
   box-shadow:
-    inset 0 0 0 1px var(--xiaohei-sidebar-glass-refraction),
-    inset 0 18px 24px -28px var(--xiaohei-sidebar-glass-highlight),
-    inset 0 -20px 30px -30px var(--xiaohei-sidebar-shadow);
+    inset 0 1px var(--xiaohei-sidebar-glass-refraction),
+    inset 0 -20px 28px -32px var(--xiaohei-sidebar-shadow-soft);
 }
 
-/* Generated ink-space artwork supplies the complex Xiaohei identity. It is a
- * paint-only layer inside the glass and never participates in host layout. */
-#dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
+/* The official brand slot owns geometry in both the wide sidebar and rail.
+ * The bitmap remains visible as a no-WebGL fallback while the compact
+ * MetallicPaint canvas adds a restrained liquid-metal pass above it. */
+.xiaohei-brand-mark {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--xiaohei-brand-mark-size);
+  height: var(--xiaohei-brand-mark-size);
+  margin: -2px;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgb(8 13 15 / 18%));
+  transform: translateY(-1px);
+}
+
+.xiaohei-brand-mark__fallback,
+.xiaohei-brand-mark__metal {
   position: absolute;
-  z-index: 0;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: left bottom;
-  pointer-events: none;
-  user-select: none;
-  opacity: var(--xiaohei-sidebar-atmosphere-opacity);
-  mix-blend-mode: screen;
+  object-fit: contain;
 }
 
-html[data-xiaohei-appearance='light']
-  #dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
-  mix-blend-mode: multiply;
+.xiaohei-brand-mark__fallback {
+  opacity: .94;
+  transition: opacity var(--xiaohei-motion-base) ease;
+}
+
+.xiaohei-brand-mark__metal {
+  opacity: 0;
+  transition:
+    opacity var(--xiaohei-motion-base) ease,
+    filter var(--xiaohei-motion-base) ease;
+}
+
+.xiaohei-brand-mark[data-metallic-ready='true'] .xiaohei-brand-mark__fallback {
+  opacity: .28;
+}
+
+.xiaohei-brand-mark[data-metallic-ready='true'] .xiaohei-brand-mark__metal {
+  opacity: .92;
+}
+
+.xiaohei-brand-name {
+  white-space: nowrap;
+  letter-spacing: .025em;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ui-conversation currently exposes the Hero mark but not its headline as a
+ * slot. Anchor the visual copy to that official mark occupant so hashed Host
+ * class names and unrelated headings remain untouched. */
+#root span:has(> .xiaohei-brand-mark[data-brand-context='hero']) + span {
+  font-size: 0;
+}
+
+#root span:has(> .xiaohei-brand-mark[data-brand-context='hero']) + span::after {
+  content: '万物有灵，自在同行';
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 32px;
+}
+
+#root [data-slot='sidebar'] button:hover .xiaohei-brand-mark__metal {
+  filter: brightness(1.12) contrast(1.04);
 }
 
 /* Header toggle and the primary action keep the host's dimensions. */
@@ -258,6 +271,11 @@ html[data-xiaohei-appearance='light']
   #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session']::before {
     transition-duration: 0ms !important;
   }
+
+  .xiaohei-brand-mark__fallback,
+  .xiaohei-brand-mark__metal {
+    transition-duration: 0ms !important;
+  }
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -267,9 +285,6 @@ html[data-xiaohei-appearance='light']
     backdrop-filter: none;
   }
 
-  #dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
-    opacity: var(--xiaohei-sidebar-atmosphere-solid-opacity);
-  }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -285,10 +300,6 @@ html[data-xiaohei-appearance='light']
     box-shadow: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-  }
-
-  #dsh-theme-xiaohei\\/sidebar-glass > .xiaohei-sidebar-atmosphere {
-    display: none;
   }
 
   #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],
