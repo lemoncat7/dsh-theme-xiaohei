@@ -1,47 +1,81 @@
-/** Conversation composer, command affordances, and send action. */
+/** Conversation composer expressed as Xiaohei's quiet spatial workbench. */
 export const XIAOHEI_COMPOSER_CSS = `
 #root [data-composer-card='true'] {
   position: relative;
   isolation: isolate;
   overflow: visible;
-  border: 1px solid var(--xiaohei-layer-content-edge) !important;
-  border-radius: 8px !important;
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      transparent 18%,
-      var(--xiaohei-spirit-faint) 52%,
-      transparent
-    ) 18px 0 / 104px 1px no-repeat,
-    linear-gradient(180deg, var(--xiaohei-layer-content-highlight), transparent 34%),
-    var(--xiaohei-layer-content) !important;
+  gap: 10px;
+  padding-top: 12px;
+  border: 1px solid var(--xiaohei-composer-edge) !important;
+  border-radius: 14px !important;
+  background: var(--xiaohei-composer-fill) !important;
+  -webkit-backdrop-filter:
+    blur(var(--xiaohei-composer-blur))
+    saturate(var(--xiaohei-composer-saturation));
+  backdrop-filter:
+    blur(var(--xiaohei-composer-blur))
+    saturate(var(--xiaohei-composer-saturation));
   box-shadow:
-    inset 0 0 0 1px var(--xiaohei-frame-inner),
-    inset 0 1px rgb(255 255 255 / 7%),
-    inset 0 -1px var(--xiaohei-layer-panel-edge),
-    0 8px 22px var(--xiaohei-shadow) !important;
+    0 10px 28px var(--xiaohei-composer-shadow),
+    0 2px 8px var(--xiaohei-shadow) !important;
   transition:
     border-color var(--xiaohei-motion-base) ease,
-    box-shadow var(--xiaohei-motion-base) ease;
+    box-shadow 260ms ease,
+    background-color var(--xiaohei-motion-base) ease;
 }
 
-#root [data-composer-card='true']:focus-within {
-  border-color: var(--xiaohei-edge-strong) !important;
-  box-shadow:
-    inset 0 1px rgb(255 255 255 / 9%),
-    0 10px 26px var(--xiaohei-shadow),
-    0 0 0 4px var(--xiaohei-focus-shadow) !important;
+/* The lower contour behaves like Xiaohei's tail. Workspace-pick mode is
+   excluded so the Host keeps ownership of its native dashed affordance. */
+#root [data-composer-card='true']:not(:has(textarea[aria-haspopup='menu']))::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  right: 58px;
+  bottom: -1px;
+  left: 18px;
+  height: 11px;
+  border-bottom: 2px solid var(--xiaohei-composer-tail);
+  border-radius: 0 0 76% 34%;
+  pointer-events: none;
+  opacity: 0.32;
+  transform: scaleX(.48) translateZ(0);
+  transform-origin: right center;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  transition:
+    opacity 240ms ease,
+    transform 360ms var(--xiaohei-motion-curve);
+}
+
+#root [data-composer-card='true']:not(:has(textarea[aria-haspopup='menu'])):focus-within::after {
+  opacity: 0.74;
+  transform: scaleX(1) translateZ(0);
+}
+
+#root [data-composer-card='true']:not(:has(textarea[aria-haspopup='menu'])):has(textarea:not(:placeholder-shown))::after {
+  opacity: 0.88;
+  transform: scaleX(.92) translateZ(0);
 }
 
 #root [data-composer-card='true'] textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0 !important;
+  border-radius: 0 !important;
   color: var(--dsw-alias-label-primary) !important;
+  background: transparent !important;
   caret-color: var(--xiaohei-spirit-strong);
+  box-shadow: none !important;
+}
+
+#root [data-composer-card='true'] textarea:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 #root [data-composer-card='true'] textarea::placeholder {
   color: var(--dsw-alias-label-tertiary) !important;
-  opacity: 0.92;
+  opacity: 0.84;
 }
 
 #root [data-composer-card='true'] [data-input-backdrop='true'] {
@@ -50,96 +84,51 @@ export const XIAOHEI_COMPOSER_CSS = `
 }
 
 #root [data-composer-card='true'] button {
-  min-width: 28px;
-  min-height: 28px;
+  min-width: 30px;
+  min-height: 30px;
   border: 1px solid transparent;
-  border-radius: var(--xiaohei-radius-small);
+  border-radius: 9px;
   transition:
     color var(--xiaohei-motion-fast) ease,
     background-color var(--xiaohei-motion-fast) ease,
     border-color var(--xiaohei-motion-fast) ease,
+    box-shadow var(--xiaohei-motion-fast) ease,
     transform var(--xiaohei-motion-fast) var(--xiaohei-motion-curve);
 }
 
 #root [data-composer-card='true'] button:not(:disabled):hover {
-  color: var(--xiaohei-spirit-strong);
-  border-color: var(--xiaohei-edge);
-  background: var(--xiaohei-spirit-soft);
+  color: var(--dsw-alias-label-primary);
+  border-color: var(--xiaohei-composer-control-edge);
+  background: var(--xiaohei-composer-control-hover);
+  box-shadow: inset 0 1px 0 var(--xiaohei-composer-highlight);
 }
 
 #root [data-composer-card='true'] button:not(:disabled):active {
-  transform: translateY(1px) scale(0.98);
-}
-
-#root button[aria-label='发送消息'],
-#root button[aria-label='Send message'] {
-  position: relative;
-  isolation: isolate;
-  border: 1px solid var(--xiaohei-edge-strong) !important;
-  border-radius: 50% !important;
-  color: var(--dsw-alias-brand-primary-invert) !important;
-  background:
-    radial-gradient(circle at 36% 27%, rgb(255 255 255 / 36%) 0 7%, transparent 9%),
-    linear-gradient(145deg, var(--xiaohei-spirit), var(--dsw-alias-button-primary-fill)) !important;
-  box-shadow:
-    inset 0 1px rgb(255 255 255 / 34%),
-    inset 0 -2px rgb(4 25 31 / 18%),
-    0 6px 16px var(--xiaohei-focus-shadow) !important;
-  transition:
-    transform var(--xiaohei-motion-fast) var(--xiaohei-motion-curve),
-    box-shadow var(--xiaohei-motion-base) ease,
-    filter var(--xiaohei-motion-base) ease;
-}
-
-#root button[aria-label='发送消息']::after,
-#root button[aria-label='Send message']::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border: 1px solid rgb(238 253 255 / 28%);
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0.58;
-  transition: opacity var(--xiaohei-motion-fast) ease, transform 220ms var(--xiaohei-motion-curve);
-}
-
-#root button[aria-label='发送消息']:not(:disabled):hover,
-#root button[aria-label='Send message']:not(:disabled):hover {
-  filter: brightness(1.05) saturate(1.03);
-  box-shadow:
-    inset 0 1px rgb(255 255 255 / 42%),
-    inset 0 -2px rgb(4 25 31 / 16%),
-    0 8px 20px var(--xiaohei-focus-shadow) !important;
-}
-
-#root button[aria-label='发送消息']:not(:disabled):active,
-#root button[aria-label='Send message']:not(:disabled):active {
-  transform: translateY(1px) scale(0.96);
-}
-
-#root button[aria-label='发送消息']:not(:disabled):active::after,
-#root button[aria-label='Send message']:not(:disabled):active::after {
-  opacity: 0.86;
-  transform: scale(0.76);
-}
-
-#root button[aria-label='发送消息']:disabled,
-#root button[aria-label='Send message']:disabled {
-  border-color: var(--xiaohei-edge) !important;
-  color: var(--dsw-alias-label-dimmed) !important;
-  background: var(--xiaohei-surface-muted) !important;
-  filter: saturate(0.42);
-  box-shadow: inset 0 1px rgb(255 255 255 / 8%) !important;
-}
-
-#root button[aria-label='发送消息']:disabled::after,
-#root button[aria-label='Send message']:disabled::after {
-  opacity: 0.12;
+  transform: translateY(1px) scale(.97);
 }
 
 @media (max-width: 700px) {
   #root [data-composer-card='true'] {
-    border-radius: 7px !important;
+    border-radius: 12px !important;
+  }
+
+  #root [data-composer-card='true']:not(:has(textarea[aria-haspopup='menu']))::after {
+    right: 54px;
+    left: 14px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  #root [data-composer-card='true'] {
+    background: var(--xiaohei-composer-solid) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #root [data-composer-card='true'] {
+    background: var(--xiaohei-composer-solid) !important;
   }
 }
 `

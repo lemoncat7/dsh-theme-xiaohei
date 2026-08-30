@@ -4,6 +4,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import { bindXiaoheiAppearance } from './appearance.js'
 import { installXiaoheiBlink } from './blink.js'
 import { installXiaoheiChrome } from './chrome.js'
+import { installXiaoheiComposerSendHeixiu } from './composer-send-heixiu.js'
 import { installXiaoheiGaze } from './gaze.js'
 import { installXiaoheiHeixiuInteractions } from './heixiu-interactions.js'
 import { installXiaoheiPluginLoading } from './loading-heixiu.js'
@@ -55,6 +56,7 @@ function installXiaoheiTheme(ctx: ClientContext): void {
 
   ctx.effect(() => bindXiaoheiAppearance(ctx), 'xiaohei-theme: follow resolved appearance')
   ctx.effect(installXiaoheiChrome, 'xiaohei-theme: install spirit control skin')
+  ctx.effect(installXiaoheiComposerSendHeixiu, 'xiaohei-theme: turn the native send action into blinking Heixiu')
   ctx.effect(installXiaoheiScene, 'xiaohei-theme: install moonlit forest scene')
   ctx.effect(installXiaoheiSidebarGlass, 'xiaohei-theme: install isolated sidebar glass')
   ctx.effect(installXiaoheiSidebarHeixiuRoaming, 'xiaohei-theme: let sidebar Heixiu roam safely')

@@ -13,7 +13,7 @@ import {
   XIAOHEI_WAITING,
 } from '../generated-keyart.js'
 import { subscribeXiaoheiHostDom } from '../host-dom.js'
-import { XIAOHEI_HOST_SLOTS, xiaoheiHostSlotSelector } from '../host-contract.js'
+import { XIAOHEI_HOST_SELECTORS } from '../host-contract.js'
 import {
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_LAYER_ID,
@@ -51,7 +51,7 @@ export function installXiaoheiScene(
 
   let disposed = false
   let removeMountedScene = (): void => {}
-  let removeHeixiuCompanions = (): void => {}
+  let removeSidebarHeixiu = (): void => {}
 
   const mount = (): void => {
     if (disposed) return
@@ -131,11 +131,11 @@ export function installXiaoheiScene(
     }
 
     doc.body.prepend(layer)
-    removeHeixiuCompanions()
-    removeHeixiuCompanions = installHeixiuCompanions(doc, layer)
+    removeSidebarHeixiu()
+    removeSidebarHeixiu = installSidebarHeixiu(doc)
     removeMountedScene = () => {
-      removeHeixiuCompanions()
-      removeHeixiuCompanions = () => {}
+      removeSidebarHeixiu()
+      removeSidebarHeixiu = () => {}
       layer.remove()
       style.remove()
     }
@@ -222,20 +222,14 @@ function createHeixiuCreature(doc: Document, name: string): HTMLSpanElement {
   return creature
 }
 
-function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => void {
-  const companions = [
-    { slot: XIAOHEI_HOST_SLOTS.sidebar, creature: createHeixiuCreature(doc, 'sidebar') },
-    { slot: XIAOHEI_HOST_SLOTS.composerBar, creature: createHeixiuCreature(doc, 'composer') },
-  ] as const
-  const companionCreatures = companions.map(({ creature }) => creature)
+function installSidebarHeixiu(doc: Document): () => void {
+  const creature = createHeixiuCreature(doc, 'sidebar')
   let attachQueued = false
 
   const attach = (): void => {
     attachQueued = false
-    for (const { slot, creature } of companions) {
-      const host = doc.querySelector<HTMLElement>(xiaoheiHostSlotSelector(slot))?.firstElementChild
-      if (host !== null && host !== undefined && creature.parentElement !== host) host.append(creature)
-    }
+    const host = doc.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.sidebar)?.firstElementChild
+    if (host !== null && host !== undefined && creature.parentElement !== host) host.append(creature)
   }
 
   const queueAttach = (): void => {
@@ -244,17 +238,17 @@ function installHeixiuCompanions(doc: Document, layer: HTMLDivElement): () => vo
     queueMicrotask(attach)
   }
 
-  const restoreDetachedCompanions = (): void => {
-    if (!shouldRestoreXiaoheiHeixiuCompanions(companionCreatures)) return
+  const restoreDetachedCompanion = (): void => {
+    if (!shouldRestoreXiaoheiHeixiuCompanions([creature])) return
     queueAttach()
   }
 
   attach()
-  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, restoreDetachedCompanions)
+  const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, restoreDetachedCompanion)
 
   return () => {
     unsubscribeHostDom()
-    for (const { creature } of companions) creature.remove()
+    creature.remove()
   }
 }
 

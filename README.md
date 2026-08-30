@@ -16,7 +16,7 @@
 - 聚能、回答、工具、等待、完成和错误分别使用轻量局部光效，离开对应状态后动画立即停止。
 - 深浅模式使用同一林城交界构图的昼夜背景：远处城市、古树会馆、小型空间门和沿树根流动的妖灵力共用一套位置，不在小黑脚下叠加底圈或常驻漩涡动效。
 - 左侧栏直接共享全局水墨灵域，仅使用向主场景渐隐的半透明同色材质组织品牌区、主操作、工作区与底部工具，并以潦草竖写的生图“罗小黑”签名占据纵向留白，不新增无功能入口。
-- 工作区、工具区和会话输入区不使用额外铭牌，分别以猫尾灵珠、空间裂环、蓝嘴黑猫牌作为轻量识别点；工作区右侧额外内收，收起后所有工具回到同一条 35px 视觉轴。
+- 工作区和工具区不使用额外铭牌；会话输入区由嘿咻直接接管官方发送键，并以低频完整帧眨眼保持安静反馈。工作区右侧额外内收，收起后所有工具回到同一条 35px 视觉轴。
 - 支持减少动态、增强对比度、强制颜色和打印模式降级。
 - 主题通过 DSH Theme Runtime 覆盖 Light / Dark / System 的语义 token，不替换用户的主题偏好；卸载后由 DSH 恢复原始 token。
 
@@ -24,10 +24,10 @@
 
 ## 安装
 
-从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0-alpha.35` 的完整构建包后安装：
+从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0-alpha.48` 的完整构建包后安装：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.35.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.48.tgz
 ```
 
 卸载：

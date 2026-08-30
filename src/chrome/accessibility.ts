@@ -2,12 +2,9 @@
 export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
 @media (prefers-reduced-motion: reduce) {
   #root [data-composer-card='true'],
-  #root [data-composer-card='true']::before,
   #root [data-composer-card='true']::after,
-  #root button[aria-label='发送消息'],
-  #root button[aria-label='Send message'],
-  #root button[aria-label='发送消息']::after,
-  #root button[aria-label='Send message']::after,
+  #root [data-composer-card='true'] button::before,
+  #root [data-composer-card='true'] button::after,
   #root [data-slot='conversation.composer'] button,
   #root [data-slot='sidebar'] button,
   #root [role='dialog']::before,
@@ -30,7 +27,6 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
     backdrop-filter: none !important;
   }
 
-  #root [data-composer-card='true']::before,
   #root [role='dialog']::before {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
@@ -45,7 +41,6 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
   #root [role='listbox'] {
     background: var(--xiaohei-surface-raised) !important;
   }
-  #root [data-composer-card='true']::before,
   #root [role='dialog']::before {
     background: transparent;
     border: 1px solid var(--xiaohei-edge-strong);
@@ -56,20 +51,17 @@ export const XIAOHEI_CHROME_ACCESSIBILITY_CSS = `
   #root [data-composer-card='true'],
   #root [role='dialog'],
   #root [role='menu'],
-  #root [role='listbox'],
-  #root button[aria-label='发送消息'],
-  #root button[aria-label='Send message'] {
+  #root [role='listbox'] {
     border: 1px solid CanvasText !important;
     background: Canvas !important;
     box-shadow: none !important;
   }
 
-  #root [data-composer-card='true']::before,
   #root [data-composer-card='true']::after,
   #root [role='dialog']::before,
   #root [role='dialog']::after,
-  #root button[aria-label='发送消息']::after,
-  #root button[aria-label='Send message']::after {
+  #root [data-composer-card='true'] button::before,
+  #root [data-composer-card='true'] button::after {
     display: none;
   }
 }

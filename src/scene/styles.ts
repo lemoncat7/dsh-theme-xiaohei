@@ -187,8 +187,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot::before {
   will-change: transform;
 }
 
-${XIAOHEI_HOST_SELECTORS.sidebarShell},
-${XIAOHEI_HOST_SELECTORS.composerBarShell} {
+${XIAOHEI_HOST_SELECTORS.sidebarShell} {
   position: relative !important;
 }
 
@@ -242,20 +241,7 @@ ${XIAOHEI_HOST_SELECTORS.composerBarShell} {
   filter: brightness(1.18) contrast(1.09) saturate(0.86);
 }
 
-.xiaohei-scene__heixiu--composer {
-  z-index: 3;
-  left: 54%;
-  right: auto;
-  top: -1.7rem;
-  width: 3.45rem;
-  --heixiu-opacity: 0.6;
-  --heixiu-blink-duration: 9.4s;
-  --heixiu-blink-delay: -6.2s;
-  animation: xiaohei-heixiu-drift-three 17.2s cubic-bezier(0.37, 0, 0.63, 1) -8.1s infinite;
-}
-
-.xiaohei-scene__heixiu--sidebar::before,
-.xiaohei-scene__heixiu--composer::before {
+.xiaohei-scene__heixiu--sidebar::before {
   content: '';
   position: absolute;
   z-index: -1;
@@ -635,12 +621,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   68% { transform: translate3d(-0.6rem, -1.15rem, 0); }
 }
 
-@keyframes xiaohei-heixiu-drift-three {
-  0%, 100% { transform: translate3d(0.25rem, 0.15rem, 0); }
-  37% { transform: translate3d(-0.65rem, 0.72rem, 0); }
-  72% { transform: translate3d(0.48rem, -0.55rem, 0); }
-}
-
 @keyframes xiaohei-spirit-one {
   0%, 100% { transform: translate3d(0, 0.5rem, 0) scale(0.72); opacity: 0.12; }
   48% { transform: translate3d(-0.7rem, -1.6rem, 0) scale(1); opacity: 0.82; }
@@ -722,13 +702,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 
   .xiaohei-scene__heixiu--sidebar { display: none; }
 
-  .xiaohei-scene__heixiu--composer {
-    left: 52%;
-    right: auto;
-    top: -1.45rem;
-    width: 2.8rem;
-  }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -759,14 +732,12 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn { opacity: 0.5; }
   .xiaohei-scene__spirit,
   .xiaohei-scene__heixiu-field,
-  .xiaohei-scene__heixiu--sidebar,
-  .xiaohei-scene__heixiu--composer { display: none; }
+  .xiaohei-scene__heixiu--sidebar { display: none; }
 }
 
 @media (forced-colors: active), print {
   #${cssEscape(XIAOHEI_SCENE_LAYER_ID)},
-  .xiaohei-scene__heixiu--sidebar,
-  .xiaohei-scene__heixiu--composer { display: none; }
+  .xiaohei-scene__heixiu--sidebar { display: none; }
 }
 `
 
