@@ -14,6 +14,12 @@ export {
 } from './scene/runtime.js'
 
 export {
+  injectXiaoheiSylvaAvatarModel,
+  prepareXiaoheiSylvaAvatarFrame,
+  XIAOHEI_SYLVA_AVATAR_MARKER,
+} from './scene/avatar-model.js'
+
+export {
   injectXiaoheiSylvaPointerBridge,
   prepareXiaoheiSylvaPointerFrame,
   resolveXiaoheiSylvaPointer,

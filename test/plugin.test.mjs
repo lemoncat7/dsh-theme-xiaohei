@@ -4,12 +4,19 @@ import test from 'node:test'
 import {
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_PART_COUNT,
+  injectXiaoheiSylvaAvatarModel,
   injectXiaoheiSylvaPointerBridge,
   installXiaoheiScene,
   prepareXiaoheiSylvaPointerFrame,
   resolveXiaoheiSylvaPointer,
   shouldRestoreXiaoheiHeixiuCompanions,
 } from '../lib/scene.js'
+import {
+  XIAOHEI_AVATAR_BLINK,
+  XIAOHEI_AVATAR_CLIMB,
+  XIAOHEI_AVATAR_JUMP,
+  XIAOHEI_AVATAR_OPEN,
+} from '../lib/generated-avatar-model.js'
 import { apply } from '../lib/plugin.js'
 import {
   apply as applyHostTheme,
@@ -155,11 +162,38 @@ test('Sylva pointer bridge maps host coordinates into the scene viewport', () =>
   assert.deepEqual(resolveXiaoheiSylvaPointer(120, 80, { ...bounds, width: 0 }), { event: 'leave' })
 })
 
+test('Sylva avatar is injected as one renderer-sharing 2.5D scene model', () => {
+  const source = '<html><body><script>(function () {\nvar renderer, scene, camera; function build(){} function layout(){} function renderFrame(){}\n})();\n</script></body></html>'
+  const modeled = injectXiaoheiSylvaAvatarModel(source)
+
+  assert.match(XIAOHEI_AVATAR_OPEN, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_AVATAR_BLINK, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_AVATAR_CLIMB, /^data:image\/webp;base64,/)
+  assert.match(XIAOHEI_AVATAR_JUMP, /^data:image\/webp;base64,/)
+  assert.match(modeled, /data-xiaohei-avatar-model="true"/)
+  assert.match(modeled, /xiaohei-avatar-model/)
+  assert.match(modeled, /intersectObject\(xiaoheiAvatar\.mesh/)
+  assert.match(modeled, /xiaoheiAvatarOriginalAssembleRoot/)
+  assert.match(modeled, /limb\.curve\.getPointAt\(anchor\.t\)/)
+  assert.match(modeled, /xiaoheiAvatarAction === 'climb'/)
+  assert.match(modeled, /xiaoheiAvatarAction === 'jump'/)
+  assert.match(modeled, /xiaoheiAvatarAction === 'portal'/)
+  assert.match(modeled, /xiaoheiAvatarOriginalRenderFrame/)
+  assert.doesNotMatch(modeled, /new THREE\.WebGLRenderer|createElement\(['"]canvas/)
+  assert.equal(injectXiaoheiSylvaAvatarModel(modeled), modeled)
+})
+
 test('Sylva background prepares its iframe before attaching the WebGL scene', () => {
   const source = readFileSync(new URL('../src/scene/sylva-background.tsx', import.meta.url), 'utf8')
   assert.match(source, /createElement\('div'\)/)
   assert.match(source, /flushSync\(\(\) => root\.render/)
+  assert.match(source, /cloneNode\(true\)/)
+  assert.match(source, /createElement\('iframe'\)/)
+  assert.match(source, /extractedFrame\.replaceWith\(frame\)/)
+  assert.match(source, /root\.unmount\(\)[\s\S]*mount\.replaceChildren\(renderedScene\)/)
   assert.ok(source.indexOf('prepareXiaoheiSylvaPointerFrame(frame)') < source.indexOf('host.append(mount)'))
+  assert.ok(source.indexOf('prepareXiaoheiSylvaAvatarFrame(frame)') < source.indexOf('prepareXiaoheiSylvaPointerFrame(frame)'))
+  assert.match(source, /installXiaoheiSylvaPointerBridge\([\s\S]*prepareXiaoheiSylvaAvatarFrame/)
   assert.equal(typeof prepareXiaoheiSylvaPointerFrame, 'function')
 })
 
@@ -966,7 +1000,7 @@ test('persisted Host appearance remains authoritative during ThemeRuntime hydrat
 })
 
 test('scene composes a passive theme field and async character art', () => {
-  assert.equal(XIAOHEI_SCENE_PART_COUNT, 3)
+  assert.equal(XIAOHEI_SCENE_PART_COUNT, 2)
   assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_BLINK, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_EYE_BASE, /^data:image\/webp;base64,/)
@@ -984,7 +1018,7 @@ test('scene composes a passive theme field and async character art', () => {
     XIAOHEI_ERROR,
   ]) assert.match(asset, /^data:image\/webp;base64,/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
-  assert.match(installXiaoheiScene.toString(), /createIdleBlink/)
+  assert.doesNotMatch(installXiaoheiScene.toString(), /createIdleBlink/)
   assert.match(installXiaoheiScene.toString(), /installSidebarHeixiu/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__sidebar-signature/)
   assert.match(XIAOHEI_SCENE_CSS, /object-fit:\s*contain/)

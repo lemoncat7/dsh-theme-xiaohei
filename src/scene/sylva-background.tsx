@@ -6,6 +6,7 @@ import {
   installXiaoheiSylvaPointerBridge,
   prepareXiaoheiSylvaPointerFrame,
 } from './pointer-bridge.js'
+import { prepareXiaoheiSylvaAvatarFrame } from './avatar-model.js'
 
 export const XIAOHEI_SYLVA_STYLE_ID = 'dsh-theme-xiaohei/threeui-style'
 
@@ -26,17 +27,47 @@ export function mountXiaoheiSylvaBackground(host: HTMLElement): () => void {
   mount.className = 'xiaohei-scene__world-mount'
   const root = createRoot(mount)
   flushSync(() => root.render(<SylvaLivingWorldScene variant="living-green" />))
-  const frame = mount.querySelector('iframe')
+  const renderedScene = mount.firstElementChild?.cloneNode(true) as HTMLElement | undefined
+  const extractedFrame = renderedScene?.querySelector('iframe') ?? null
+  const frame = extractedFrame === null ? null : doc.createElement('iframe')
+  if (frame !== null && extractedFrame !== null) {
+    for (const attribute of extractedFrame.attributes) {
+      if (attribute.name !== 'srcdoc') frame.setAttribute(attribute.name, attribute.value)
+    }
+    frame.setAttribute('srcdoc', extractedFrame.getAttribute('srcdoc') ?? '')
+    extractedFrame.replaceWith(frame)
+  }
   const frameWindow = doc.defaultView
-  if (frameWindow !== null && frame instanceof frameWindow.HTMLIFrameElement) {
+  let reactMounted = true
+  if (renderedScene !== undefined && frameWindow !== null && frame instanceof frameWindow.HTMLIFrameElement) {
+    prepareXiaoheiSylvaAvatarFrame(frame)
     prepareXiaoheiSylvaPointerFrame(frame)
+    const sceneHost = renderedScene
+    sceneHost.dataset.state = 'loading'
+    frame.addEventListener('load', () => {
+      sceneHost.dataset.state = 'ready'
+    }, { once: true })
+
+    /* The registered component is the authoritative source builder. Its
+       detached iframe may already have acquired a browsing context, though,
+       so mutating that node can leave the first unadapted document running.
+       Clone the authored host but create a fresh iframe, dispose the extractor,
+       then connect only the fully adapted document. Reusing a cloned iframe
+       can retain its first navigation snapshot in Chromium. This keeps one
+       WebGL boot and one renderer. */
+    root.unmount()
+    reactMounted = false
+    mount.replaceChildren(renderedScene)
   }
   host.append(mount)
-  const removePointerBridge = installXiaoheiSylvaPointerBridge(host)
+  const removePointerBridge = installXiaoheiSylvaPointerBridge(
+    host,
+    prepareXiaoheiSylvaAvatarFrame,
+  )
 
   return () => {
     removePointerBridge()
-    root.unmount()
+    if (reactMounted) root.unmount()
     mount.remove()
     style.remove()
   }

@@ -91,7 +91,10 @@ export function prepareXiaoheiSylvaPointerFrame(frame: HTMLIFrameElement): boole
 }
 
 /** Install a movement-only bridge. It never forwards clicks or presses. */
-export function installXiaoheiSylvaPointerBridge(host: HTMLElement): () => void {
+export function installXiaoheiSylvaPointerBridge(
+  host: HTMLElement,
+  prepareSceneFrame: (frame: HTMLIFrameElement) => void = () => {},
+): () => void {
   const win = host.ownerDocument.defaultView
   if (win === null) return () => {}
 
@@ -104,6 +107,7 @@ export function installXiaoheiSylvaPointerBridge(host: HTMLElement): () => void 
     frame = nextFrame
     lastFrameWindow = nextFrame.contentWindow
 
+    prepareSceneFrame(frame)
     prepareXiaoheiSylvaPointerFrame(frame)
   }
 
@@ -115,6 +119,16 @@ export function installXiaoheiSylvaPointerBridge(host: HTMLElement): () => void 
     if (event.pointerType === 'touch' || frame === null) return
     const point = resolveXiaoheiSylvaPointer(event.clientX, event.clientY, frame.getBoundingClientRect())
     post({ ...point, pointerType: event.pointerType || 'mouse' })
+  }
+
+  const onPointerDown = (event: PointerEvent): void => {
+    if (event.pointerType !== 'touch' || frame === null) return
+    const point = resolveXiaoheiSylvaPointer(event.clientX, event.clientY, frame.getBoundingClientRect())
+    post({ ...point, pointerType: 'touch' })
+  }
+
+  const onPointerEnd = (event: PointerEvent): void => {
+    if (event.pointerType === 'touch') post({ event: 'leave', pointerType: 'touch' })
   }
 
   const onPointerLeave = (event: PointerEvent): void => {
@@ -140,6 +154,9 @@ export function installXiaoheiSylvaPointerBridge(host: HTMLElement): () => void 
   })
   prepareFrame()
   win.addEventListener('pointermove', onPointerMove, { passive: true, capture: true })
+  win.addEventListener('pointerdown', onPointerDown, { passive: true, capture: true })
+  win.addEventListener('pointerup', onPointerEnd, { passive: true, capture: true })
+  win.addEventListener('pointercancel', onPointerEnd, { passive: true, capture: true })
   win.addEventListener('pointerleave', onPointerLeave, { capture: true })
   win.addEventListener('blur', onBlur)
   win.addEventListener('message', onMessage)
@@ -147,6 +164,9 @@ export function installXiaoheiSylvaPointerBridge(host: HTMLElement): () => void 
   return () => {
     observer.disconnect()
     win.removeEventListener('pointermove', onPointerMove, { capture: true })
+    win.removeEventListener('pointerdown', onPointerDown, { capture: true })
+    win.removeEventListener('pointerup', onPointerEnd, { capture: true })
+    win.removeEventListener('pointercancel', onPointerEnd, { capture: true })
     win.removeEventListener('pointerleave', onPointerLeave, { capture: true })
     win.removeEventListener('blur', onBlur)
     win.removeEventListener('message', onMessage)
