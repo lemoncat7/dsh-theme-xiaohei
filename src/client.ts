@@ -1,4 +1,16 @@
-export { apply, inject } from './plugin.js'
+import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import { apply as applyTheme } from './plugin.js'
+import { configureXiaoheiWorldRenderer } from './scene.js'
+import { mountXiaoheiSylvaBackground } from './scene/sylva-background.js'
+
+export { inject } from './plugin.js'
+
+/** Browser entrypoint wires the exact ThreeUI source into the shared scene lifecycle. */
+export function apply(ctx: ClientContext): void {
+  const releaseWorldRenderer = configureXiaoheiWorldRenderer(mountXiaoheiSylvaBackground)
+  ctx.effect(() => releaseWorldRenderer, 'xiaohei-theme: register ThreeUI living world renderer')
+  applyTheme(ctx)
+}
 export { bindXiaoheiAppearance, XIAOHEI_APPEARANCE_ATTRIBUTE } from './appearance.js'
 export { installXiaoheiBlink, XIAOHEI_BLINK_STYLE_ID } from './blink.js'
 export {
@@ -28,10 +40,12 @@ export {
   XIAOHEI_PORTAL_STYLE_ID,
 } from './portal.js'
 export {
+  configureXiaoheiWorldRenderer,
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_LAYER_ID,
   XIAOHEI_SCENE_PART_COUNT,
   XIAOHEI_SCENE_STYLE_ID,
+  XIAOHEI_SCENE_WORLD_CLASS,
   installXiaoheiScene,
 } from './scene.js'
 export { bindXiaoheiSessionState, XIAOHEI_STATE_ATTRIBUTE } from './state.js'

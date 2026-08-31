@@ -6,18 +6,16 @@ import { XIAOHEI_HOST_SELECTORS } from '../host-contract.js'
 /** DOM ids are exported so lifecycle and browser tests can detect leaks. */
 export const XIAOHEI_SCENE_STYLE_ID = 'dsh-theme-xiaohei/scene-style'
 export const XIAOHEI_SCENE_LAYER_ID = 'dsh-theme-xiaohei/scene-layer'
+export const XIAOHEI_SCENE_WORLD_CLASS = 'xiaohei-scene__world'
 
-/**
- * The generated key art is a real raster asset. CSS supplies only atmosphere
- * and motion, never a shape-built substitute for the character.
- */
+/** Neutral ambient color field and complete character art. */
 const XIAOHEI_SCENE_BASE_CSS = `
 body {
-  background: #151C1E;
+  background: #0D1419;
 }
 
 html[data-xiaohei-appearance='light'] body {
-  background: #E5EBF1;
+  background: #EDF1F2;
 }
 
 #root {
@@ -34,14 +32,50 @@ html[data-xiaohei-appearance='light'] body {
   isolation: isolate;
   pointer-events: none;
   user-select: none;
-  background: #151C1E;
+  background: #0D1419;
 }
 
 html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
+  background: #E9EDEF;
+}
+
+#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::before,
+#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+}
+
+#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::before {
+  inset: -12%;
   background:
-    radial-gradient(80% 64% at 16% 8%, rgb(248 250 252 / 82%), transparent 72%),
-    radial-gradient(70% 58% at 86% 88%, rgb(207 220 230 / 48%), transparent 76%),
-    #E5EBF1;
+    radial-gradient(ellipse 52% 46% at 12% 8%, rgb(132 148 158 / 9%), transparent 72%),
+    radial-gradient(ellipse 48% 58% at 94% 72%, rgb(74 91 101 / 12%), transparent 74%),
+    radial-gradient(ellipse 42% 38% at 58% 12%, rgb(205 213 217 / 4%), transparent 70%);
+  filter: blur(26px);
+}
+
+html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::before {
+  background:
+    radial-gradient(ellipse 58% 52% at 8% 0%, rgb(255 255 255 / 68%), transparent 72%),
+    radial-gradient(ellipse 50% 62% at 96% 58%, rgb(173 185 192 / 19%), transparent 74%),
+    radial-gradient(ellipse 54% 46% at 24% 104%, rgb(198 208 212 / 23%), transparent 76%),
+    radial-gradient(ellipse 38% 34% at 58% 44%, rgb(255 255 255 / 24%), transparent 74%);
+}
+
+#${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::after {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.72'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: soft-light;
+  opacity: 0.025;
+}
+
+html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::after {
+  mix-blend-mode: multiply;
+  opacity: 0.018;
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} > * {
@@ -50,73 +84,35 @@ html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
   pointer-events: none;
 }
 
-.xiaohei-scene__keyart {
+.${XIAOHEI_SCENE_WORLD_CLASS} {
   inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #4a4d44;
+}
+
+.${XIAOHEI_SCENE_WORLD_CLASS} > * {
   width: 100%;
   height: 100%;
-  max-width: none;
-  object-fit: cover;
-  object-position: center bottom;
-  transform: scale(1.002);
-  filter: blur(0.55px) saturate(96%) contrast(98%);
-  transition: opacity 320ms ease-out;
 }
 
-.xiaohei-scene__keyart--night {
-  opacity: 0.98;
+.xiaohei-scene__world-mount {
+  position: absolute;
+  inset: 0;
 }
 
-.xiaohei-scene__keyart--dawn {
-  opacity: 0;
+.${XIAOHEI_SCENE_WORLD_CLASS} .sylva-living-world-scene {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
-@media (max-aspect-ratio: 4 / 3) {
-  .xiaohei-scene__keyart {
-    object-position: 66% bottom;
-  }
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night {
-  opacity: 0;
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
-  opacity: 0.98;
-}
-
-.xiaohei-scene__spirit {
-  width: 0.58rem;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #8BE5D5;
-  box-shadow: 0 0 0.7rem rgb(117 228 208 / 88%), 0 0 1.8rem rgb(101 209 190 / 56%);
-  mix-blend-mode: screen;
-  opacity: 0.18;
-  will-change: transform, opacity;
-}
-
-html[data-xiaohei-appearance='light'] .xiaohei-scene__spirit {
-  background: #4D927C;
-  box-shadow: 0 0 0.45rem rgb(67 133 111 / 54%), 0 0 1.4rem rgb(106 151 132 / 28%);
-  mix-blend-mode: multiply;
-}
-
-.xiaohei-scene__spirit--one {
-  right: 22%;
-  bottom: 20%;
-  animation: xiaohei-spirit-one 6.8s cubic-bezier(0.37, 0, 0.63, 1) infinite;
-}
-
-.xiaohei-scene__spirit--two {
-  right: 34%;
-  bottom: 30%;
-  animation: xiaohei-spirit-two 8.4s cubic-bezier(0.37, 0, 0.63, 1) -2.2s infinite;
-}
-
-.xiaohei-scene__spirit--three {
-  right: 13%;
-  bottom: 45%;
-  animation: xiaohei-spirit-three 7.7s cubic-bezier(0.37, 0, 0.63, 1) -4.1s infinite;
+/* The world is visual-only. Pointer movement is mirrored into its sandbox by
+   the scene adapter, so the DSH application remains the sole hit-test layer. */
+.${XIAOHEI_SCENE_WORLD_CLASS} .sylva-living-world-scene,
+.${XIAOHEI_SCENE_WORLD_CLASS} .sylva-living-world-scene iframe {
+  pointer-events: none !important;
 }
 
 .xiaohei-scene__mascot {
@@ -126,6 +122,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__spirit {
   aspect-ratio: 1;
   overflow: visible;
   isolation: isolate;
+  z-index: 3;
   filter:
     drop-shadow(0 0.6rem 1.45rem rgb(83 218 193 / 35%))
     drop-shadow(0 1.25rem 2.6rem rgb(1 9 10 / 30%));
@@ -173,6 +170,7 @@ html[data-xiaohei-appearance='light'] .xiaohei-scene__mascot::before {
 
 .xiaohei-scene__heixiu-field {
   inset: 0;
+  z-index: 3;
   overflow: hidden;
 }
 
@@ -621,21 +619,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
   68% { transform: translate3d(-0.6rem, -1.15rem, 0); }
 }
 
-@keyframes xiaohei-spirit-one {
-  0%, 100% { transform: translate3d(0, 0.5rem, 0) scale(0.72); opacity: 0.12; }
-  48% { transform: translate3d(-0.7rem, -1.6rem, 0) scale(1); opacity: 0.82; }
-}
-
-@keyframes xiaohei-spirit-two {
-  0%, 100% { transform: translate3d(0.6rem, 0.4rem, 0) scale(0.68); opacity: 0.08; }
-  52% { transform: translate3d(-0.35rem, -1.35rem, 0) scale(0.92); opacity: 0.66; }
-}
-
-@keyframes xiaohei-spirit-three {
-  0%, 100% { transform: translate3d(-0.4rem, 0.8rem, 0) scale(0.7); opacity: 0.1; }
-  44% { transform: translate3d(0.45rem, -1.2rem, 0) scale(0.96); opacity: 0.7; }
-}
-
 @keyframes xiaohei-thinking-dot {
   0%, 18%, 100% { opacity: 0.28; }
   42%, 62% { opacity: 0.96; }
@@ -675,19 +658,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 }
 
 @media (max-width: 768px) {
-  .xiaohei-scene__keyart {
-    object-position: 62% bottom;
-  }
-
-  .xiaohei-scene__keyart--night { opacity: 0.9; }
-  .xiaohei-scene__keyart--dawn { opacity: 0; }
-
-  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night { opacity: 0; }
-
-  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn {
-    opacity: 0.94;
-  }
-
   .xiaohei-scene__mascot {
     right: -1.5rem;
     bottom: 5rem;
@@ -705,17 +675,16 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .xiaohei-scene__spirit,
   .xiaohei-scene__heixiu,
   .xiaohei-scene__heixiu-open,
   .xiaohei-scene__heixiu-blink,
   .xiaohei-scene__thinking-dot,
   .xiaohei-scene__state-fx > span {
     animation: none;
+    transition: none;
     will-change: auto;
   }
 
-  .xiaohei-scene__spirit { display: none; }
   .xiaohei-scene__state-fx { display: none; }
 
   html[data-xiaohei-state='thinking'] .xiaohei-scene__thinking-dot {
@@ -726,11 +695,6 @@ html[data-xiaohei-state='error'] .xiaohei-scene__error-glow {
 }
 
 @media (prefers-contrast: more) {
-  .xiaohei-scene__keyart--night { opacity: 0.48; }
-  .xiaohei-scene__keyart--dawn { opacity: 0; }
-  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--night { opacity: 0; }
-  html[data-xiaohei-appearance='light'] .xiaohei-scene__keyart--dawn { opacity: 0.5; }
-  .xiaohei-scene__spirit,
   .xiaohei-scene__heixiu-field,
   .xiaohei-scene__heixiu--sidebar { display: none; }
 }

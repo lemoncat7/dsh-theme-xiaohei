@@ -4,7 +4,10 @@ import test from 'node:test'
 import {
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_PART_COUNT,
+  injectXiaoheiSylvaPointerBridge,
   installXiaoheiScene,
+  prepareXiaoheiSylvaPointerFrame,
+  resolveXiaoheiSylvaPointer,
   shouldRestoreXiaoheiHeixiuCompanions,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
@@ -98,7 +101,6 @@ import {
 } from '../lib/portal.js'
 import {
   XIAOHEI_COMPLETE,
-  XIAOHEI_DAWN_KEY_ART,
   XIAOHEI_THINKING,
   XIAOHEI_ERROR,
   XIAOHEI_HEIXIU_BLINK,
@@ -109,8 +111,6 @@ import {
   XIAOHEI_IDLE_BLINK,
   XIAOHEI_IDLE_SHEET,
   XIAOHEI_IDLE_TAIL,
-  XIAOHEI_KEY_ART,
-  XIAOHEI_NIGHT_KEY_ART,
   XIAOHEI_STREAMING,
   XIAOHEI_TOOL,
   XIAOHEI_WAITING,
@@ -133,6 +133,35 @@ import {
 } from '../lib/theme.js'
 
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
+
+test('Sylva pointer bridge derives an isolated movement-only receiver once', () => {
+  const source = '<html><body><script>(function () {\nvar pointer = {}, ndc = {}, hero = document.body;\n})();\n</script></body></html>'
+  const bridged = injectXiaoheiSylvaPointerBridge(source)
+
+  assert.match(bridged, /data-xiaohei-pointer-bridge="true"/)
+  assert.match(bridged, /pointer\.x = \(data\.x \/ window\.innerWidth\)/)
+  assert.match(bridged, /ndc\.x = \(\(data\.x - xiaoheiHeroRect\.left\)/)
+  assert.match(bridged, /sylva-pointer-ack-v1/)
+  assert.match(bridged, /REDUCED && renderer && camera && typeof updateMouse === 'function'/)
+  assert.doesNotMatch(bridged, /PointerEvent|pointerdown|pointerup|click/)
+  assert.equal(injectXiaoheiSylvaPointerBridge(bridged), bridged)
+})
+
+test('Sylva pointer bridge maps host coordinates into the scene viewport', () => {
+  const bounds = { left: 120, top: 80, width: 640, height: 420 }
+  assert.deepEqual(resolveXiaoheiSylvaPointer(170, 115, bounds), { event: 'move', x: 50, y: 35 })
+  assert.deepEqual(resolveXiaoheiSylvaPointer(90, 115, bounds), { event: 'leave' })
+  assert.deepEqual(resolveXiaoheiSylvaPointer(170, 600, bounds), { event: 'leave' })
+  assert.deepEqual(resolveXiaoheiSylvaPointer(120, 80, { ...bounds, width: 0 }), { event: 'leave' })
+})
+
+test('Sylva background prepares its iframe before attaching the WebGL scene', () => {
+  const source = readFileSync(new URL('../src/scene/sylva-background.tsx', import.meta.url), 'utf8')
+  assert.match(source, /createElement\('div'\)/)
+  assert.match(source, /flushSync\(\(\) => root\.render/)
+  assert.ok(source.indexOf('prepareXiaoheiSylvaPointerFrame(frame)') < source.indexOf('host.append(mount)'))
+  assert.equal(typeof prepareXiaoheiSylvaPointerFrame, 'function')
+})
 
 test('theme client is prefetched in the first DSH boot tier', () => {
   assert.equal(packageJson.dsh.client.platform, 'web')
@@ -936,12 +965,8 @@ test('persisted Host appearance remains authoritative during ThemeRuntime hydrat
   assert.equal(bootStyleRemoved, true)
 })
 
-test('scene uses asynchronously decoded key art and compositor-safe motion', () => {
-  assert.equal(XIAOHEI_SCENE_PART_COUNT, 7)
-  assert.match(XIAOHEI_KEY_ART, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_NIGHT_KEY_ART, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_DAWN_KEY_ART, /^data:image\/webp;base64,/)
-  assert.equal(XIAOHEI_KEY_ART, XIAOHEI_NIGHT_KEY_ART)
+test('scene composes a passive theme field and async character art', () => {
+  assert.equal(XIAOHEI_SCENE_PART_COUNT, 3)
   assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_BLINK, /^data:image\/webp;base64,/)
   assert.match(XIAOHEI_IDLE_EYE_BASE, /^data:image\/webp;base64,/)
@@ -1007,23 +1032,26 @@ test('scene uses asynchronously decoded key art and compositor-safe motion', () 
   assert.match(XIAOHEI_STATE_TRANSITION_CSS, /transition-delay:\s*70ms/)
   assert.doesNotMatch(XIAOHEI_STATE_TRANSITION_CSS, /transform|scale|translate|requestAnimationFrame|setTimeout/)
   assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
-  assert.match(installXiaoheiScene.toString(), /decoding = ['"]async['"]/)
-  assert.match(installXiaoheiScene.toString(), /fetchPriority = ['"]low['"]/)
+  const sceneRuntimeSource = readFileSync(new URL('../src/scene/runtime.ts', import.meta.url), 'utf8')
+  assert.match(sceneRuntimeSource, /decoding = ['"]async['"]/)
+  assert.match(sceneRuntimeSource, /fetchPriority = ['"]low['"]/)
   assert.match(installXiaoheiScene.toString(), /createHeixiuField/)
+  assert.match(installXiaoheiScene.toString(), /createWorldBackground/)
   assert.match(installXiaoheiScene.toString(), /installSidebarHeixiu/)
   assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: true }]), false)
   assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: false }]), true)
   assert.match(XIAOHEI_SCENE_CSS, /pointer-events:\s*none/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--dawn/)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart\s*\{[\s\S]*filter:\s*blur\(0\.55px\) saturate\(96%\) contrast\(98%\)/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__realm-/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__blob-cursor|xiaohei-spirit-blob-filter/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /realm-canvas|spirit-sphere|portal-ring/)
+  assert.doesNotMatch(sceneRuntimeSource, /realm|pointermove|requestAnimationFrame/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /--xiaohei-sidebar-(?:aura|current)/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart--(?:night|dawn)\s*\{[^}]*filter:/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__keyart\s*\{[\s\S]*object-position:\s*center bottom/)
-  assert.match(XIAOHEI_SCENE_CSS, /max-aspect-ratio:\s*4\s*\/\s*3[\s\S]*object-position:\s*66% bottom/)
-  assert.match(XIAOHEI_SCENE_CSS, /max-width:\s*768px[\s\S]*object-position:\s*62% bottom/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'[\s\S]*background:[\s\S]*#E5EBF1/)
+  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'[\s\S]*background:[\s\S]*#E9EDEF/)
+  assert.match(XIAOHEI_SCENE_CSS, /::before[\s\S]*radial-gradient/)
+  assert.match(XIAOHEI_SCENE_CSS, /feTurbulence/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-ambient|@keyframes xiaohei-background/)
+  assert.match(XIAOHEI_SCENE_CSS, /sylva-living-world-scene/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__veil/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__aura/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-spirit-ring/)
@@ -1152,6 +1180,11 @@ test('uses paired light and dark theme semantics and only DSH custom properties'
     assert.equal(modes.light, XIAOHEI_DAWN_THEME.tokens[key])
     assert.equal(modes.dark, XIAOHEI_NIGHT_THEME.tokens[key])
   }
+})
+
+test('native shell base stays transparent over the interactive world', () => {
+  assert.equal(XIAOHEI_DAWN_THEME.tokens['--dsw-alias-bg-base'], 'transparent')
+  assert.equal(XIAOHEI_NIGHT_THEME.tokens['--dsw-alias-bg-base'], 'transparent')
 })
 
 test('core light and dark opaque pairs meet WCAG AA contrast', () => {

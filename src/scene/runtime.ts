@@ -1,13 +1,11 @@
 import {
   XIAOHEI_COMPLETE,
-  XIAOHEI_DAWN_KEY_ART,
   XIAOHEI_THINKING,
   XIAOHEI_ERROR,
   XIAOHEI_HEIXIU_BLINK,
   XIAOHEI_HEIXIU_OPEN,
   XIAOHEI_IDLE_BLINK,
   XIAOHEI_IDLE_SHEET,
-  XIAOHEI_NIGHT_KEY_ART,
   XIAOHEI_STREAMING,
   XIAOHEI_TOOL,
   XIAOHEI_WAITING,
@@ -18,14 +16,21 @@ import {
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_LAYER_ID,
   XIAOHEI_SCENE_STYLE_ID,
+  XIAOHEI_SCENE_WORLD_CLASS,
 } from './styles.js'
 
+type XiaoheiWorldRenderer = (host: HTMLElement) => () => void
+let worldRenderer: XiaoheiWorldRenderer | undefined
+
+/** Register the browser-only world renderer without coupling shared scene code to raw assets. */
+export function configureXiaoheiWorldRenderer(renderer: XiaoheiWorldRenderer): () => void {
+  worldRenderer = renderer
+  return () => {
+    if (worldRenderer === renderer) worldRenderer = undefined
+  }
+}
 const PARTS = [
-  'xiaohei-scene__keyart xiaohei-scene__keyart--night',
-  'xiaohei-scene__keyart xiaohei-scene__keyart--dawn',
-  'xiaohei-scene__spirit xiaohei-scene__spirit--one',
-  'xiaohei-scene__spirit xiaohei-scene__spirit--two',
-  'xiaohei-scene__spirit xiaohei-scene__spirit--three',
+  XIAOHEI_SCENE_WORLD_CLASS,
   'xiaohei-scene__mascot',
   'xiaohei-scene__heixiu-field',
 ] as const
@@ -52,10 +57,13 @@ export function installXiaoheiScene(
   let disposed = false
   let removeMountedScene = (): void => {}
   let removeSidebarHeixiu = (): void => {}
+  let removeWorld = (): void => {}
 
   const mount = (): void => {
     if (disposed) return
 
+    removeWorld()
+    removeWorld = () => {}
     doc.getElementById(XIAOHEI_SCENE_STYLE_ID)?.remove()
     doc.getElementById(XIAOHEI_SCENE_LAYER_ID)?.remove()
 
@@ -69,18 +77,14 @@ export function installXiaoheiScene(
     layer.setAttribute('aria-hidden', 'true')
     layer.setAttribute('data-xiaohei-scene', '')
 
-    const keyArtSources = [XIAOHEI_NIGHT_KEY_ART, XIAOHEI_DAWN_KEY_ART] as const
-    for (const [index, source] of keyArtSources.entries()) {
-      const keyArt = doc.createElement('img')
-      keyArt.className = PARTS[index]!
-      keyArt.alt = ''
-      keyArt.decoding = 'async'
-      keyArt.fetchPriority = 'low'
-      keyArt.src = source
-      layer.append(keyArt)
-    }
+    let worldHost: HTMLDivElement | undefined
+    for (const className of PARTS) {
+      if (className === XIAOHEI_SCENE_WORLD_CLASS) {
+        worldHost = createWorldBackground(doc)
+        layer.append(worldHost)
+        continue
+      }
 
-    for (const className of PARTS.slice(keyArtSources.length)) {
       if (className === 'xiaohei-scene__mascot') {
         const mascot = doc.createElement('div')
         mascot.className = className
@@ -131,9 +135,14 @@ export function installXiaoheiScene(
     }
 
     doc.body.prepend(layer)
+    if (worldHost !== undefined && worldRenderer !== undefined) {
+      removeWorld = worldRenderer(worldHost)
+    }
     removeSidebarHeixiu()
     removeSidebarHeixiu = installSidebarHeixiu(doc)
     removeMountedScene = () => {
+      removeWorld()
+      removeWorld = () => {}
       removeSidebarHeixiu()
       removeSidebarHeixiu = () => {}
       layer.remove()
@@ -158,6 +167,12 @@ export function installXiaoheiScene(
     cancelSchedule()
     removeMountedScene()
   }
+}
+
+function createWorldBackground(doc: Document): HTMLDivElement {
+  const world = doc.createElement('div')
+  world.className = XIAOHEI_SCENE_WORLD_CLASS
+  return world
 }
 
 function createIdleSheet(doc: Document, frame: number, modifier: string): HTMLImageElement {

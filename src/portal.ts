@@ -2,7 +2,7 @@ import { XIAOHEI_HEIXIU_BLINK, XIAOHEI_HEIXIU_OPEN } from './generated-keyart.js
 import { XIAOHEI_PORTAL_CSS } from './chrome/portal.js'
 import { subscribeXiaoheiHostDom } from './host-dom.js'
 import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
-import { XIAOHEI_SCENE_LAYER_ID } from './scene.js'
+import { XIAOHEI_SCENE_LAYER_ID, XIAOHEI_SCENE_WORLD_CLASS } from './scene.js'
 
 export const XIAOHEI_PORTAL_STYLE_ID = 'dsh-theme-xiaohei/portal-style'
 export const XIAOHEI_PORTAL_LAYER_ID = 'dsh-theme-xiaohei/portal-layer'
@@ -114,8 +114,8 @@ export function installXiaoheiPortalTransit(
     const scene = doc.getElementById(XIAOHEI_SCENE_LAYER_ID)
     if (scene === null) return false
     if (layer.parentElement !== scene) {
-      const dawnKeyArt = scene.querySelector('.xiaohei-scene__keyart--dawn')
-      scene.insertBefore(layer, dawnKeyArt?.nextSibling ?? scene.firstChild)
+      const world = scene.querySelector(`.${XIAOHEI_SCENE_WORLD_CLASS}`)
+      scene.insertBefore(layer, world?.nextSibling ?? scene.firstChild)
     }
     return true
   }

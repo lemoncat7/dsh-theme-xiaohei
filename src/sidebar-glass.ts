@@ -1,4 +1,4 @@
-import { XIAOHEI_SCENE_LAYER_ID } from './scene.js'
+import { XIAOHEI_SCENE_LAYER_ID, XIAOHEI_SCENE_WORLD_CLASS } from './scene.js'
 import { subscribeXiaoheiHostDom } from './host-dom.js'
 import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
 
@@ -123,8 +123,8 @@ export function installXiaoheiSidebarGlass(
       glass.setAttribute('aria-hidden', 'true')
       appliedBounds = undefined
 
-      const dawnKeyArt = sceneLayer.querySelector('.xiaohei-scene__keyart--dawn')
-      sceneLayer.insertBefore(glass, dawnKeyArt?.nextSibling ?? sceneLayer.firstChild)
+      const world = sceneLayer.querySelector(`.${XIAOHEI_SCENE_WORLD_CLASS}`)
+      sceneLayer.insertBefore(glass, world?.nextSibling ?? sceneLayer.firstChild)
     }
 
     applyBounds()

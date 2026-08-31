@@ -9,7 +9,7 @@ export const XIAOHEI_DAWN_THEME_ID = 'xiaohei-dawn'
 export const XIAOHEI_NIGHT_THEME_ID = 'xiaohei-night'
 
 const DAWN_TOKENS: ThemeTokens = {
-  '--dsw-alias-bg-base': 'rgb(218 225 232 / 24%)',
+  '--dsw-alias-bg-base': 'transparent',
   '--dsw-alias-bg-layer-1': 'rgb(232 237 243 / 82%)',
   '--dsw-alias-bg-layer-2': 'rgb(238 242 247 / 90%)',
   '--dsw-alias-bg-layer-3': 'rgb(244 247 250 / 96%)',
@@ -100,7 +100,7 @@ const DAWN_TOKENS: ThemeTokens = {
 }
 
 const NIGHT_TOKENS: ThemeTokens = {
-  '--dsw-alias-bg-base': 'rgb(12 17 19 / 18%)',
+  '--dsw-alias-bg-base': 'transparent',
   '--dsw-alias-bg-layer-1': 'rgb(20 27 29 / 74%)',
   '--dsw-alias-bg-layer-2': 'rgb(25 33 35 / 86%)',
   '--dsw-alias-bg-layer-3': 'rgb(31 40 42 / 94%)',

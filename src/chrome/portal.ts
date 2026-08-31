@@ -6,7 +6,7 @@ export const XIAOHEI_PORTAL_CSS = `
 #dsh-theme-xiaohei\\/portal-layer {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;
   overflow: hidden;
   contain: strict;
   pointer-events: none;
