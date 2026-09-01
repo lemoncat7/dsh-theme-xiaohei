@@ -1,4 +1,5 @@
 import { XIAOHEI_AVATAR_MODEL_GLB } from '../generated-avatar-model.js'
+import { XIAOHEI_AVATAR_MOTION_RUNTIME } from './avatar-motion.js'
 
 export const XIAOHEI_SYLVA_AVATAR_MARKER = 'data-xiaohei-avatar-model'
 
@@ -16,6 +17,8 @@ const AVATAR_ADAPTER = `
   var xiaoheiAvatarWorldSphere = new THREE.Sphere();
   var xiaoheiAvatarPoint = new THREE.Vector3();
   var xiaoheiAvatarHover = 0;
+
+${XIAOHEI_AVATAR_MOTION_RUNTIME}
 
   function xiaoheiAvatarDecode(source) {
     var encoded = source.slice(source.indexOf(',') + 1);
@@ -112,6 +115,9 @@ const AVATAR_ADAPTER = `
     model.name = 'xiaohei-avatar-hi3d-model';
     root.add(model);
 
+    var rig = xiaoheiAvatarBuildRig(parsed.geometry, parsed.reviewedHeight);
+    model.add(rig.rootBone);
+
     var material = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       side: THREE.FrontSide,
@@ -148,13 +154,15 @@ const AVATAR_ADAPTER = `
       );
     };
     material.customProgramCacheKey = function () { return 'xiaohei-scanned-basic-v1'; };
-    var mesh = new THREE.Mesh(parsed.geometry, material);
+    var mesh = new THREE.SkinnedMesh(parsed.geometry, material);
     mesh.name = 'xiaohei-avatar-hi3d-web-v1';
     mesh.castShadow = false;
     mesh.receiveShadow = false;
     mesh.frustumCulled = false;
     mesh.visible = false;
     model.add(mesh);
+    model.updateMatrixWorld(true);
+    mesh.bind(rig.skeleton);
 
     var scanWire = null;
     if (!REDUCED) {
@@ -195,12 +203,15 @@ const AVATAR_ADAPTER = `
           '}'
         ].join('\\n')
       });
-      scanWire = new THREE.Mesh(parsed.geometry, scanMaterial);
+      scanWire = new THREE.SkinnedMesh(parsed.geometry, scanMaterial);
       scanWire.name = 'xiaohei-avatar-survey-wire-v1';
       scanWire.renderOrder = 12;
       scanWire.frustumCulled = false;
       model.add(scanWire);
+      scanWire.bind(rig.skeleton);
     }
+    var portal = xiaoheiAvatarBuildPortal();
+    root.add(portal);
 
     var textureBlob = new Blob([parsed.imageBytes], { type: parsed.imageType });
     var textureUrl = URL.createObjectURL(textureBlob);
@@ -235,15 +246,16 @@ const AVATAR_ADAPTER = `
       model: model,
       mesh: mesh,
       scanWire: scanWire,
+      rig: rig,
+      portal: portal,
       hitSphere: parsed.geometry.boundingSphere.clone(),
       reviewedHeight: parsed.reviewedHeight
     };
   }
 
-  function xiaoheiAvatarSample(target) {
+  function xiaoheiAvatarSampleAt(t, target) {
     if (!xiaoheiAvatarLimbs || !xiaoheiAvatarLimbs[0]) return false;
     var limb = xiaoheiAvatarLimbs[0];
-    var t = 0.42;
     target.copy(limb.curve.getPointAt(t));
     var radius = limb.rw(t) + (limb.moss ? limb.moss(t) * 0.78 : 0);
     target.y += radius + 0.02;
@@ -256,7 +268,8 @@ const AVATAR_ADAPTER = `
     var avatar = xiaoheiAvatarBuildModel();
     nearGroup.add(avatar.root);
     xiaoheiAvatar = avatar;
-    xiaoheiAvatarSample(xiaoheiAvatarPoint);
+    xiaoheiAvatarPrepareMotion(avatar);
+    xiaoheiAvatarSampleAt(avatar.motion.anchorT, xiaoheiAvatarPoint);
     avatar.root.position.copy(xiaoheiAvatarPoint);
     document.documentElement.dataset.xiaoheiAvatarReady = 'true';
     document.documentElement.dataset.xiaoheiAvatarMotion = 'static-hi3d-idle-v1';
@@ -269,7 +282,8 @@ const AVATAR_ADAPTER = `
   function xiaoheiAvatarUpdate() {
     if (!xiaoheiAvatar || !camera || !nearGroup) return;
     var now = performance.now();
-    xiaoheiAvatarSample(xiaoheiAvatarPoint);
+    xiaoheiAvatarAdvanceMotion(xiaoheiAvatar, now);
+    xiaoheiAvatarSampleAt(xiaoheiAvatar.motion.anchorT, xiaoheiAvatarPoint);
     xiaoheiAvatar.root.position.copy(xiaoheiAvatarPoint);
     var displayHeight = NARROW.matches ? 2.08 : 1.68;
     xiaoheiAvatar.root.scale.setScalar(displayHeight / xiaoheiAvatar.reviewedHeight);
@@ -284,16 +298,14 @@ const AVATAR_ADAPTER = `
       hit = xiaoheiAvatarRay.ray.intersectsSphere(xiaoheiAvatarWorldSphere);
     }
     xiaoheiAvatarHover += ((hit ? 1 : 0) - xiaoheiAvatarHover) * (hit ? 0.10 : 0.055);
-    var breath = Math.sin(now * 0.00125);
-    var settle = Math.sin(now * 0.00053 + 0.7);
-    xiaoheiAvatar.model.position.y = breath * 0.007;
-    xiaoheiAvatar.model.rotation.z = settle * 0.006 - xiaoheiAvatarHover * 0.012;
-    xiaoheiAvatar.model.rotation.y += (((ndc.x <= 2 ? ndc.x : 0) * 0.035) - xiaoheiAvatar.model.rotation.y) * 0.025;
+    xiaoheiAvatar.model.rotation.y += (((ndc.x <= 2 ? ndc.x : 0) * 0.014) - xiaoheiAvatar.model.rotation.y) * 0.025;
+    xiaoheiAvatarPoseMotion(xiaoheiAvatar, now);
     if (xiaoheiAvatar.scanWire && (!scanning || uScanOn.value < 0.5)) {
       xiaoheiAvatar.model.remove(xiaoheiAvatar.scanWire);
       xiaoheiAvatar.scanWire.material.dispose();
       xiaoheiAvatar.scanWire = null;
       document.documentElement.dataset.xiaoheiAvatarScan = 'complete';
+      xiaoheiAvatarStartArrival(xiaoheiAvatar, now);
     }
     document.documentElement.dataset.xiaoheiAvatarHover = xiaoheiAvatarHover > 0.08 ? 'true' : 'false';
   }

@@ -19,6 +19,8 @@ export {
   XIAOHEI_SYLVA_AVATAR_MARKER,
 } from './scene/avatar-model.js'
 
+export { XIAOHEI_AVATAR_MOTION_RUNTIME } from './scene/avatar-motion.js'
+
 export {
   injectXiaoheiSylvaPerformanceProfile,
   XIAOHEI_SYLVA_PERFORMANCE_MARKER,
