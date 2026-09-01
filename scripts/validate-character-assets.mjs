@@ -28,8 +28,8 @@ const avatarModel = await readFile(
 if (avatarModel.toString('ascii', 0, 4) !== 'glTF' || avatarModel.readUInt32LE(4) !== 2) {
   throw new Error('xiaohei-avatar-hi3d-web-v1.glb must be a GLB 2.0 container')
 }
-if (avatarModel.length > 4 * 1024 * 1024) {
-  throw new Error('xiaohei-avatar-hi3d-web-v1.glb exceeds the 4 MB theme budget')
+if (avatarModel.length > 1_100_000) {
+  throw new Error('xiaohei-avatar-hi3d-web-v1.glb exceeds the reviewed 1.1 MB web budget')
 }
 const jsonLength = avatarModel.readUInt32LE(12)
 const manifest = JSON.parse(
@@ -46,6 +46,18 @@ if ((indexAccessor?.count ?? 0) < 90_000 || (indexAccessor?.count ?? 0) > 180_00
 }
 if (manifest.images?.[0]?.bufferView === undefined || primitive?.attributes?.TEXCOORD_0 === undefined) {
   throw new Error('xiaohei-avatar-hi3d-web-v1.glb must contain an embedded texture and UVs')
+}
+const binaryOffset = 20 + jsonLength + 8
+const imageView = manifest.bufferViews[manifest.images[0].bufferView]
+const embeddedTexture = avatarModel.subarray(
+  binaryOffset + (imageView.byteOffset ?? 0),
+  binaryOffset + (imageView.byteOffset ?? 0) + imageView.byteLength,
+)
+const textureSize = readJpegDimensions(embeddedTexture)
+if (textureSize.width !== 512 || textureSize.height !== 512) {
+  throw new Error(
+    `xiaohei-avatar-hi3d-web-v1.glb texture must be 512x512, received ${textureSize.width}x${textureSize.height}`,
+  )
 }
 
 function readWebpDimensions(source) {
@@ -93,4 +105,28 @@ function readWebpDimensions(source) {
 
 function readUInt24LE(source, offset) {
   return source[offset] | (source[offset + 1] << 8) | (source[offset + 2] << 16)
+}
+
+function readJpegDimensions(source) {
+  if (source[0] !== 0xff || source[1] !== 0xd8) throw new Error('avatar texture is not a JPEG')
+  let offset = 2
+  while (offset + 9 < source.length) {
+    if (source[offset] !== 0xff) {
+      offset += 1
+      continue
+    }
+    const marker = source[offset + 1]
+    offset += 2
+    if (marker === 0xd9 || marker === 0xda) break
+    const length = source.readUInt16BE(offset)
+    if (length < 2 || offset + length > source.length) break
+    if (marker >= 0xc0 && marker <= 0xc3) {
+      return {
+        height: source.readUInt16BE(offset + 3),
+        width: source.readUInt16BE(offset + 5),
+      }
+    }
+    offset += length
+  }
+  throw new Error('avatar JPEG dimensions were not found')
 }

@@ -20,6 +20,11 @@ export {
 } from './scene/avatar-model.js'
 
 export {
+  injectXiaoheiSylvaPerformanceProfile,
+  XIAOHEI_SYLVA_PERFORMANCE_MARKER,
+} from './scene/sylva-performance.js'
+
+export {
   injectXiaoheiSylvaPointerBridge,
   prepareXiaoheiSylvaPointerFrame,
   resolveXiaoheiSylvaPointer,

@@ -5,6 +5,7 @@ import {
   XIAOHEI_SCENE_CSS,
   XIAOHEI_SCENE_PART_COUNT,
   injectXiaoheiSylvaAvatarModel,
+  injectXiaoheiSylvaPerformanceProfile,
   injectXiaoheiSylvaPointerBridge,
   installXiaoheiScene,
   prepareXiaoheiSylvaPointerFrame,
@@ -192,12 +193,36 @@ test('Sylva avatar is injected as one renderer-sharing optimized Hi3D model', ()
   assert.equal(injectXiaoheiSylvaAvatarModel(modeled), modeled)
 })
 
+test('Sylva performance profile halves moss load and removes the butterfly', () => {
+  const authored = [
+    '<html><body><script>(function () {',
+    'var BLADES_NEAR = small ? 70000 : 190000;',
+    'var BLADES_FAR  = small ? 20000 :  60000;',
+    'renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.6 : 2));',
+    'if (!small) bf = buildButterfly(nearGroup, nearLimbs, nearGroup.userData.uni);',
+    'if (renderer && clock) renderFrame();',
+    '})();',
+    '</script></body></html>',
+  ].join('\n')
+  const profiled = injectXiaoheiSylvaPerformanceProfile(authored)
+
+  assert.match(profiled, /data-xiaohei-performance-profile="balanced-v1"/)
+  assert.match(profiled, /small \? 48000 : 105000/)
+  assert.match(profiled, /small \? 12000 :\s+28000/)
+  assert.match(profiled, /small \? 1\.25 : 1\.4/)
+  assert.match(profiled, /bf = null; \/\* butterfly disabled/)
+  assert.doesNotMatch(profiled, /buildButterfly\(nearGroup/)
+  assert.match(profiled, /xiaoheiWorldFrameInterval/)
+  assert.match(profiled, /< 620000 \? 30 : 45/)
+  assert.equal(injectXiaoheiSylvaPerformanceProfile(profiled), profiled)
+})
+
 test('Sylva background prepares its iframe before attaching the WebGL scene', () => {
   const source = readFileSync(new URL('../src/scene/sylva-background.tsx', import.meta.url), 'utf8')
   assert.match(source, /createElement\('div'\)/)
   assert.match(source, /flushSync\(\(\) => root\.render/)
   assert.match(source, /const patchedSetAttribute = function setXiaoheiAttribute/)
-  assert.match(source, /injectXiaoheiSylvaPointerBridge\([\s\S]*injectXiaoheiSylvaAvatarModel\(source\)/)
+  assert.match(source, /injectXiaoheiSylvaPointerBridge\([\s\S]*injectXiaoheiSylvaAvatarModel\([\s\S]*injectXiaoheiSylvaPerformanceProfile\(source\)/)
   assert.match(source, /source\.includes\('<title>Interactive procedural moss root world<\/title>'\)/)
   assert.match(source, /return \(\) => \{[\s\S]*restoreSourceInterceptors\(\)/)
   assert.ok(source.indexOf('elementPrototype.setAttribute = patchedSetAttribute') < source.indexOf('flushSync(() => root.render'))

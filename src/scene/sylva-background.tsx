@@ -10,6 +10,7 @@ import {
   injectXiaoheiSylvaAvatarModel,
   prepareXiaoheiSylvaAvatarFrame,
 } from './avatar-model.js'
+import { injectXiaoheiSylvaPerformanceProfile } from './sylva-performance.js'
 
 export const XIAOHEI_SYLVA_STYLE_ID = 'dsh-theme-xiaohei/threeui-style'
 
@@ -43,7 +44,11 @@ export function mountXiaoheiSylvaBackground(host: HTMLElement): () => void {
   const srcDocDescriptor = Object.getOwnPropertyDescriptor(iframePrototype, 'srcdoc')
   const composeSource = (source: string): string => (
     source.includes('<title>Interactive procedural moss root world</title>')
-      ? injectXiaoheiSylvaPointerBridge(injectXiaoheiSylvaAvatarModel(source))
+      ? injectXiaoheiSylvaPointerBridge(
+        injectXiaoheiSylvaAvatarModel(
+          injectXiaoheiSylvaPerformanceProfile(source),
+        ),
+      )
       : source
   )
 
