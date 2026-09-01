@@ -16,6 +16,7 @@ const AVATAR_ADAPTER = `
   var xiaoheiAvatarRay = new THREE.Raycaster();
   var xiaoheiAvatarWorldSphere = new THREE.Sphere();
   var xiaoheiAvatarPoint = new THREE.Vector3();
+  var xiaoheiAvatarCameraLocal = new THREE.Vector3();
   var xiaoheiAvatarHover = 0;
 
 ${XIAOHEI_AVATAR_MOTION_RUNTIME}
@@ -210,9 +211,6 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
       model.add(scanWire);
       scanWire.bind(rig.skeleton);
     }
-    var portal = xiaoheiAvatarBuildPortal();
-    root.add(portal);
-
     var textureBlob = new Blob([parsed.imageBytes], { type: parsed.imageType });
     var textureUrl = URL.createObjectURL(textureBlob);
     new THREE.TextureLoader().load(
@@ -247,7 +245,6 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
       mesh: mesh,
       scanWire: scanWire,
       rig: rig,
-      portal: portal,
       hitSphere: parsed.geometry.boundingSphere.clone(),
       reviewedHeight: parsed.reviewedHeight
     };
@@ -282,11 +279,26 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
   function xiaoheiAvatarUpdate() {
     if (!xiaoheiAvatar || !camera || !nearGroup) return;
     var now = performance.now();
-    xiaoheiAvatarAdvanceMotion(xiaoheiAvatar, now);
     xiaoheiAvatarSampleAt(xiaoheiAvatar.motion.anchorT, xiaoheiAvatarPoint);
     xiaoheiAvatar.root.position.copy(xiaoheiAvatarPoint);
     var displayHeight = NARROW.matches ? 2.08 : 1.68;
     xiaoheiAvatar.root.scale.setScalar(displayHeight / xiaoheiAvatar.reviewedHeight);
+
+    xiaoheiAvatarCameraLocal.copy(camera.position);
+    nearGroup.worldToLocal(xiaoheiAvatarCameraLocal);
+    var cameraDx = xiaoheiAvatarCameraLocal.x - xiaoheiAvatarPoint.x;
+    var cameraDy = xiaoheiAvatarCameraLocal.y - xiaoheiAvatarPoint.y - displayHeight * 0.66;
+    var cameraDz = xiaoheiAvatarCameraLocal.z - xiaoheiAvatarPoint.z;
+    var screenYaw = Math.atan2(cameraDx, cameraDz);
+    var yawDelta = Math.atan2(
+      Math.sin(screenYaw - xiaoheiAvatar.model.rotation.y),
+      Math.cos(screenYaw - xiaoheiAvatar.model.rotation.y)
+    );
+    xiaoheiAvatar.model.rotation.y += yawDelta * 0.075;
+    xiaoheiAvatar.screenPitch = Math.max(
+      -0.10,
+      Math.min(0.10, Math.atan2(cameraDy, Math.hypot(cameraDx, cameraDz)) * 0.52)
+    );
 
     var hit = false;
     if (ndc.x <= 2 && xiaoheiAvatar.mesh.visible) {
@@ -298,14 +310,12 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
       hit = xiaoheiAvatarRay.ray.intersectsSphere(xiaoheiAvatarWorldSphere);
     }
     xiaoheiAvatarHover += ((hit ? 1 : 0) - xiaoheiAvatarHover) * (hit ? 0.10 : 0.055);
-    xiaoheiAvatar.model.rotation.y += (((ndc.x <= 2 ? ndc.x : 0) * 0.014) - xiaoheiAvatar.model.rotation.y) * 0.025;
     xiaoheiAvatarPoseMotion(xiaoheiAvatar, now);
     if (xiaoheiAvatar.scanWire && (!scanning || uScanOn.value < 0.5)) {
       xiaoheiAvatar.model.remove(xiaoheiAvatar.scanWire);
       xiaoheiAvatar.scanWire.material.dispose();
       xiaoheiAvatar.scanWire = null;
       document.documentElement.dataset.xiaoheiAvatarScan = 'complete';
-      xiaoheiAvatarStartArrival(xiaoheiAvatar, now);
     }
     document.documentElement.dataset.xiaoheiAvatarHover = xiaoheiAvatarHover > 0.08 ? 'true' : 'false';
   }
