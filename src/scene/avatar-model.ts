@@ -121,6 +121,33 @@ const AVATAR_ADAPTER = `
       depthWrite: true
     });
     material.toneMapped = false;
+    material.onBeforeCompile = function (shader) {
+      shader.uniforms.uXiaoheiScanO = uScanO;
+      shader.uniforms.uXiaoheiScanR = uScanR;
+      shader.uniforms.uXiaoheiScanOn = uScanOn;
+      shader.vertexShader = [
+        'varying vec3 vXiaoheiWorld;',
+        shader.vertexShader
+      ].join('\\n').replace(
+        '#include <begin_vertex>',
+        '#include <begin_vertex>\\n  vXiaoheiWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;'
+      );
+      shader.fragmentShader = [
+        'uniform vec3 uXiaoheiScanO;',
+        'uniform float uXiaoheiScanR;',
+        'uniform float uXiaoheiScanOn;',
+        'varying vec3 vXiaoheiWorld;',
+        shader.fragmentShader
+      ].join('\\n').replace(
+        '#include <clipping_planes_fragment>',
+        [
+          '#include <clipping_planes_fragment>',
+          'float xiaoheiScanDistance = distance(vXiaoheiWorld, uXiaoheiScanO);',
+          'if (uXiaoheiScanOn > 0.5 && xiaoheiScanDistance > uXiaoheiScanR - 520.0) discard;'
+        ].join('\\n')
+      );
+    };
+    material.customProgramCacheKey = function () { return 'xiaohei-scanned-basic-v1'; };
     var mesh = new THREE.Mesh(parsed.geometry, material);
     mesh.name = 'xiaohei-avatar-hi3d-web-v1';
     mesh.castShadow = false;
@@ -128,6 +155,52 @@ const AVATAR_ADAPTER = `
     mesh.frustumCulled = false;
     mesh.visible = false;
     model.add(mesh);
+
+    var scanWire = null;
+    if (!REDUCED) {
+      var scanMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          uScanO: uScanO,
+          uScanR: uScanR,
+          uWire: uWire,
+          uTime: uTime
+        },
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+        blending: THREE.AdditiveBlending,
+        wireframe: true,
+        vertexShader: [
+          'varying vec3 vW;',
+          'void main(){',
+          '  vec4 wp = modelMatrix * vec4(position, 1.0);',
+          '  vW = wp.xyz;',
+          '  gl_Position = projectionMatrix * viewMatrix * wp;',
+          '}'
+        ].join('\\n'),
+        fragmentShader: [
+          'precision highp float;',
+          'uniform vec3 uScanO;',
+          'uniform float uScanR, uWire, uTime;',
+          'varying vec3 vW;',
+          'void main(){',
+          '  float d = distance(vW, uScanO);',
+          '  float rim = exp(-pow((d - uScanR) / 135.0, 2.0));',
+          '  float trail = 1.0 - smoothstep(uScanR - 950.0, uScanR, d);',
+          '  float a = (rim * 1.35 + trail * 0.26) * uWire;',
+          '  if (a < 0.004) discard;',
+          '  a *= 0.70 + 0.30 * sin(d * 0.045 - uTime * 7.0);',
+          '  vec3 col = mix(vec3(0.30, 0.72, 0.46), vec3(0.86, 1.00, 0.90), rim);',
+          '  gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));',
+          '}'
+        ].join('\\n')
+      });
+      scanWire = new THREE.Mesh(parsed.geometry, scanMaterial);
+      scanWire.name = 'xiaohei-avatar-survey-wire-v1';
+      scanWire.renderOrder = 12;
+      scanWire.frustumCulled = false;
+      model.add(scanWire);
+    }
 
     var textureBlob = new Blob([parsed.imageBytes], { type: parsed.imageType });
     var textureUrl = URL.createObjectURL(textureBlob);
@@ -161,6 +234,7 @@ const AVATAR_ADAPTER = `
       root: root,
       model: model,
       mesh: mesh,
+      scanWire: scanWire,
       hitSphere: parsed.geometry.boundingSphere.clone(),
       reviewedHeight: parsed.reviewedHeight
     };
@@ -188,6 +262,7 @@ const AVATAR_ADAPTER = `
     document.documentElement.dataset.xiaoheiAvatarMotion = 'static-hi3d-idle-v1';
     document.documentElement.dataset.xiaoheiAvatarAction = 'idle-3d';
     document.documentElement.dataset.xiaoheiAvatarPose = 'idle';
+    document.documentElement.dataset.xiaoheiAvatarScan = xiaoheiAvatar.scanWire ? 'active' : 'skipped';
     renderFrame();
   }
 
@@ -214,6 +289,12 @@ const AVATAR_ADAPTER = `
     xiaoheiAvatar.model.position.y = breath * 0.007;
     xiaoheiAvatar.model.rotation.z = settle * 0.006 - xiaoheiAvatarHover * 0.012;
     xiaoheiAvatar.model.rotation.y += (((ndc.x <= 2 ? ndc.x : 0) * 0.035) - xiaoheiAvatar.model.rotation.y) * 0.025;
+    if (xiaoheiAvatar.scanWire && (!scanning || uScanOn.value < 0.5)) {
+      xiaoheiAvatar.model.remove(xiaoheiAvatar.scanWire);
+      xiaoheiAvatar.scanWire.material.dispose();
+      xiaoheiAvatar.scanWire = null;
+      document.documentElement.dataset.xiaoheiAvatarScan = 'complete';
+    }
     document.documentElement.dataset.xiaoheiAvatarHover = xiaoheiAvatarHover > 0.08 ? 'true' : 'false';
   }
 
