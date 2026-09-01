@@ -23,13 +23,13 @@ for (const [filename, expectedWidth, expectedHeight] of assets) {
 }
 
 const avatarModel = await readFile(
-  new URL('../src/assets/model/xiaohei-avatar-hi3d-web-v1.glb', import.meta.url),
+  new URL('../src/assets/model/xiaohei-avatar-hi3d-rig-web-v2.glb', import.meta.url),
 )
 if (avatarModel.toString('ascii', 0, 4) !== 'glTF' || avatarModel.readUInt32LE(4) !== 2) {
-  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must be a GLB 2.0 container')
+  throw new Error('xiaohei-avatar-hi3d-rig-web-v2.glb must be a GLB 2.0 container')
 }
-if (avatarModel.length > 1_100_000) {
-  throw new Error('xiaohei-avatar-hi3d-web-v1.glb exceeds the reviewed 1.1 MB web budget')
+if (avatarModel.length > 2_500_000) {
+  throw new Error('xiaohei-avatar-hi3d-rig-web-v2.glb exceeds the reviewed 2.5 MB web budget')
 }
 const jsonLength = avatarModel.readUInt32LE(12)
 const manifest = JSON.parse(
@@ -38,14 +38,17 @@ const manifest = JSON.parse(
 const primitive = manifest.meshes?.[0]?.primitives?.[0]
 const positionAccessor = manifest.accessors?.[primitive?.attributes?.POSITION]
 const indexAccessor = manifest.accessors?.[primitive?.indices]
-if ((positionAccessor?.count ?? 0) < 18_000 || (positionAccessor?.count ?? 0) > 50_000) {
-  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must keep 18k-50k reviewed vertices')
+if ((positionAccessor?.count ?? 0) < 40_000 || (positionAccessor?.count ?? 0) > 70_000) {
+  throw new Error('xiaohei-avatar-hi3d-rig-web-v2.glb must keep 40k-70k reviewed vertices')
 }
-if ((indexAccessor?.count ?? 0) < 90_000 || (indexAccessor?.count ?? 0) > 180_000) {
-  throw new Error('xiaohei-avatar-hi3d-web-v1.glb triangle density is outside the web budget')
+if ((indexAccessor?.count ?? 0) < 180_000 || (indexAccessor?.count ?? 0) > 300_000) {
+  throw new Error('xiaohei-avatar-hi3d-rig-web-v2.glb triangle density is outside the web budget')
 }
 if (manifest.images?.[0]?.bufferView === undefined || primitive?.attributes?.TEXCOORD_0 === undefined) {
-  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must contain an embedded texture and UVs')
+  throw new Error('xiaohei-avatar-hi3d-rig-web-v2.glb must contain an embedded texture and UVs')
+}
+if (manifest.images[0].mimeType !== 'image/webp') {
+  throw new Error('xiaohei-avatar-hi3d-rig-web-v2.glb must use the reviewed embedded WebP texture')
 }
 const binaryOffset = 20 + jsonLength + 8
 const imageView = manifest.bufferViews[manifest.images[0].bufferView]
@@ -53,10 +56,10 @@ const embeddedTexture = avatarModel.subarray(
   binaryOffset + (imageView.byteOffset ?? 0),
   binaryOffset + (imageView.byteOffset ?? 0) + imageView.byteLength,
 )
-const textureSize = readJpegDimensions(embeddedTexture)
-if (textureSize.width !== 512 || textureSize.height !== 512) {
+const textureSize = readWebpDimensions(embeddedTexture)
+if (textureSize.width !== 1024 || textureSize.height !== 1024) {
   throw new Error(
-    `xiaohei-avatar-hi3d-web-v1.glb texture must be 512x512, received ${textureSize.width}x${textureSize.height}`,
+    `xiaohei-avatar-hi3d-rig-web-v2.glb texture must be 1024x1024, received ${textureSize.width}x${textureSize.height}`,
   )
 }
 
@@ -105,28 +108,4 @@ function readWebpDimensions(source) {
 
 function readUInt24LE(source, offset) {
   return source[offset] | (source[offset + 1] << 8) | (source[offset + 2] << 16)
-}
-
-function readJpegDimensions(source) {
-  if (source[0] !== 0xff || source[1] !== 0xd8) throw new Error('avatar texture is not a JPEG')
-  let offset = 2
-  while (offset + 9 < source.length) {
-    if (source[offset] !== 0xff) {
-      offset += 1
-      continue
-    }
-    const marker = source[offset + 1]
-    offset += 2
-    if (marker === 0xd9 || marker === 0xda) break
-    const length = source.readUInt16BE(offset)
-    if (length < 2 || offset + length > source.length) break
-    if (marker >= 0xc0 && marker <= 0xc3) {
-      return {
-        height: source.readUInt16BE(offset + 3),
-        width: source.readUInt16BE(offset + 5),
-      }
-    }
-    offset += length
-  }
-  throw new Error('avatar JPEG dimensions were not found')
 }

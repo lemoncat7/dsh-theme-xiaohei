@@ -46,7 +46,7 @@ const embeddedIdentity = await Promise.all(identityAssets.map(async ([name, file
   return `export const ${name}: string = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
 }))
 const avatarModel = await readFile(
-  new URL('../src/assets/model/xiaohei-avatar-hi3d-web-v1.glb', import.meta.url),
+  new URL('../src/assets/model/xiaohei-avatar-hi3d-rig-web-v2.glb', import.meta.url),
 )
 const embeddedAvatarModel = [
   `export const XIAOHEI_AVATAR_MODEL_GLB: string = ${JSON.stringify(`data:model/gltf-binary;base64,${avatarModel.toString('base64')}`)}`,

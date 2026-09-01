@@ -95,7 +95,15 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
     geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
 
-    var image = manifest.images[manifest.textures[0].source];
+    var texture = manifest.textures[0];
+    var imageSource = texture.source;
+    if (
+      imageSource === undefined
+      && texture.extensions
+      && texture.extensions.EXT_texture_webp
+    ) imageSource = texture.extensions.EXT_texture_webp.source;
+    var image = manifest.images[imageSource];
+    if (!image) throw new Error('Xiaohei avatar texture source is missing');
     var imageView = manifest.bufferViews[image.bufferView];
     var imageStart = binaryOffset + (imageView.byteOffset || 0);
     var imageEnd = imageStart + imageView.byteLength;
@@ -111,9 +119,9 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
   function xiaoheiAvatarBuildModel() {
     var parsed = xiaoheiAvatarParseModel(xiaoheiAvatarModelSource);
     var root = new THREE.Group();
-    root.name = 'xiaohei-avatar-hi3d-root';
+    root.name = 'xiaohei-avatar-hi3d-rig-root-v2';
     var model = new THREE.Group();
-    model.name = 'xiaohei-avatar-hi3d-model';
+    model.name = 'xiaohei-avatar-hi3d-rig-model-v2';
     root.add(model);
 
     var rig = xiaoheiAvatarBuildRig(parsed.geometry, parsed.reviewedHeight);
@@ -136,8 +144,8 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
         'varying vec3 vXiaoheiWorld;',
         shader.vertexShader
       ].join('\\n').replace(
-        '#include <begin_vertex>',
-        '#include <begin_vertex>\\n  vXiaoheiWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;'
+        '#include <project_vertex>',
+        'vXiaoheiWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;\\n#include <project_vertex>'
       );
       shader.fragmentShader = [
         'uniform vec3 uXiaoheiScanO;',
@@ -154,9 +162,9 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
         ].join('\\n')
       );
     };
-    material.customProgramCacheKey = function () { return 'xiaohei-scanned-basic-v1'; };
+    material.customProgramCacheKey = function () { return 'xiaohei-scanned-basic-v2'; };
     var mesh = new THREE.SkinnedMesh(parsed.geometry, material);
-    mesh.name = 'xiaohei-avatar-hi3d-web-v1';
+    mesh.name = 'xiaohei-avatar-hi3d-rig-web-v2';
     mesh.castShadow = false;
     mesh.receiveShadow = false;
     mesh.frustumCulled = false;
@@ -167,45 +175,53 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
 
     var scanWire = null;
     if (!REDUCED) {
-      var scanMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-          uScanO: uScanO,
-          uScanR: uScanR,
-          uWire: uWire,
-          uTime: uTime
-        },
+      var scanMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
         transparent: true,
+        opacity: 1,
         depthWrite: false,
         depthTest: false,
         blending: THREE.AdditiveBlending,
-        wireframe: true,
-        vertexShader: [
-          'varying vec3 vW;',
-          'void main(){',
-          '  vec4 wp = modelMatrix * vec4(position, 1.0);',
-          '  vW = wp.xyz;',
-          '  gl_Position = projectionMatrix * viewMatrix * wp;',
-          '}'
-        ].join('\\n'),
-        fragmentShader: [
-          'precision highp float;',
-          'uniform vec3 uScanO;',
-          'uniform float uScanR, uWire, uTime;',
-          'varying vec3 vW;',
-          'void main(){',
-          '  float d = distance(vW, uScanO);',
-          '  float rim = exp(-pow((d - uScanR) / 135.0, 2.0));',
-          '  float trail = 1.0 - smoothstep(uScanR - 950.0, uScanR, d);',
-          '  float a = (rim * 1.35 + trail * 0.26) * uWire;',
-          '  if (a < 0.004) discard;',
-          '  a *= 0.70 + 0.30 * sin(d * 0.045 - uTime * 7.0);',
-          '  vec3 col = mix(vec3(0.30, 0.72, 0.46), vec3(0.86, 1.00, 0.90), rim);',
-          '  gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));',
-          '}'
-        ].join('\\n')
+        wireframe: true
       });
+      scanMaterial.toneMapped = false;
+      scanMaterial.onBeforeCompile = function (shader) {
+        shader.uniforms.uXiaoheiScanO = uScanO;
+        shader.uniforms.uXiaoheiScanR = uScanR;
+        shader.uniforms.uXiaoheiWire = uWire;
+        shader.uniforms.uXiaoheiTime = uTime;
+        shader.vertexShader = [
+          'varying vec3 vXiaoheiWireWorld;',
+          shader.vertexShader
+        ].join('\\n').replace(
+          '#include <project_vertex>',
+          'vXiaoheiWireWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;\\n#include <project_vertex>'
+        );
+        shader.fragmentShader = [
+          'uniform vec3 uXiaoheiScanO;',
+          'uniform float uXiaoheiScanR;',
+          'uniform float uXiaoheiWire;',
+          'uniform float uXiaoheiTime;',
+          'varying vec3 vXiaoheiWireWorld;',
+          shader.fragmentShader
+        ].join('\\n').replace(
+          '#include <clipping_planes_fragment>',
+          [
+            '#include <clipping_planes_fragment>',
+            'float xiaoheiWireDistance = distance(vXiaoheiWireWorld, uXiaoheiScanO);',
+            'float xiaoheiWireRim = exp(-pow((xiaoheiWireDistance - uXiaoheiScanR) / 135.0, 2.0));',
+            'float xiaoheiWireTrail = 1.0 - smoothstep(uXiaoheiScanR - 950.0, uXiaoheiScanR, xiaoheiWireDistance);',
+            'float xiaoheiWireAlpha = (xiaoheiWireRim * 1.35 + xiaoheiWireTrail * 0.26) * uXiaoheiWire;',
+            'if (xiaoheiWireAlpha < 0.004) discard;',
+            'xiaoheiWireAlpha *= 0.70 + 0.30 * sin(xiaoheiWireDistance * 0.045 - uXiaoheiTime * 7.0);',
+            'diffuseColor.rgb = mix(vec3(0.30, 0.72, 0.46), vec3(0.86, 1.00, 0.90), xiaoheiWireRim);',
+            'diffuseColor.a *= clamp(xiaoheiWireAlpha, 0.0, 1.0);'
+          ].join('\\n')
+        );
+      };
+      scanMaterial.customProgramCacheKey = function () { return 'xiaohei-skinned-scan-wire-v2'; };
       scanWire = new THREE.SkinnedMesh(parsed.geometry, scanMaterial);
-      scanWire.name = 'xiaohei-avatar-survey-wire-v1';
+      scanWire.name = 'xiaohei-avatar-survey-wire-v2';
       scanWire.renderOrder = 12;
       scanWire.frustumCulled = false;
       model.add(scanWire);
@@ -227,7 +243,7 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
         material.needsUpdate = true;
         mesh.visible = true;
         URL.revokeObjectURL(textureUrl);
-        document.documentElement.dataset.xiaoheiAvatarTexture = 'embedded-hi3d-uv-v1';
+        document.documentElement.dataset.xiaoheiAvatarTexture = 'embedded-hi3d-webp-uv-v2';
         renderFrame();
       },
       undefined,
@@ -269,7 +285,7 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
     xiaoheiAvatarSampleAt(avatar.motion.anchorT, xiaoheiAvatarPoint);
     avatar.root.position.copy(xiaoheiAvatarPoint);
     document.documentElement.dataset.xiaoheiAvatarReady = 'true';
-    document.documentElement.dataset.xiaoheiAvatarMotion = 'static-hi3d-idle-v1';
+    document.documentElement.dataset.xiaoheiAvatarMotion = 'skinned-hi3d-idle-v2';
     document.documentElement.dataset.xiaoheiAvatarAction = 'idle-3d';
     document.documentElement.dataset.xiaoheiAvatarPose = 'idle';
     document.documentElement.dataset.xiaoheiAvatarScan = xiaoheiAvatar.scanWire ? 'active' : 'skipped';
