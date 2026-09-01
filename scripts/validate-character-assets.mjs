@@ -38,10 +38,10 @@ const manifest = JSON.parse(
 const primitive = manifest.meshes?.[0]?.primitives?.[0]
 const positionAccessor = manifest.accessors?.[primitive?.attributes?.POSITION]
 const indexAccessor = manifest.accessors?.[primitive?.indices]
-if ((positionAccessor?.count ?? 0) < 40_000 || (positionAccessor?.count ?? 0) > 90_000) {
-  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must keep 40k-90k reviewed vertices')
+if ((positionAccessor?.count ?? 0) < 18_000 || (positionAccessor?.count ?? 0) > 50_000) {
+  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must keep 18k-50k reviewed vertices')
 }
-if ((indexAccessor?.count ?? 0) < 180_000 || (indexAccessor?.count ?? 0) > 360_000) {
+if ((indexAccessor?.count ?? 0) < 90_000 || (indexAccessor?.count ?? 0) > 180_000) {
   throw new Error('xiaohei-avatar-hi3d-web-v1.glb triangle density is outside the web budget')
 }
 if (manifest.images?.[0]?.bufferView === undefined || primitive?.attributes?.TEXCOORD_0 === undefined) {

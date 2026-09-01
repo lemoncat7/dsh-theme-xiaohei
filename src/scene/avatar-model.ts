@@ -13,6 +13,7 @@ const AVATAR_ADAPTER = `
   var xiaoheiAvatar = null;
   var xiaoheiAvatarLimbs = null;
   var xiaoheiAvatarRay = new THREE.Raycaster();
+  var xiaoheiAvatarWorldSphere = new THREE.Sphere();
   var xiaoheiAvatarPoint = new THREE.Vector3();
   var xiaoheiAvatarHover = 0;
 
@@ -156,7 +157,13 @@ const AVATAR_ADAPTER = `
         renderFrame();
       }
     );
-    return { root: root, model: model, mesh: mesh, reviewedHeight: parsed.reviewedHeight };
+    return {
+      root: root,
+      model: model,
+      mesh: mesh,
+      hitSphere: parsed.geometry.boundingSphere.clone(),
+      reviewedHeight: parsed.reviewedHeight
+    };
   }
 
   function xiaoheiAvatarSample(target) {
@@ -192,11 +199,14 @@ const AVATAR_ADAPTER = `
     var displayHeight = NARROW.matches ? 2.08 : 1.68;
     xiaoheiAvatar.root.scale.setScalar(displayHeight / xiaoheiAvatar.reviewedHeight);
 
-    nearGroup.updateMatrixWorld(true);
     var hit = false;
     if (ndc.x <= 2 && xiaoheiAvatar.mesh.visible) {
       xiaoheiAvatarRay.setFromCamera(ndc, camera);
-      hit = xiaoheiAvatarRay.intersectObject(xiaoheiAvatar.mesh, false).length > 0;
+      xiaoheiAvatar.mesh.updateWorldMatrix(true, false);
+      xiaoheiAvatarWorldSphere
+        .copy(xiaoheiAvatar.hitSphere)
+        .applyMatrix4(xiaoheiAvatar.mesh.matrixWorld);
+      hit = xiaoheiAvatarRay.ray.intersectsSphere(xiaoheiAvatarWorldSphere);
     }
     xiaoheiAvatarHover += ((hit ? 1 : 0) - xiaoheiAvatarHover) * (hit ? 0.10 : 0.055);
     var breath = Math.sin(now * 0.00125);
