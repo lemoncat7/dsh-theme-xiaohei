@@ -45,17 +45,12 @@ const embeddedIdentity = await Promise.all(identityAssets.map(async ([name, file
   const asset = await readFile(assetPath)
   return `export const ${name}: string = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
 }))
-const avatarModelAssets = [
-  ['XIAOHEI_AVATAR_OPEN', 'xiaohei-avatar-open-v1.webp'],
-  ['XIAOHEI_AVATAR_BLINK', 'xiaohei-avatar-blink-v1.webp'],
-  ['XIAOHEI_AVATAR_CLIMB', 'xiaohei-avatar-climb-v1.webp'],
-  ['XIAOHEI_AVATAR_JUMP', 'xiaohei-avatar-jump-v1.webp'],
+const avatarModel = await readFile(
+  new URL('../src/assets/model/xiaohei-avatar-hi3d-web-v1.glb', import.meta.url),
+)
+const embeddedAvatarModel = [
+  `export const XIAOHEI_AVATAR_MODEL_GLB: string = ${JSON.stringify(`data:model/gltf-binary;base64,${avatarModel.toString('base64')}`)}`,
 ]
-const embeddedAvatarModel = await Promise.all(avatarModelAssets.map(async ([name, filename]) => {
-  const assetPath = new URL(`../src/assets/model/${filename}`, import.meta.url)
-  const asset = await readFile(assetPath)
-  return `export const ${name}: string = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
-}))
 
 await writeFile(
   targetPath,

@@ -11,12 +11,6 @@ import {
   resolveXiaoheiSylvaPointer,
   shouldRestoreXiaoheiHeixiuCompanions,
 } from '../lib/scene.js'
-import {
-  XIAOHEI_AVATAR_BLINK,
-  XIAOHEI_AVATAR_CLIMB,
-  XIAOHEI_AVATAR_JUMP,
-  XIAOHEI_AVATAR_OPEN,
-} from '../lib/generated-avatar-model.js'
 import { apply } from '../lib/plugin.js'
 import {
   apply as applyHostTheme,
@@ -162,22 +156,35 @@ test('Sylva pointer bridge maps host coordinates into the scene viewport', () =>
   assert.deepEqual(resolveXiaoheiSylvaPointer(120, 80, { ...bounds, width: 0 }), { event: 'leave' })
 })
 
-test('Sylva avatar is injected as one renderer-sharing 2.5D scene model', () => {
+test('Sylva avatar is injected as one renderer-sharing optimized Hi3D model', () => {
   const source = '<html><body><script>(function () {\nvar renderer, scene, camera; function build(){} function layout(){} function renderFrame(){}\n})();\n</script></body></html>'
   const modeled = injectXiaoheiSylvaAvatarModel(source)
 
-  assert.match(XIAOHEI_AVATAR_OPEN, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_AVATAR_BLINK, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_AVATAR_CLIMB, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_AVATAR_JUMP, /^data:image\/webp;base64,/)
   assert.match(modeled, /data-xiaohei-avatar-model="true"/)
-  assert.match(modeled, /xiaohei-avatar-model/)
-  assert.match(modeled, /intersectObject\(xiaoheiAvatar\.mesh/)
+  assert.match(modeled, /xiaohei-avatar-hi3d-model/)
+  assert.match(modeled, /data:model\/gltf-binary;base64/)
+  assert.match(modeled, /Xiaohei avatar must be a GLB 2\.0 model/)
+  assert.match(modeled, /THREE\.Mesh/)
+  assert.match(modeled, /embedded-hi3d-uv-v1/)
+  assert.match(modeled, /geometry\.setAttribute\('uv'/)
+  assert.match(modeled, /geometry\.setAttribute\('normal'/)
+  assert.match(modeled, /THREE\.MeshBasicMaterial/)
+  assert.match(modeled, /material\.toneMapped = false/)
+  assert.match(modeled, /THREE\.FrontSide/)
+  assert.match(modeled, /transparent:\s*false/)
+  assert.match(modeled, /depthWrite:\s*true/)
+  assert.match(modeled, /mesh\.visible = false/)
+  assert.match(modeled, /texture\.flipY = false/)
+  assert.doesNotMatch(modeled, /xiaohei-avatar-soft-silhouette|THREE\.BackSide|THREE\.SkinnedMesh/)
+  assert.doesNotMatch(modeled, /THREE\.HemisphereLight|THREE\.DirectionalLight/)
+  assert.match(modeled, /intersectObject\(xiaoheiAvatar\.mesh, false\)/)
   assert.match(modeled, /xiaoheiAvatarOriginalAssembleRoot/)
-  assert.match(modeled, /limb\.curve\.getPointAt\(anchor\.t\)/)
-  assert.match(modeled, /xiaoheiAvatarAction === 'climb'/)
-  assert.match(modeled, /xiaoheiAvatarAction === 'jump'/)
-  assert.match(modeled, /xiaoheiAvatarAction === 'portal'/)
+  assert.match(modeled, /nearGroup\.add\(avatar\.root\)/)
+  assert.match(modeled, /limb\.curve\.getPointAt\(t\)/)
+  assert.match(modeled, /static-hi3d-idle-v1/)
+  assert.doesNotMatch(modeled, /SphereGeometry|CylinderGeometry|ConeGeometry/)
+  assert.doesNotMatch(modeled, /PlaneGeometry|GLTFLoader/)
+  assert.doesNotMatch(modeled, /xiaoheiAvatarAction ===/)
   assert.match(modeled, /xiaoheiAvatarOriginalRenderFrame/)
   assert.doesNotMatch(modeled, /new THREE\.WebGLRenderer|createElement\(['"]canvas/)
   assert.equal(injectXiaoheiSylvaAvatarModel(modeled), modeled)
@@ -187,12 +194,12 @@ test('Sylva background prepares its iframe before attaching the WebGL scene', ()
   const source = readFileSync(new URL('../src/scene/sylva-background.tsx', import.meta.url), 'utf8')
   assert.match(source, /createElement\('div'\)/)
   assert.match(source, /flushSync\(\(\) => root\.render/)
-  assert.match(source, /cloneNode\(true\)/)
-  assert.match(source, /createElement\('iframe'\)/)
-  assert.match(source, /extractedFrame\.replaceWith\(frame\)/)
-  assert.match(source, /root\.unmount\(\)[\s\S]*mount\.replaceChildren\(renderedScene\)/)
-  assert.ok(source.indexOf('prepareXiaoheiSylvaPointerFrame(frame)') < source.indexOf('host.append(mount)'))
-  assert.ok(source.indexOf('prepareXiaoheiSylvaAvatarFrame(frame)') < source.indexOf('prepareXiaoheiSylvaPointerFrame(frame)'))
+  assert.match(source, /const patchedSetAttribute = function setXiaoheiAttribute/)
+  assert.match(source, /injectXiaoheiSylvaPointerBridge\([\s\S]*injectXiaoheiSylvaAvatarModel\(source\)/)
+  assert.match(source, /source\.includes\('<title>Interactive procedural moss root world<\/title>'\)/)
+  assert.match(source, /return \(\) => \{[\s\S]*restoreSourceInterceptors\(\)/)
+  assert.ok(source.indexOf('elementPrototype.setAttribute = patchedSetAttribute') < source.indexOf('flushSync(() => root.render'))
+  assert.ok(source.indexOf('flushSync(() => root.render') < source.indexOf('host.append(mount)'))
   assert.match(source, /installXiaoheiSylvaPointerBridge\([\s\S]*prepareXiaoheiSylvaAvatarFrame/)
   assert.equal(typeof prepareXiaoheiSylvaPointerFrame, 'function')
 })

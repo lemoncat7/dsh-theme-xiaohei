@@ -22,6 +22,32 @@ for (const [filename, expectedWidth, expectedHeight] of assets) {
   }
 }
 
+const avatarModel = await readFile(
+  new URL('../src/assets/model/xiaohei-avatar-hi3d-web-v1.glb', import.meta.url),
+)
+if (avatarModel.toString('ascii', 0, 4) !== 'glTF' || avatarModel.readUInt32LE(4) !== 2) {
+  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must be a GLB 2.0 container')
+}
+if (avatarModel.length > 4 * 1024 * 1024) {
+  throw new Error('xiaohei-avatar-hi3d-web-v1.glb exceeds the 4 MB theme budget')
+}
+const jsonLength = avatarModel.readUInt32LE(12)
+const manifest = JSON.parse(
+  avatarModel.subarray(20, 20 + jsonLength).toString('utf8').replaceAll('\0', '').trim(),
+)
+const primitive = manifest.meshes?.[0]?.primitives?.[0]
+const positionAccessor = manifest.accessors?.[primitive?.attributes?.POSITION]
+const indexAccessor = manifest.accessors?.[primitive?.indices]
+if ((positionAccessor?.count ?? 0) < 40_000 || (positionAccessor?.count ?? 0) > 90_000) {
+  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must keep 40k-90k reviewed vertices')
+}
+if ((indexAccessor?.count ?? 0) < 180_000 || (indexAccessor?.count ?? 0) > 360_000) {
+  throw new Error('xiaohei-avatar-hi3d-web-v1.glb triangle density is outside the web budget')
+}
+if (manifest.images?.[0]?.bufferView === undefined || primitive?.attributes?.TEXCOORD_0 === undefined) {
+  throw new Error('xiaohei-avatar-hi3d-web-v1.glb must contain an embedded texture and UVs')
+}
+
 function readWebpDimensions(source) {
   if (source.toString('ascii', 0, 4) !== 'RIFF' || source.toString('ascii', 8, 12) !== 'WEBP') {
     throw new Error('character asset is not a valid WebP RIFF container')

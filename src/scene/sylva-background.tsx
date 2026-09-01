@@ -3,10 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { SylvaLivingWorldScene } from '../shaders/sylva-living-world/SylvaLivingWorldScene.js'
 import threeUiStyle from '../shaders/threeui.css?raw'
 import {
+  injectXiaoheiSylvaPointerBridge,
   installXiaoheiSylvaPointerBridge,
-  prepareXiaoheiSylvaPointerFrame,
 } from './pointer-bridge.js'
-import { prepareXiaoheiSylvaAvatarFrame } from './avatar-model.js'
+import {
+  injectXiaoheiSylvaAvatarModel,
+  prepareXiaoheiSylvaAvatarFrame,
+} from './avatar-model.js'
 
 export const XIAOHEI_SYLVA_STYLE_ID = 'dsh-theme-xiaohei/threeui-style'
 
@@ -20,44 +23,69 @@ export function mountXiaoheiSylvaBackground(host: HTMLElement): () => void {
   style.textContent = threeUiStyle
   doc.head.append(style)
 
-  /* Render while detached so the authored WebGL document receives its
-     movement adapter before its first navigation. Rewriting srcDoc after a
-     connected iframe has started would boot the large scene twice. */
+  /* React assigns srcDoc during this synchronous render. Intercept that one
+     assignment so the authored iframe's very first navigation already holds
+     both adapters. Rewriting srcDoc afterwards leaves Chromium's running
+     document on the original snapshot even when the attribute looks updated. */
   const mount = doc.createElement('div')
   mount.className = 'xiaohei-scene__world-mount'
   const root = createRoot(mount)
-  flushSync(() => root.render(<SylvaLivingWorldScene variant="living-green" />))
-  const renderedScene = mount.firstElementChild?.cloneNode(true) as HTMLElement | undefined
-  const extractedFrame = renderedScene?.querySelector('iframe') ?? null
-  const frame = extractedFrame === null ? null : doc.createElement('iframe')
-  if (frame !== null && extractedFrame !== null) {
-    for (const attribute of extractedFrame.attributes) {
-      if (attribute.name !== 'srcdoc') frame.setAttribute(attribute.name, attribute.value)
-    }
-    frame.setAttribute('srcdoc', extractedFrame.getAttribute('srcdoc') ?? '')
-    extractedFrame.replaceWith(frame)
-  }
   const frameWindow = doc.defaultView
-  let reactMounted = true
-  if (renderedScene !== undefined && frameWindow !== null && frame instanceof frameWindow.HTMLIFrameElement) {
-    prepareXiaoheiSylvaAvatarFrame(frame)
-    prepareXiaoheiSylvaPointerFrame(frame)
-    const sceneHost = renderedScene
-    sceneHost.dataset.state = 'loading'
-    frame.addEventListener('load', () => {
-      sceneHost.dataset.state = 'ready'
-    }, { once: true })
-
-    /* The registered component is the authoritative source builder. Its
-       detached iframe may already have acquired a browsing context, though,
-       so mutating that node can leave the first unadapted document running.
-       Clone the authored host but create a fresh iframe, dispose the extractor,
-       then connect only the fully adapted document. Reusing a cloned iframe
-       can retain its first navigation snapshot in Chromium. This keeps one
-       WebGL boot and one renderer. */
+  if (frameWindow === null) {
     root.unmount()
-    reactMounted = false
-    mount.replaceChildren(renderedScene)
+    style.remove()
+    return () => {}
+  }
+
+  const elementPrototype = frameWindow.Element.prototype
+  const iframePrototype = frameWindow.HTMLIFrameElement.prototype
+  const nativeSetAttribute = elementPrototype.setAttribute
+  const srcDocDescriptor = Object.getOwnPropertyDescriptor(iframePrototype, 'srcdoc')
+  const composeSource = (source: string): string => (
+    source.includes('<title>Interactive procedural moss root world</title>')
+      ? injectXiaoheiSylvaPointerBridge(injectXiaoheiSylvaAvatarModel(source))
+      : source
+  )
+
+  const patchedSetAttribute = function setXiaoheiAttribute(
+    this: Element,
+    name: string,
+    value: string,
+  ): void {
+    const isSceneSource = this instanceof frameWindow.HTMLIFrameElement && name.toLowerCase() === 'srcdoc'
+    nativeSetAttribute.call(this, name, isSceneSource ? composeSource(String(value)) : value)
+  }
+  elementPrototype.setAttribute = patchedSetAttribute
+  const patchedSrcDocSetter = function setXiaoheiSrcDoc(this: HTMLIFrameElement, value: string): void {
+    srcDocDescriptor?.set?.call(this, composeSource(String(value)))
+  }
+  if (srcDocDescriptor?.set !== undefined && srcDocDescriptor.configurable) {
+    Object.defineProperty(iframePrototype, 'srcdoc', {
+      ...srcDocDescriptor,
+      set: patchedSrcDocSetter,
+    })
+  }
+
+  const restoreSourceInterceptors = (): void => {
+    if (elementPrototype.setAttribute === patchedSetAttribute) {
+      elementPrototype.setAttribute = nativeSetAttribute
+    }
+    const currentDescriptor = Object.getOwnPropertyDescriptor(iframePrototype, 'srcdoc')
+    if (currentDescriptor?.set === patchedSrcDocSetter && srcDocDescriptor !== undefined) {
+      Object.defineProperty(iframePrototype, 'srcdoc', srcDocDescriptor)
+    }
+  }
+  try {
+    flushSync(() => root.render(<SylvaLivingWorldScene variant="living-green" />))
+  } catch (error) {
+    restoreSourceInterceptors()
+    throw error
+  }
+
+  const frame = mount.querySelector('iframe')
+  if (frame instanceof frameWindow.HTMLIFrameElement) {
+    frame.dataset.xiaoheiAvatarModel = 'true'
+    frame.dataset.xiaoheiPointerBridge = 'true'
   }
   host.append(mount)
   const removePointerBridge = installXiaoheiSylvaPointerBridge(
@@ -67,7 +95,8 @@ export function mountXiaoheiSylvaBackground(host: HTMLElement): () => void {
 
   return () => {
     removePointerBridge()
-    if (reactMounted) root.unmount()
+    restoreSourceInterceptors()
+    root.unmount()
     mount.remove()
     style.remove()
   }
