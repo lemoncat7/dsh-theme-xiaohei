@@ -296,8 +296,8 @@ ${XIAOHEI_AVATAR_MOTION_RUNTIME}
     );
     xiaoheiAvatar.model.rotation.y += yawDelta * 0.075;
     xiaoheiAvatar.screenPitch = Math.max(
-      -0.10,
-      Math.min(0.10, Math.atan2(cameraDy, Math.hypot(cameraDx, cameraDz)) * 0.52)
+      -0.075,
+      Math.min(0.075, -Math.atan2(cameraDy, Math.hypot(cameraDx, cameraDz)) * 0.38)
     );
 
     var hit = false;
