@@ -4,7 +4,7 @@
 
 ## 兼容性
 
-正式版 `0.3.0` 针对 DeepSeek Harness `0.1.2-rc.1` 构建并完成部署验证，需要 Node.js `22.19+` 或 `24+`。Session Controller、Conversation、Renderer、Sidebar、Slots 与 Theme 接口均对应 `0.1.2-rc.1`。
+开发预览版 `0.3.0-alpha.160` 针对 DeepSeek Harness `0.1.2-rc.1` 构建并完成部署验证，需要 Node.js `22.19+` 或 `24+`。Session Controller、Conversation、Renderer、Sidebar、Slots 与 Theme 接口均对应 `0.1.2-rc.1`；主题仍在持续设计，不作为正式版发布。
 
 ## 当前范围
 
@@ -28,10 +28,10 @@
 
 ## 安装
 
-从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0` 的完整构建包后安装：
+当前版本仍处于开发预览阶段，可从源码构建完整包后安装：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.160.tgz
 ```
 
 卸载：
