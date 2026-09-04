@@ -1,10 +1,13 @@
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
+import type {} from '@deepseek-ai/dsh-api-session-controller/client'
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import { bindXiaoheiAppearance } from './appearance.js'
 import { installXiaoheiBlink } from './blink.js'
 import { installXiaoheiChrome } from './chrome.js'
 import { installXiaoheiComposerSendHeixiu } from './composer-send-heixiu.js'
+import { installXiaoheiComposerAvatar } from './composer-avatar.js'
 import { installXiaoheiGaze } from './gaze.js'
 import { installXiaoheiHeixiuInteractions } from './heixiu-interactions.js'
 import { installXiaoheiPluginLoading } from './loading-heixiu.js'
@@ -56,8 +59,9 @@ function installXiaoheiTheme(ctx: ClientContext): void {
 
   ctx.effect(() => bindXiaoheiAppearance(ctx), 'xiaohei-theme: follow resolved appearance')
   ctx.effect(installXiaoheiChrome, 'xiaohei-theme: install spirit control skin')
+  ctx.effect(installXiaoheiComposerAvatar, 'xiaohei-theme: keep one human Xiaohei beside the composer')
   ctx.effect(installXiaoheiComposerSendHeixiu, 'xiaohei-theme: turn the native send action into blinking Heixiu')
-  ctx.effect(installXiaoheiScene, 'xiaohei-theme: install moonlit forest scene')
+  ctx.effect(installXiaoheiScene, 'xiaohei-theme: install quiet gradient scene')
   ctx.effect(installXiaoheiSidebarGlass, 'xiaohei-theme: install isolated sidebar glass')
   ctx.effect(installXiaoheiSidebarHeixiuRoaming, 'xiaohei-theme: let sidebar Heixiu roam safely')
   ctx.effect(installXiaoheiHeixiuInteractions, 'xiaohei-theme: bind Heixiu companion interactions')

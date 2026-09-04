@@ -9,3 +9,4 @@ src/generated-conversation.ts
 *.tgz
 .DS_Store
 tmp/
+__pycache__/

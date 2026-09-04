@@ -2,6 +2,10 @@
 
 `Xiaohei Night` 是一个基于 DeepSeek Harness 官方主题注册接口开发的非官方粉丝主题插件。主题以苔根、蕨类、花粉与妖灵生命力构成自然灵质空间，并以克制的灵力反馈和完整角色状态表达罗小黑元素。
 
+## 兼容性
+
+正式版 `0.3.0` 针对 DeepSeek Harness `0.1.2-rc.1` 构建并完成部署验证，需要 Node.js `22.19+` 或 `24+`。Session Controller、Conversation、Renderer、Sidebar、Slots 与 Theme 接口均对应 `0.1.2-rc.1`。
+
 ## 当前范围
 
 - 保留 DSH 原有布局、密度和交互层级。
@@ -24,10 +28,10 @@
 
 ## 安装
 
-从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0-alpha.67` 的完整构建包后安装：
+从 [GitHub Releases](https://github.com/lemoncat7/dsh-theme-xiaohei/releases) 下载 `0.3.0` 的完整构建包后安装：
 
 ```bash
-dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0-alpha.67.tgz
+dsh plugin --profile web add ./lemoncat7-dsh-theme-xiaohei-0.3.0.tgz
 ```
 
 卸载：

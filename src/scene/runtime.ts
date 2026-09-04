@@ -21,6 +21,7 @@ export function configureXiaoheiWorldRenderer(renderer: XiaoheiWorldRenderer): (
     if (worldRenderer === renderer) worldRenderer = undefined
   }
 }
+
 const PARTS = [
   XIAOHEI_SCENE_WORLD_CLASS,
   'xiaohei-scene__heixiu-field',

@@ -63,10 +63,32 @@ html {
   --xiaohei-layer-panel: rgb(20 27 29 / 76%);
   --xiaohei-layer-panel-edge: rgb(124 189 192 / 12%);
   --xiaohei-layer-panel-shadow: rgb(0 5 8 / 26%);
-  --xiaohei-conversation-text: #E0E6E4;
-  --xiaohei-conversation-meta: rgb(195 205 204 / 58%);
-  --xiaohei-conversation-user: rgb(117 158 154 / 13%);
-  --xiaohei-conversation-user-edge: rgb(143 177 173 / 12%);
+  --xiaohei-conversation-text: #E5E7E8;
+  --xiaohei-conversation-meta: rgb(199 203 206 / 60%);
+  --xiaohei-conversation-assistant:
+    linear-gradient(
+      115deg,
+      rgb(86 91 95 / 30%) 0%,
+      rgb(50 54 57 / 22%) 46%,
+      rgb(27 30 32 / 30%) 100%
+    ),
+    rgb(20 23 25 / 68%);
+  --xiaohei-conversation-user:
+    linear-gradient(
+      118deg,
+      rgb(105 110 114 / 27%) 0%,
+      rgb(61 65 68 / 23%) 52%,
+      rgb(34 37 40 / 31%) 100%
+    ),
+    rgb(27 30 33 / 72%);
+  --xiaohei-conversation-meta-surface:
+    linear-gradient(112deg, rgb(91 96 100 / 17%), rgb(42 46 49 / 14%)),
+    rgb(20 23 25 / 58%);
+  --xiaohei-conversation-meta-edge: rgb(221 225 227 / 12%);
+  --xiaohei-conversation-edge: rgb(229 232 234 / 17%);
+  --xiaohei-conversation-highlight: rgb(255 255 255 / 12%);
+  --xiaohei-conversation-shadow: rgb(0 0 0 / 28%);
+  --xiaohei-conversation-blur: 18px;
   --xiaohei-layer-content: rgb(27 35 37 / 92%);
   --xiaohei-layer-content-edge: rgb(124 189 192 / 20%);
   --xiaohei-layer-content-highlight: rgb(239 255 255 / 4%);
@@ -169,10 +191,32 @@ html[data-xiaohei-appearance='light'] {
   --xiaohei-layer-panel: rgb(226 232 239 / 78%);
   --xiaohei-layer-panel-edge: rgb(84 125 120 / 11%);
   --xiaohei-layer-panel-shadow: rgb(43 55 51 / 8%);
-  --xiaohei-conversation-text: #303842;
-  --xiaohei-conversation-meta: rgb(76 87 99 / 56%);
-  --xiaohei-conversation-user: rgb(84 125 120 / 10%);
-  --xiaohei-conversation-user-edge: rgb(84 125 120 / 10%);
+  --xiaohei-conversation-text: #30353A;
+  --xiaohei-conversation-meta: rgb(72 79 86 / 58%);
+  --xiaohei-conversation-assistant:
+    linear-gradient(
+      115deg,
+      rgb(255 255 255 / 55%) 0%,
+      rgb(230 233 235 / 24%) 48%,
+      rgb(202 207 210 / 16%) 100%
+    ),
+    rgb(232 235 237 / 67%);
+  --xiaohei-conversation-user:
+    linear-gradient(
+      118deg,
+      rgb(255 255 255 / 42%) 0%,
+      rgb(213 217 220 / 23%) 52%,
+      rgb(190 196 200 / 17%) 100%
+    ),
+    rgb(220 224 227 / 72%);
+  --xiaohei-conversation-meta-surface:
+    linear-gradient(112deg, rgb(255 255 255 / 34%), rgb(201 206 209 / 15%)),
+    rgb(224 227 229 / 58%);
+  --xiaohei-conversation-meta-edge: rgb(50 57 63 / 12%);
+  --xiaohei-conversation-edge: rgb(45 52 58 / 15%);
+  --xiaohei-conversation-highlight: rgb(255 255 255 / 58%);
+  --xiaohei-conversation-shadow: rgb(36 42 47 / 13%);
+  --xiaohei-conversation-blur: 18px;
   --xiaohei-layer-content: rgb(238 242 247 / 94%);
   --xiaohei-layer-content-edge: rgb(84 125 120 / 20%);
   --xiaohei-layer-content-highlight: rgb(255 255 255 / 62%);

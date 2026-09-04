@@ -1,5 +1,6 @@
 import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from './chrome/accessibility.js'
 import { XIAOHEI_COMPOSER_CSS } from './chrome/composer.js'
+import { XIAOHEI_COMPOSER_AVATAR_CSS } from './chrome/composer-avatar.js'
 import { XIAOHEI_COMPOSER_SEND_HEIXIU_CSS } from './chrome/composer-send-heixiu.js'
 import { XIAOHEI_CONTROL_PRIMITIVES_CSS } from './chrome/controls.js'
 import { XIAOHEI_CONVERSATION_CSS } from './chrome/conversation.js'
@@ -28,6 +29,7 @@ export const XIAOHEI_CHROME_CSS = [
   XIAOHEI_CONVERSATION_CSS,
   XIAOHEI_CONVERSATION_MESSAGES_CSS,
   XIAOHEI_COMPOSER_CSS,
+  XIAOHEI_COMPOSER_AVATAR_CSS,
   XIAOHEI_COMPOSER_SEND_HEIXIU_CSS,
   XIAOHEI_OVERLAY_CSS,
   XIAOHEI_CHROME_ACCESSIBILITY_CSS,
