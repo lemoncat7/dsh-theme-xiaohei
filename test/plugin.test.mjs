@@ -35,7 +35,14 @@ import {
 } from '../lib/chrome.js'
 import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from '../lib/chrome/accessibility.js'
 import { XIAOHEI_COMPOSER_CSS } from '../lib/chrome/composer.js'
+import { XIAOHEI_COMPOSER_AVATAR_CSS } from '../lib/chrome/composer-avatar.js'
 import { XIAOHEI_COMPOSER_SEND_HEIXIU_CSS } from '../lib/chrome/composer-send-heixiu.js'
+import {
+  installXiaoheiComposerAvatar,
+  resolveXiaoheiComposerAvatarPosition,
+  resolveXiaoheiComposerIdleMotion,
+  XIAOHEI_COMPOSER_AVATAR_CLASS,
+} from '../lib/composer-avatar.js'
 import {
   installXiaoheiComposerSendHeixiu,
   resolveXiaoheiSendBlinkDelay,
@@ -157,27 +164,39 @@ test('Sylva pointer bridge maps host coordinates into the scene viewport', () =>
   assert.deepEqual(resolveXiaoheiSylvaPointer(120, 80, { ...bounds, width: 0 }), { event: 'leave' })
 })
 
-test('Sylva avatar is injected as one renderer-sharing optimized skinned Hi3D model', () => {
+test.skip('legacy Sylva Mixamo avatar contract', () => {
   const source = '<html><body><script>(function () {\nvar renderer, scene, camera; function build(){} function layout(){} function renderFrame(){}\n})();\n</script></body></html>'
   const modeled = injectXiaoheiSylvaAvatarModel(source)
 
   assert.match(modeled, /data-xiaohei-avatar-model="true"/)
-  assert.match(modeled, /xiaohei-avatar-hi3d-rig-model-v2/)
+  assert.match(modeled, /xiaohei-avatar-imported-rig-model-v1/)
   assert.match(modeled, /data:model\/gltf-binary;base64/)
   assert.match(modeled, /Xiaohei avatar must be a GLB 2\.0 model/)
-  assert.match(modeled, /THREE\.Mesh/)
   assert.match(modeled, /THREE\.SkinnedMesh/)
-  assert.match(modeled, /xiaoheiAvatarBuildRig/)
-  assert.match(modeled, /skinIndex/)
-  assert.match(modeled, /head: 'head'/)
-  assert.match(modeled, /lowerArmL: 'lower-arm-left'/)
-  assert.match(modeled, /lowerLegR: 'lower-leg-right'/)
+  assert.match(modeled, /primitive\.attributes\.JOINTS_0/)
+  assert.match(modeled, /primitive\.attributes\.WEIGHTS_0/)
+  assert.match(modeled, /geometry\.setAttribute\('skinIndex'/)
+  assert.match(modeled, /geometry\.setAttribute\('skinWeight'/)
+  assert.match(modeled, /MAT4: 16/)
+  assert.match(modeled, /xiaoheiAvatarBuildImportedRig/)
+  assert.match(modeled, /bonesByName/)
+  assert.match(modeled, /restByName/)
+  assert.match(modeled, /skin\.inverseBindMatrices/)
+  assert.match(modeled, /new THREE\.Skeleton/)
+  assert.match(modeled, /new THREE\.Matrix4\(\)\.fromArray/)
+  assert.match(modeled, /mesh\.bind\(rig\.skeleton, new THREE\.Matrix4\(\)\)/)
+  assert.match(modeled, /model\.add\(mesh\)/)
+  assert.doesNotMatch(modeled, /armature\.add\(mesh\)/)
+  assert.match(modeled, /xiaoheiAvatarBuildImportedAnimation/)
+  assert.match(modeled, /new THREE\.AnimationMixer/)
+  assert.match(modeled, /THREE\.QuaternionKeyframeTrack/)
+  assert.match(modeled, /THREE\.VectorKeyframeTrack/)
   assert.match(modeled, /xiaoheiAvatarPoseMotion/)
-  assert.match(modeled, /nearGroup\.worldToLocal\(xiaoheiAvatarCameraLocal\)/)
+  assert.match(modeled, /xiaoheiAvatarHostGroup\.worldToLocal\(xiaoheiAvatarCameraLocal\)/)
   assert.match(modeled, /Math\.atan2\(cameraDx, cameraDz\)/)
   assert.match(modeled, /-Math\.atan2\(cameraDy, Math\.hypot\(cameraDx, cameraDz\)\) \* 0\.38/)
   assert.doesNotMatch(modeled, /RingGeometry|spirit-transit|arrival-settle|nextTransit/)
-  assert.match(modeled, /embedded-hi3d-webp-uv-v2/)
+  assert.match(modeled, /embedded-mixamo-webp-uv-v1/)
   assert.match(modeled, /EXT_texture_webp/)
   assert.match(modeled, /geometry\.setAttribute\('uv'/)
   assert.match(modeled, /geometry\.setAttribute\('normal'/)
@@ -185,12 +204,30 @@ test('Sylva avatar is injected as one renderer-sharing optimized skinned Hi3D mo
   assert.match(modeled, /material\.toneMapped = false/)
   assert.match(modeled, /material\.onBeforeCompile/)
   assert.match(modeled, /uXiaoheiScanOn/)
-  assert.match(modeled, /xiaoheiScanDistance > uXiaoheiScanR - 520\.0/)
-  assert.match(modeled, /xiaohei-avatar-survey-wire-v2/)
+  assert.match(modeled, /xiaoheiScanFront = uXiaoheiScanR - 520\.0/)
+  assert.match(modeled, /xiaoheiScanDelta > 115\.0/)
+  assert.match(modeled, /xiaoheiBuildHalo/)
+  assert.match(modeled, /xiaoheiBuildCore/)
+  assert.match(modeled, /xiaoheiBuildAmount/)
+  assert.match(modeled, /diffuseColor\.rgb = mix\(diffuseColor\.rgb, xiaoheiBuildColor/)
+  assert.match(modeled, /xiaoheiAvatarBeginSharedScan/)
+  assert.match(modeled, /scanT = 0/)
+  assert.match(modeled, /uScanOn\.value = 1/)
+  assert.match(modeled, /uXiaoheiScanO = uScanO/)
+  assert.match(modeled, /uXiaoheiScanR = uScanR/)
+  assert.match(modeled, /uXiaoheiScanOn = uScanOn/)
+  assert.match(modeled, /uXiaoheiWire = uWire/)
+  assert.match(modeled, /scanMax = Math\.max\(scanMax, avatarDistance \+ avatarRadius \+ 620\)/)
+  assert.match(modeled, /\/ 135\.0, 2\.0/)
+  assert.match(modeled, /uXiaoheiScanR - 950\.0/)
+  assert.match(modeled, /dataset\.xiaoheiAvatarScan = 'active'/)
+  assert.match(modeled, /avatarScan\.started/)
+  assert.doesNotMatch(modeled, /duration:\s*1050|localOrigin|contactAt|scanFront|scanLine/)
+  assert.match(modeled, /xiaohei-avatar-imported-survey-wire-v1/)
   assert.match(modeled, /wireframe:\s*true/)
   assert.match(modeled, /xiaoheiAvatar\.scanWire\.material\.dispose\(\)/)
   assert.match(modeled, /dataset\.xiaoheiAvatarScan = 'complete'/)
-  assert.match(modeled, /THREE\.FrontSide/)
+  assert.match(modeled, /THREE\.DoubleSide/)
   assert.match(modeled, /transparent:\s*false/)
   assert.match(modeled, /depthWrite:\s*true/)
   assert.match(modeled, /mesh\.visible = false/)
@@ -201,14 +238,121 @@ test('Sylva avatar is injected as one renderer-sharing optimized skinned Hi3D mo
   assert.match(modeled, /updateWorldMatrix\(true, false\)/)
   assert.doesNotMatch(modeled, /intersectObject\(xiaoheiAvatar\.mesh/)
   assert.match(modeled, /xiaoheiAvatarOriginalAssembleRoot/)
-  assert.match(modeled, /nearGroup\.add\(avatar\.root\)/)
+  assert.match(modeled, /xiaoheiAvatarHostGroup\.add\(avatar\.root\)/)
+  assert.match(modeled, /options\.order === 0/)
+  assert.match(modeled, /anchorLimb: 0/)
+  assert.match(modeled, /anchorT: 0\.38/)
+  assert.match(modeled, /walkMinT: 0\.30/)
+  assert.match(modeled, /walkMaxT: 0\.48/)
+  assert.match(modeled, /walkSpeed: 0\.021/)
+  assert.match(modeled, /xiaoheiAvatarAdvanceMotion\(xiaoheiAvatar, now\)/)
+  assert.match(modeled, /xiaoheiAvatarBeginIndependentAction/)
+  assert.match(modeled, /poseReview: 'sit'/)
+  assert.match(modeled, /'sit-review-transition'/)
+  assert.match(modeled, /xiaoheiMotionSitArms/)
+  assert.match(modeled, /xiaoheiAvatarApplyImportedArmBlend/)
+  assert.match(modeled, /avatar\.reviewedHeight \* 0\.369 \* seated/)
+  assert.match(modeled, /-1\.02 \+ dangling/)
+  assert.match(modeled, /xiaoheiAvatarHosts/)
+  assert.match(modeled, /xiaoheiAvatarFindVisibleSeat/)
+  assert.match(modeled, /xiaoheiAvatarSampleSeatCandidate/)
+  assert.match(modeled, /xiaoheiAvatarProbeVisible/)
+  assert.match(modeled, /xiaoheiAvatarContactRay\.intersectObject/)
+  assert.match(modeled, /xiaoheiAvatarSeatNormal\.y < 0\.48/)
+  assert.match(modeled, /worldDisplayHeight = displayHeight \* Math\.abs\(xiaoheiAvatarHostScale\.y\)/)
+  assert.match(modeled, /worldDisplayHeight \* 0\.20/)
+  assert.match(modeled, /worldDisplayHeight \* 0\.32/)
+  assert.match(modeled, /reviewSeatReady: false/)
+  assert.match(modeled, /dataset\.xiaoheiAvatarSeat = 'visible-surface'/)
+  assert.doesNotMatch(modeled, /displayHeight \* 0\.13 \* seatFrontBlend/)
+  assert.match(modeled, /motion && motion\.poseReview/)
+  assert.match(modeled, /xiaoheiAvatar\.model\.rotation\.y = screenYaw/)
+  assert.match(modeled, /motion\.travelTargetT/)
+  assert.match(modeled, /reachedTarget/)
+  assert.doesNotMatch(modeled, /pendingRoutine|travelMode/)
+  assert.match(modeled, /running \? 9\.4 : 6\.7/)
+  assert.match(modeled, /motion\.phase === 'walk'/)
+  assert.match(modeled, /avatar\.animation\.mixer\.update\(animationDelta\)/)
+  assert.match(modeled, /xiaoheiAvatarResolveImportedLegPose/)
+  assert.match(modeled, /knee: Math\.min\(0, knee\)/)
+  assert.match(modeled, /xiaoheiAvatarResolveImportedActionPose/)
+  assert.match(modeled, /'jump-crouch'/)
+  assert.match(modeled, /'jump-air'/)
+  assert.match(modeled, /'jump-land'/)
+  assert.match(modeled, /'sit-down'/)
+  assert.match(modeled, /'stand-up'/)
+  assert.match(modeled, /LeftLeg'[\s\S]*-1\.32, 0\), 0, 0/)
+  assert.match(modeled, /RightLeg'[\s\S]*-1\.32, 0\), 0, 0/)
+  assert.match(modeled, /LeftFoot'[\s\S]*-0\.34, 0\.52\), 0, 0/)
+  assert.match(modeled, /RightFoot'[\s\S]*-0\.34, 0\.52\), 0, 0/)
+  assert.match(modeled, /xiaoheiMotionArmDown\.leftUpper/)
+  assert.match(modeled, /xiaoheiMotionArmDown\.rightUpper/)
+  assert.match(modeled, /xiaoheiAvatarApplyImportedArmPose/)
+  assert.doesNotMatch(modeled, /setFromUnitVectors/)
+  assert.doesNotMatch(modeled, /xiaoheiAvatarSolveImportedLeg/)
+  assert.match(modeled, /motion\.phase === 'walk'/)
+  assert.match(modeled, /xiaoheiAvatarAheadPoint/)
+  assert.match(modeled, /motion\.anchorT \+ motion\.walkDirection \* 0\.012/)
+  assert.match(modeled, /xiaoheiAvatarHostLimbs\[limbIndex\]/)
+  assert.match(modeled, /limb\.grid && limb\.S && limb\.R/)
+  assert.match(modeled, /surfaceY <= highestY/)
+  assert.match(modeled, /surfaceY \+ 0\.018/)
+  assert.match(modeled, /if \(limb\.sink\) target\.y -= moss \* limb\.sink/)
   assert.match(modeled, /limb\.curve\.getPointAt\(t\)/)
-  assert.match(modeled, /skinned-hi3d-idle-v2/)
+  assert.match(modeled, /imported-mixamo-animation-v1/)
+  assert.match(modeled, /avatar\.model\.scale\.set\(1, 1, 1\)/)
   assert.doesNotMatch(modeled, /static-hi3d-idle-v1/)
   assert.doesNotMatch(modeled, /SphereGeometry|CylinderGeometry|ConeGeometry|WireframeGeometry/)
   assert.doesNotMatch(modeled, /PlaneGeometry|GLTFLoader/)
   assert.doesNotMatch(modeled, /xiaoheiAvatarAction ===/)
   assert.match(modeled, /xiaoheiAvatarOriginalRenderFrame/)
+  assert.doesNotMatch(modeled, /new THREE\.WebGLRenderer|createElement\(['"]canvas/)
+  assert.equal(injectXiaoheiSylvaAvatarModel(modeled), modeled)
+})
+
+test('Sylva avatar is injected as one renderer-sharing illustrated 2.5D character', () => {
+  const source = '<html><body><script>(function () {\nvar renderer, scene, camera; function build(){} function layout(){} function renderFrame(){}\n})();\n</script></body></html>'
+  const modeled = injectXiaoheiSylvaAvatarModel(source)
+
+  assert.match(modeled, /data-xiaohei-avatar-model="true"/)
+  assert.match(modeled, /xiaohei-avatar-2-5d-model-v1/)
+  assert.match(modeled, /data:image\/webp;base64/)
+  assert.match(modeled, /xiaoheiAvatarBuildPartGeometry/)
+  assert.match(modeled, /segmentsX: 24, segmentsY: 24/)
+  assert.match(modeled, /xiaoheiAvatarBuildIllustratedRig/)
+  assert.match(modeled, /new THREE\.Bone\(\)/)
+  assert.match(modeled, /parts\.armLeft = xiaoheiAvatarBuildSkinnedPart/)
+  assert.match(modeled, /arm-left-with-sleeve/)
+  assert.match(modeled, /parts\.torso = xiaoheiAvatarBuildPart/)
+  assert.match(modeled, /parts\.legLeft = xiaoheiAvatarBuildSkinnedPart/)
+  assert.match(modeled, /leg-left-with-shoe/)
+  assert.match(modeled, /geometry\.setAttribute\('skinIndex'/)
+  assert.match(modeled, /geometry\.setAttribute\('skinWeight'/)
+  assert.match(modeled, /new THREE\.SkinnedMesh/)
+  assert.match(modeled, /mesh\.bind\(rig\.skeleton\)/)
+  assert.match(modeled, /xiaoheiAvatarRay\.intersectObjects\(avatar\.hitMeshes, false\)/)
+  assert.match(modeled, /xiaoheiAvatarUpdateRig\(avatar, now\)/)
+  assert.match(modeled, /bones\.upperArmLeft\.rotation\.set/)
+  assert.match(modeled, /bones\.upperArmRight\.rotation\.set/)
+  assert.match(modeled, /bones\.upperLegLeft\.rotation\.set/)
+  assert.match(modeled, /depthTest: true/)
+  assert.match(modeled, /depthWrite: false/)
+  assert.match(modeled, /xiaoheiAvatarRay\.intersectObjects\(avatar\.hitMeshes, false\)/)
+  assert.match(modeled, /xiaoheiAvatarDeformEar/)
+  assert.match(modeled, /position\.array\.set\(avatar\.basePositions\)/)
+  assert.match(modeled, /avatar\.earLeftAmount = earPulse/)
+  assert.match(modeled, /avatar\.earRightAmount = earPulse/)
+  assert.match(modeled, /avatar\.blinkUntil = now \+ 135/)
+  assert.doesNotMatch(modeled, /CircleGeometry|xiaoheiAvatarUpdateGaze/)
+  assert.match(modeled, /limb\.grid && limb\.S && limb\.R/)
+  assert.match(modeled, /surfaceY <= highestY/)
+  assert.match(modeled, /surfaceY \+ 0\.018/)
+  assert.match(modeled, /if \(limb\.sink\) target\.y -= moss \* limb\.sink/)
+  assert.match(modeled, /limb\.curve\.getPointAt\(t\)/)
+  assert.match(modeled, /illustrated-2-5d-v1/)
+  assert.match(modeled, /avatar\.model\.rotation\.y = Math\.atan2\(cameraDx, cameraDz\)/)
+  assert.match(modeled, /xiaoheiAvatarOriginalRenderFrame/)
+  assert.doesNotMatch(modeled, /GLTFLoader|data:model\/gltf-binary/)
   assert.doesNotMatch(modeled, /new THREE\.WebGLRenderer|createElement\(['"]canvas/)
   assert.equal(injectXiaoheiSylvaAvatarModel(modeled), modeled)
 })
@@ -242,13 +386,35 @@ test('Sylva background prepares its iframe before attaching the WebGL scene', ()
   assert.match(source, /createElement\('div'\)/)
   assert.match(source, /flushSync\(\(\) => root\.render/)
   assert.match(source, /const patchedSetAttribute = function setXiaoheiAttribute/)
-  assert.match(source, /injectXiaoheiSylvaPointerBridge\([\s\S]*injectXiaoheiSylvaAvatarModel\([\s\S]*injectXiaoheiSylvaPerformanceProfile\(source\)/)
+  assert.match(source, /injectXiaoheiSylvaPointerBridge\(injectXiaoheiSylvaPerformanceProfile\(source\)\)/)
+  assert.doesNotMatch(source, /injectXiaoheiSylvaAvatarModel|prepareXiaoheiSylvaAvatarFrame/)
   assert.match(source, /source\.includes\('<title>Interactive procedural moss root world<\/title>'\)/)
   assert.match(source, /return \(\) => \{[\s\S]*restoreSourceInterceptors\(\)/)
   assert.ok(source.indexOf('elementPrototype.setAttribute = patchedSetAttribute') < source.indexOf('flushSync(() => root.render'))
   assert.ok(source.indexOf('flushSync(() => root.render') < source.indexOf('host.append(mount)'))
-  assert.match(source, /installXiaoheiSylvaPointerBridge\([\s\S]*prepareXiaoheiSylvaAvatarFrame/)
+  assert.match(source, /installXiaoheiSylvaPointerBridge\(host\)/)
   assert.equal(typeof prepareXiaoheiSylvaPointerFrame, 'function')
+})
+
+test('active theme keeps the quiet CSS background and one layered break-frame portrait renderer', () => {
+  const client = readFileSync(new URL('../src/client.ts', import.meta.url), 'utf8')
+  const embedAssets = readFileSync(new URL('../scripts/embed-assets.mjs', import.meta.url), 'utf8')
+  const styles = readFileSync(new URL('../src/scene/styles.ts', import.meta.url), 'utf8')
+  const packageSource = readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+
+  assert.doesNotMatch(client, /mountXiaoheiTreeHollowBackground|Sylva|ThreeUI|three|pixi/i)
+  assert.match(embedAssets, /XIAOHEI_BREAKFRAME_IDLE', 'xiaohei-breakframe-idle-v1\.webp'/)
+  assert.match(embedAssets, /XIAOHEI_BREAKFRAME_BLINK', 'xiaohei-breakframe-blink-v1\.webp'/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /not\(\[data-xiaohei-avatar-reaction\]\)/)
+  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /breakout-left/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /ring-front[\s\S]*clip-path: inset\(67%/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /composer-avatar__circle[\s\S]*background: transparent/)
+  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /composer-avatar__background/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /prefers-reduced-motion: reduce/)
+  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /rig-canvas|open-rig-ready/)
+  assert.match(styles, /xiaohei-scene__world[\s\S]*linear-gradient\(148deg, #24272A/)
+  assert.match(styles, /data-xiaohei-appearance='light'[\s\S]*linear-gradient\(148deg, #F3F4F4/)
+  assert.doesNotMatch(packageSource, /"pixi\.js"|"three"/)
 })
 
 test('theme client is prefetched in the first DSH boot tier', () => {
@@ -374,8 +540,9 @@ test('shades DSH native palettes without forcing a theme preference', () => {
   assert.deepEqual(calls.slice(11).map(call => call[1]), [
     'xiaohei-theme: follow resolved appearance',
     'xiaohei-theme: install spirit control skin',
+    'xiaohei-theme: keep one human Xiaohei beside the composer',
     'xiaohei-theme: turn the native send action into blinking Heixiu',
-    'xiaohei-theme: install moonlit forest scene',
+    'xiaohei-theme: install quiet gradient scene',
     'xiaohei-theme: install isolated sidebar glass',
     'xiaohei-theme: let sidebar Heixiu roam safely',
     'xiaohei-theme: bind Heixiu companion interactions',
@@ -522,6 +689,7 @@ test('control skin composes isolated responsibility layers in a stable order', (
     XIAOHEI_CONVERSATION_CSS,
     XIAOHEI_CONVERSATION_MESSAGES_CSS,
     XIAOHEI_COMPOSER_CSS,
+    XIAOHEI_COMPOSER_AVATAR_CSS,
     XIAOHEI_COMPOSER_SEND_HEIXIU_CSS,
     XIAOHEI_OVERLAY_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
@@ -544,12 +712,92 @@ test('conversation remains clear without a permanent reading veil', () => {
   assert.doesNotMatch(XIAOHEI_CHROME_CSS, /xiaohei-conversation-(?:reading|edge)-veil/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-chat-flow-kind='assistant-step'/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-chat-flow-kind='user'/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /--xiaohei-conversation-assistant/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /backdrop-filter:\s*blur\(var\(--xiaohei-conversation-blur\)\)/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-conversation-edge:/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-conversation-meta-surface:/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-chat-flow-kind='tool-call'/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /dsh-knowledge-writeback-status/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-context-injection-body/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-turn-tail/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /inline-size:\s*fit-content/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /max-inline-size:\s*100%/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-chat-flow-kind='assistant-step'\]::before/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-chat-flow-kind='user'\]::after/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /content:\s*'我'/)
+  assert.doesNotMatch(XIAOHEI_CONVERSATION_MESSAGES_CSS, /@keyframes xiaohei-(?:assistant|user)-avatar/)
   assert.doesNotMatch(XIAOHEI_CONVERSATION_MESSAGES_CSS, /(?:width|max-width|min-width|overflow-y):/)
   assert.match(XIAOHEI_CHROME_CSS, /:has\(> \[data-conversation-scroll\]\)\s*\{\s*background:\s*transparent/)
   assert.doesNotMatch(XIAOHEI_CHROME_CSS, /wSkVaW_/)
 
+})
+
+test('one animated human companion follows the composer between hero and docked layouts', () => {
+  assert.equal(XIAOHEI_COMPOSER_AVATAR_CLASS, 'xiaohei-composer-avatar')
+  assert.deepEqual(resolveXiaoheiComposerAvatarPosition({
+    left: 425,
+    top: 380,
+    width: 780,
+    height: 98,
+    bottom: 478,
+  }, 1365, 820), {
+    placement: 'hero',
+    scale: 0.92,
+    x: 729,
+    y: 199,
+  })
+  assert.deepEqual(resolveXiaoheiComposerAvatarPosition({
+    left: 425,
+    top: 690,
+    width: 780,
+    height: 98,
+    bottom: 788,
+  }, 1365, 820), {
+    placement: 'docked',
+    scale: 0.9,
+    x: 254,
+    y: 630,
+  })
+  assert.deepEqual(resolveXiaoheiComposerAvatarPosition({
+    left: 8,
+    top: 600,
+    width: 374,
+    height: 98,
+    bottom: 698,
+  }, 390, 780), {
+    placement: 'mobile',
+    scale: 0.72,
+    x: 16,
+    y: 460,
+  })
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /position:\s*fixed/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /translate3d\(/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /transform 440ms cubic-bezier\(\.2, \.82, \.2, 1\)/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-avatar-blink='true'/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /image--inside-blink[\s\S]*display:\s*none/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /image--overflow-blink[\s\S]*mask-image:\s*radial-gradient/)
+  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-avatar-blink='true'[\s\S]{0,240}image--inside-idle/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /xiaohei-composer-avatar__effects-back/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /xiaohei-composer-avatar__circle/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /xiaohei-composer-avatar__overflow/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /xiaohei-composer-avatar__ring-front/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /xiaohei-composer-avatar__breakout/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /image--breakout-right-reach[\s\S]*mask-image:/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-avatar-idle='peek'/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-avatar-idle='double-blink'/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /xiaohei-avatar-nod/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-avatar-near/)
+  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /composer-avatar__heixiu/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-portrait='thinking'/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-avatar-reaction='touch'[\s\S]*xiaohei-avatar-touch-motion/)
+  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /data-xiaohei-state=/)
+  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /prefers-reduced-motion:\s*reduce/)
+  const avatarKeyframes = extractKeyframes(XIAOHEI_COMPOSER_AVATAR_CSS)
+  assert.doesNotMatch(avatarKeyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
+  assert.equal(resolveXiaoheiComposerIdleMotion(() => 0), 'glance-left')
+  assert.equal(resolveXiaoheiComposerIdleMotion(() => 0, 'glance-left'), 'glance-right')
+  assert.equal(resolveXiaoheiComposerIdleMotion(() => 1), 'ponder')
+  assert.equal(typeof installXiaoheiComposerAvatar(undefined), 'function')
 })
 
 test('composer expresses Xiaohei through a tail contour and native primary action', () => {
@@ -1135,11 +1383,12 @@ test('scene composes a passive theme field and async character art', () => {
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /realm-canvas|spirit-sphere|portal-ring/)
   assert.doesNotMatch(sceneRuntimeSource, /realm|pointermove|requestAnimationFrame/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /--xiaohei-sidebar-(?:aura|current)/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'[\s\S]*background:[\s\S]*#E9EDEF/)
+  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'[\s\S]*background:[\s\S]*#E8EAEC/)
   assert.match(XIAOHEI_SCENE_CSS, /::before[\s\S]*radial-gradient/)
   assert.match(XIAOHEI_SCENE_CSS, /feTurbulence/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-ambient|@keyframes xiaohei-background/)
-  assert.match(XIAOHEI_SCENE_CSS, /sylva-living-world-scene/)
+  assert.doesNotMatch(installXiaoheiScene.toString(), /TreeHollow|Sylva|Pixi/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /sylva-living-world-scene|xiaohei-character__canvas/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__veil/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__aura/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-spirit-ring/)

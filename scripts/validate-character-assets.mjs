@@ -22,6 +22,34 @@ for (const [filename, expectedWidth, expectedHeight] of assets) {
   }
 }
 
+for (const filename of [
+  'xiaohei-avatar-2d-front-v1.webp',
+  'xiaohei-avatar-2d-blink-v1.webp',
+]) {
+  const source = await readFile(new URL(`../src/assets/model/${filename}`, import.meta.url))
+  const { width, height } = readWebpDimensions(source)
+  if (width !== 768 || height !== 768) {
+    throw new Error(`${filename}: expected 768x768, received ${width}x${height}`)
+  }
+}
+
+for (const filename of [
+  'xiaohei-breakframe-idle-v1.webp',
+  'xiaohei-breakframe-blink-v1.webp',
+  'xiaohei-breakframe-brace-v1.webp',
+  'xiaohei-breakframe-reach-v1.webp',
+  'xiaohei-breakframe-thinking-v1.webp',
+  'xiaohei-breakframe-working-v1.webp',
+  'xiaohei-breakframe-complete-v1.webp',
+  'xiaohei-breakframe-error-v1.webp',
+]) {
+  const source = await readFile(new URL(`../src/assets/model/${filename}`, import.meta.url))
+  const { width, height } = readWebpDimensions(source)
+  if (width !== 512 || height !== 512) {
+    throw new Error(`${filename}: expected 512x512, received ${width}x${height}`)
+  }
+}
+
 const avatarModel = await readFile(
   new URL('../src/assets/model/xiaohei-avatar-hi3d-rig-web-v2.glb', import.meta.url),
 )

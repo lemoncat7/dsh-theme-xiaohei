@@ -6,10 +6,6 @@ import {
   injectXiaoheiSylvaPointerBridge,
   installXiaoheiSylvaPointerBridge,
 } from './pointer-bridge.js'
-import {
-  injectXiaoheiSylvaAvatarModel,
-  prepareXiaoheiSylvaAvatarFrame,
-} from './avatar-model.js'
 import { injectXiaoheiSylvaPerformanceProfile } from './sylva-performance.js'
 
 export const XIAOHEI_SYLVA_STYLE_ID = 'dsh-theme-xiaohei/threeui-style'
@@ -44,11 +40,7 @@ export function mountXiaoheiSylvaBackground(host: HTMLElement): () => void {
   const srcDocDescriptor = Object.getOwnPropertyDescriptor(iframePrototype, 'srcdoc')
   const composeSource = (source: string): string => (
     source.includes('<title>Interactive procedural moss root world</title>')
-      ? injectXiaoheiSylvaPointerBridge(
-        injectXiaoheiSylvaAvatarModel(
-          injectXiaoheiSylvaPerformanceProfile(source),
-        ),
-      )
+      ? injectXiaoheiSylvaPointerBridge(injectXiaoheiSylvaPerformanceProfile(source))
       : source
   )
 
@@ -89,14 +81,10 @@ export function mountXiaoheiSylvaBackground(host: HTMLElement): () => void {
 
   const frame = mount.querySelector('iframe')
   if (frame instanceof frameWindow.HTMLIFrameElement) {
-    frame.dataset.xiaoheiAvatarModel = 'true'
     frame.dataset.xiaoheiPointerBridge = 'true'
   }
   host.append(mount)
-  const removePointerBridge = installXiaoheiSylvaPointerBridge(
-    host,
-    prepareXiaoheiSylvaAvatarFrame,
-  )
+  const removePointerBridge = installXiaoheiSylvaPointerBridge(host)
 
   return () => {
     removePointerBridge()

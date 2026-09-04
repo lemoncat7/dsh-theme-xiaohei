@@ -1,8 +1,8 @@
 import type {
-  ConversationSnapshot,
   ISessions,
+  SessionSnapshot,
   SessionSummary,
-} from '@deepseek-ai/dsh-client-runtime/client'
+} from '@deepseek-ai/dsh-api-session-controller/client'
 
 export const XIAOHEI_STATE_ATTRIBUTE = 'data-xiaohei-state'
 export const XIAOHEI_COMPLETE_DURATION_MS = 1600
@@ -18,7 +18,7 @@ export type XiaoheiState =
 
 /** Resolve one official DSH snapshot using the theme's visible-state priority. */
 export function resolveXiaoheiState(
-  snapshot: ConversationSnapshot | undefined,
+  snapshot: SessionSnapshot | LegacySessionActivity | undefined,
   summary: SessionSummary | undefined,
 ): Exclude<XiaoheiState, 'complete'> {
   if (snapshot !== undefined) {
@@ -30,15 +30,36 @@ export function resolveXiaoheiState(
       || snapshot.lastAgentError !== null
     ) return 'error'
 
-    if (snapshot.pending.length > 0 || summary?.pendingInteraction !== undefined) return 'waiting'
-    if (snapshot.runningCalls.length > 0) return 'tool'
-    if (snapshot.running && snapshot.partial !== null) return 'streaming'
+    const pending = 'pending' in snapshot
+      ? snapshot.pending
+      : [...snapshot.queue, ...snapshot.pendingSubmissions]
+    const runningCalls = 'runningCalls' in snapshot ? snapshot.runningCalls : []
+    const partial = 'partial' in snapshot ? snapshot.partial : null
+    if (pending.length > 0 || legacyPendingInteraction(summary) !== undefined) return 'waiting'
+    if (runningCalls.length > 0) return 'tool'
+    if (snapshot.running && partial !== null) return 'streaming'
     if (snapshot.running) return 'thinking'
     return 'idle'
   }
 
-  if (summary?.pendingInteraction !== undefined) return 'waiting'
+  if (legacyPendingInteraction(summary) !== undefined) return 'waiting'
   return summary?.running === true ? 'thinking' : 'idle'
+}
+
+interface LegacySessionActivity {
+  removed: boolean
+  openState: 'cold' | 'loading' | 'open' | 'error'
+  openError: unknown | null
+  promptError: unknown | null
+  lastAgentError: unknown | null
+  pending: readonly unknown[]
+  runningCalls: readonly unknown[]
+  partial: unknown | null
+  running: boolean
+}
+
+function legacyPendingInteraction(summary: SessionSummary | undefined): unknown {
+  return (summary as SessionSummary & { pendingInteraction?: unknown } | undefined)?.pendingInteraction
 }
 
 /** Mirror the selected Session's official detailed state onto the theme root. */

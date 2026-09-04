@@ -1,14 +1,12 @@
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
+import type {} from '@deepseek-ai/dsh-api-session-controller/client'
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { apply as applyTheme } from './plugin.js'
-import { configureXiaoheiWorldRenderer } from './scene.js'
-import { mountXiaoheiSylvaBackground } from './scene/sylva-background.js'
 
 export { inject } from './plugin.js'
 
-/** Browser entrypoint wires the exact ThreeUI source into the shared scene lifecycle. */
+/** Browser entrypoint keeps the ambient world renderer-free and lets CSS own the backdrop. */
 export function apply(ctx: ClientContext): void {
-  const releaseWorldRenderer = configureXiaoheiWorldRenderer(mountXiaoheiSylvaBackground)
-  ctx.effect(() => releaseWorldRenderer, 'xiaohei-theme: register ThreeUI living world renderer')
   applyTheme(ctx)
 }
 export { bindXiaoheiAppearance, XIAOHEI_APPEARANCE_ATTRIBUTE } from './appearance.js'

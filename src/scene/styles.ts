@@ -8,14 +8,14 @@ export const XIAOHEI_SCENE_STYLE_ID = 'dsh-theme-xiaohei/scene-style'
 export const XIAOHEI_SCENE_LAYER_ID = 'dsh-theme-xiaohei/scene-layer'
 export const XIAOHEI_SCENE_WORLD_CLASS = 'xiaohei-scene__world'
 
-/** Neutral ambient color field and complete character art. */
+/** Quiet ink-and-silver atmosphere behind the application chrome. */
 const XIAOHEI_SCENE_BASE_CSS = `
 body {
-  background: #0D1419;
+  background: #111315;
 }
 
 html[data-xiaohei-appearance='light'] body {
-  background: #EDF1F2;
+  background: #E8EAEC;
 }
 
 #root {
@@ -32,11 +32,13 @@ html[data-xiaohei-appearance='light'] body {
   isolation: isolate;
   pointer-events: none;
   user-select: none;
-  background: #0D1419;
+  background:
+    linear-gradient(148deg, #1D2022 0%, #151719 46%, #101214 100%);
 }
 
 html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
-  background: #E9EDEF;
+  background:
+    linear-gradient(148deg, #F3F4F4 0%, #E8EAEC 48%, #D9DDE0 100%);
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::before,
@@ -50,20 +52,19 @@ html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)} {
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::before {
-  inset: -12%;
+  inset: -16%;
   background:
-    radial-gradient(ellipse 52% 46% at 12% 8%, rgb(132 148 158 / 9%), transparent 72%),
-    radial-gradient(ellipse 48% 58% at 94% 72%, rgb(74 91 101 / 12%), transparent 74%),
-    radial-gradient(ellipse 42% 38% at 58% 12%, rgb(205 213 217 / 4%), transparent 70%);
-  filter: blur(26px);
+    radial-gradient(ellipse 54% 48% at 8% 4%, rgb(232 235 236 / 8%), transparent 74%),
+    radial-gradient(ellipse 52% 62% at 96% 82%, rgb(91 98 99 / 9%), transparent 76%),
+    radial-gradient(ellipse 38% 32% at 76% 8%, rgb(207 211 212 / 3%), transparent 72%);
+  filter: blur(36px);
 }
 
 html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::before {
   background:
-    radial-gradient(ellipse 58% 52% at 8% 0%, rgb(255 255 255 / 68%), transparent 72%),
-    radial-gradient(ellipse 50% 62% at 96% 58%, rgb(173 185 192 / 19%), transparent 74%),
-    radial-gradient(ellipse 54% 46% at 24% 104%, rgb(198 208 212 / 23%), transparent 76%),
-    radial-gradient(ellipse 38% 34% at 58% 44%, rgb(255 255 255 / 24%), transparent 74%);
+    radial-gradient(ellipse 58% 52% at 7% 0%, rgb(255 255 255 / 62%), transparent 74%),
+    radial-gradient(ellipse 50% 62% at 98% 76%, rgb(177 183 187 / 16%), transparent 76%),
+    radial-gradient(ellipse 48% 42% at 20% 108%, rgb(207 211 212 / 18%), transparent 78%);
 }
 
 #${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::after {
@@ -88,31 +89,24 @@ html[data-xiaohei-appearance='light'] #${cssEscape(XIAOHEI_SCENE_LAYER_ID)}::aft
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: #4a4d44;
+  background:
+    radial-gradient(ellipse 76% 64% at 16% 8%, rgb(75 80 83 / 22%), transparent 72%),
+    radial-gradient(ellipse 66% 58% at 92% 84%, rgb(28 33 31 / 24%), transparent 76%),
+    radial-gradient(ellipse 46% 36% at 72% 16%, rgb(111 117 119 / 5%), transparent 74%),
+    linear-gradient(148deg, #24272A 0%, #17191B 45%, #101214 100%);
+}
+
+html[data-xiaohei-appearance='light'] .${XIAOHEI_SCENE_WORLD_CLASS} {
+  background:
+    radial-gradient(ellipse 76% 64% at 14% 6%, rgb(255 255 255 / 66%), transparent 72%),
+    radial-gradient(ellipse 64% 58% at 94% 84%, rgb(184 190 193 / 24%), transparent 76%),
+    radial-gradient(ellipse 44% 34% at 70% 14%, rgb(255 255 255 / 20%), transparent 74%),
+    linear-gradient(148deg, #F3F4F4 0%, #E8EAEC 48%, #D9DDE0 100%);
 }
 
 .${XIAOHEI_SCENE_WORLD_CLASS} > * {
   width: 100%;
   height: 100%;
-}
-
-.xiaohei-scene__world-mount {
-  position: absolute;
-  inset: 0;
-}
-
-.${XIAOHEI_SCENE_WORLD_CLASS} .sylva-living-world-scene {
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-}
-
-/* The world is visual-only. Pointer movement is mirrored into its sandbox by
-   the scene adapter, so the DSH application remains the sole hit-test layer. */
-.${XIAOHEI_SCENE_WORLD_CLASS} .sylva-living-world-scene,
-.${XIAOHEI_SCENE_WORLD_CLASS} .sylva-living-world-scene iframe {
-  pointer-events: none !important;
 }
 
 .xiaohei-scene__mascot {
