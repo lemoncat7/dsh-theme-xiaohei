@@ -10,7 +10,6 @@ import {
   installXiaoheiScene,
   prepareXiaoheiSylvaPointerFrame,
   resolveXiaoheiSylvaPointer,
-  shouldRestoreXiaoheiHeixiuCompanions,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
 import {
@@ -396,24 +395,18 @@ test('Sylva background prepares its iframe before attaching the WebGL scene', ()
   assert.equal(typeof prepareXiaoheiSylvaPointerFrame, 'function')
 })
 
-test('active theme keeps the quiet CSS background and one layered break-frame portrait renderer', () => {
+test('active theme keeps the quiet CSS background without a mounted character companion', () => {
   const client = readFileSync(new URL('../src/client.ts', import.meta.url), 'utf8')
-  const embedAssets = readFileSync(new URL('../scripts/embed-assets.mjs', import.meta.url), 'utf8')
+  const plugin = readFileSync(new URL('../src/plugin.ts', import.meta.url), 'utf8')
   const styles = readFileSync(new URL('../src/scene/styles.ts', import.meta.url), 'utf8')
   const packageSource = readFileSync(new URL('../package.json', import.meta.url), 'utf8')
 
   assert.doesNotMatch(client, /mountXiaoheiTreeHollowBackground|Sylva|ThreeUI|three|pixi/i)
-  assert.match(embedAssets, /XIAOHEI_BREAKFRAME_IDLE', 'xiaohei-breakframe-idle-v1\.webp'/)
-  assert.match(embedAssets, /XIAOHEI_BREAKFRAME_BLINK', 'xiaohei-breakframe-blink-v1\.webp'/)
-  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /not\(\[data-xiaohei-avatar-reaction\]\)/)
-  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /breakout-left/)
-  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /ring-front[\s\S]*clip-path: inset\(67%/)
-  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /composer-avatar__circle[\s\S]*background: transparent/)
-  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /composer-avatar__background/)
-  assert.match(XIAOHEI_COMPOSER_AVATAR_CSS, /prefers-reduced-motion: reduce/)
-  assert.doesNotMatch(XIAOHEI_COMPOSER_AVATAR_CSS, /rig-canvas|open-rig-ready/)
-  assert.match(styles, /xiaohei-scene__world[\s\S]*linear-gradient\(148deg, #24272A/)
-  assert.match(styles, /data-xiaohei-appearance='light'[\s\S]*linear-gradient\(148deg, #F3F4F4/)
+  assert.doesNotMatch(plugin, /installXiaoheiComposerAvatar|installXiaoheiSidebarHeixiuRoaming/)
+  assert.match(plugin, /installXiaoheiComposerSendHeixiu/)
+  assert.match(styles, /XIAOHEI_WALLPAPER_DARK/)
+  assert.match(styles, /data-xiaohei-appearance='light'[\s\S]*XIAOHEI_WALLPAPER_LIGHT/)
+  assert.doesNotMatch(styles, /xiaohei-scene__mascot|xiaohei-scene__heixiu/)
   assert.doesNotMatch(packageSource, /"pixi\.js"|"three"/)
 })
 
@@ -491,6 +484,7 @@ test('shades DSH native palettes without forcing a theme preference', () => {
     },
     inject(services, setup) {
       calls.push(['inject', services])
+      if (services.includes('sessions')) return // Optional service absent in this fixture.
       setup(ctx)
     },
     slots: {
@@ -530,7 +524,7 @@ test('shades DSH native palettes without forcing a theme preference', () => {
     name: 'conversation.hero.brand.mark',
     priority: -20,
   }])
-  assert.deepEqual(calls[8], ['inject', ['theme', 'sessions']])
+  assert.deepEqual(calls[8], ['inject', ['theme']])
   assert.equal(calls[9][0], 'effect')
   assert.deepEqual(calls[10], [
     'overrideTokens',
@@ -540,17 +534,12 @@ test('shades DSH native palettes without forcing a theme preference', () => {
   assert.deepEqual(calls.slice(11).map(call => call[1]), [
     'xiaohei-theme: follow resolved appearance',
     'xiaohei-theme: install spirit control skin',
-    'xiaohei-theme: keep one human Xiaohei beside the composer',
     'xiaohei-theme: turn the native send action into blinking Heixiu',
-    'xiaohei-theme: install quiet gradient scene',
+    'xiaohei-theme: install paired atmosphere',
     'xiaohei-theme: install isolated sidebar glass',
-    'xiaohei-theme: let sidebar Heixiu roam safely',
-    'xiaohei-theme: bind Heixiu companion interactions',
-    'xiaohei-theme: install random Heixiu portal visits',
-    'xiaohei-theme: install proximity gaze',
-    'xiaohei-theme: synchronize complete-frame blinking',
-    'xiaohei-theme: install sparse idle reactions',
-    'xiaohei-theme: follow current session agent state',
+    'xiaohei-theme: place responsive character poses',
+    'xiaohei-theme: mount bloub Heixiu beside composer',
+    ['sessions'],
   ])
   assert.equal(calls.some(call => call[0] === 'setTheme' || call[0] === 'register'), false)
 
@@ -689,11 +678,15 @@ test('control skin composes isolated responsibility layers in a stable order', (
     XIAOHEI_CONVERSATION_CSS,
     XIAOHEI_CONVERSATION_MESSAGES_CSS,
     XIAOHEI_COMPOSER_CSS,
-    XIAOHEI_COMPOSER_AVATAR_CSS,
     XIAOHEI_COMPOSER_SEND_HEIXIU_CSS,
     XIAOHEI_OVERLAY_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
   ].join('\n'))
+})
+
+test('sidebar hides only tree scrollbar paint without changing scrolling geometry', () => {
+  assert.match(XIAOHEI_SIDEBAR_CSS, /\[data-slot='sidebar\.workspaces'\] \[role='tree'\] \{\s*scrollbar-color: transparent transparent !important/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /scrollbar-width:\s*none|overflow-y:\s*hidden/)
 })
 
 test('native controls inherit one browser-independent theme contract', () => {
@@ -722,6 +715,10 @@ test('conversation remains clear without a permanent reading veil', () => {
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-turn-tail/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /inline-size:\s*fit-content/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /max-inline-size:\s*100%/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /padding:\s*16px 28px !important/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /padding:\s*14px 28px !important/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /padding-inline:\s*20px !important/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /padding:\s*6px 14px/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-chat-flow-kind='assistant-step'\]::before/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /data-chat-flow-kind='user'\]::after/)
   assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /content:\s*'我'/)
@@ -876,59 +873,17 @@ test('Heixiu becomes the real Host send action and blinks at a sparse natural ca
   assert.equal(typeof installXiaoheiComposerSendHeixiu(undefined), 'function')
 })
 
-test('workspace skin follows official tree state without replacing native behaviour', () => {
-  assert.match(XIAOHEI_SIDEBAR_CSS, /data-slot='sidebar'/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /prefers-reduced-transparency:\s*reduce/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-emphasis:\s*#3F454C/)
-  assert.doesNotMatch(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-(?:material|hover|control|emphasis):[^;]*(?:84 125 120|99 193 199|#547D78|#63C1C7)/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /data-slot='sidebar\.workspaces'/)
+test('workspace skin preserves native tree layout and distinguishes selection', () => {
   assert.match(XIAOHEI_WORKSPACE_CSS, /content:\s*'空间'/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-space-frame-edge/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /margin:\s*2px 2px 0/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /margin-inline:\s*2px/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /:last-child/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-expanded='true'/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /role='treeitem'\]\[aria-selected='true'/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-space-frame-fill/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-path/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-row-highlight/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-folder-shadow/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /blur\(var\(--xiaohei-workspace-glass-blur\)\)/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /prefers-reduced-transparency:\s*reduce/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /@supports not \(\(backdrop-filter:/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-workspace-active-solid:/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /translateY\(-1px\)/)
-  assert.doesNotMatch(
-    `${XIAOHEI_CHROME_TOKENS_CSS}\n${XIAOHEI_WORKSPACE_CSS}`,
-    /workspace-rift|WORKSPACE_RIFT|workspace-active-line|data:image\/webp;base64|drop-shadow/,
-  )
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /\[role='treeitem'\]\[aria-expanded\]::(?:before|after)/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /span:not\(:first-child\)/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /aria-selected='true'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /aria-expanded='true'/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /--xiaohei-workspace-row-active-hover/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /backdrop-filter:|translateY|margin-inline|width:\s*calc|space-frame/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /::before|::after\s*\{[^}]*position:/)
+  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /addEventListener|MutationObserver|animation\s*:/)
   assert.match(XIAOHEI_WORKSPACE_CSS, /forced-colors:\s*active/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /clip-path|_folderActive|space-rift-mask|workspace-frame/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /animation\s*:/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /(?:onclick|addEventListener|MutationObserver)/)
-  const workspaceRootRule = XIAOHEI_WORKSPACE_CSS.match(
-    /#root \[data-slot='sidebar\.workspaces'\] > div \{([^}]*)\}/,
-  )?.[1] ?? ''
-  assert.notEqual(workspaceRootRule, '')
-  assert.doesNotMatch(workspaceRootRule, /isolation\s*:|z-index\s*:/)
-  assert.doesNotMatch(
-    XIAOHEI_SIDEBAR_CSS,
-    /#root \[data-slot='sidebar'\] > div \{[^}]*isolation:\s*isolate/s,
-  )
-  assert.match(XIAOHEI_SIDEBAR_CSS, /--xiaohei-sidebar-brush-ink/)
-  assert.doesNotMatch(XIAOHEI_IDENTITY_CSS, /\[data-slot='sidebar\.workspaces'\] > div::(?:before|after)/)
-})
-
-test('workspace path stays in the native sidebar flow without a group card', () => {
-  assert.match(XIAOHEI_SIDEBAR_CSS, /xiaohei-sidebar-glass-width/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /left:\s*19px/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 4px\)/)
-  assert.match(XIAOHEI_WORKSPACE_CSS, /width:\s*calc\(100% - 16px\)/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /box-shadow:[\s\S]{0,160}xiaohei-sidebar-shadow/)
-  assert.doesNotMatch(XIAOHEI_WORKSPACE_CSS, /right:\s*-[1-9][0-9]*px/)
+  assert.match(XIAOHEI_WORKSPACE_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.doesNotMatch(XIAOHEI_SIDEBAR_CSS, /brush-ink|mask-image/)
 })
 
 test('sidebar material preserves the host geometry of fixed overlays', () => {
@@ -968,7 +923,7 @@ test('sidebar glass uses the quiet Realm material without stacking over the host
   assert.match(XIAOHEI_SIDEBAR_CSS, /#dsh-theme-xiaohei\\\/sidebar-glass/)
   assert.match(XIAOHEI_SIDEBAR_CSS, /var\(--xiaohei-sidebar-glass-fill\)/)
   assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-solid:/)
-  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-fill:\s*rgb\(236 240 242 \/ 18%\)/)
+  assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-fill:\s*rgb\(247 245 242 \/ 58%\)/)
   assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-saturation:\s*102%/)
   assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-blur:\s*18px/)
   assert.match(XIAOHEI_CHROME_TOKENS_CSS, /--xiaohei-sidebar-glass-radius:\s*18px/)
@@ -1061,7 +1016,6 @@ test('runtime behaviours do not recreate full-tree Host observers', () => {
     'loading-heixiu.ts',
     'portal.ts',
     'reactions.ts',
-    'scene/runtime.ts',
     'sidebar-glass.ts',
     'sidebar-heixiu-roaming.ts',
   ]
@@ -1301,109 +1255,34 @@ test('persisted Host appearance remains authoritative during ThemeRuntime hydrat
   assert.equal(bootStyleRemoved, true)
 })
 
-test('scene composes a passive theme field and async character art', () => {
-  assert.equal(XIAOHEI_SCENE_PART_COUNT, 2)
-  assert.match(XIAOHEI_IDLE_SHEET, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDLE_BLINK, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDLE_EYE_BASE, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDLE_EAR_LEFT, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDLE_EAR_RIGHT, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_IDLE_TAIL, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_HEIXIU_OPEN, /^data:image\/webp;base64,/)
-  assert.match(XIAOHEI_HEIXIU_BLINK, /^data:image\/webp;base64,/)
-  for (const asset of [
-    XIAOHEI_THINKING,
-    XIAOHEI_STREAMING,
-    XIAOHEI_TOOL,
-    XIAOHEI_WAITING,
-    XIAOHEI_COMPLETE,
-    XIAOHEI_ERROR,
-  ]) assert.match(asset, /^data:image\/webp;base64,/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data:image\/webp;base64,/)
-  assert.doesNotMatch(installXiaoheiScene.toString(), /createIdleBlink/)
-  assert.match(installXiaoheiScene.toString(), /installSidebarHeixiu/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__sidebar-signature/)
-  assert.match(XIAOHEI_SCENE_CSS, /object-fit:\s*contain/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /@keyframes xiaohei-mascot-blink/)
-  for (const state of ['thinking', 'streaming', 'tool', 'waiting', 'complete', 'error']) {
-    assert.match(XIAOHEI_SCENE_CSS, new RegExp(`data-xiaohei-state='${state}'`))
-    assert.match(XIAOHEI_SCENE_CSS, new RegExp(`mascot-state--${state}`))
-  }
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__thinking-bubble/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__thinking-dot--one/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__thinking-dot--three/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-thinking-dot/)
-  assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion[\s\S]*xiaohei-scene__thinking-dot[\s\S]*animation: none/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-(?:scene__)?energy/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-tail-write/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__tail-write--three/)
-  assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion[\s\S]*xiaohei-scene__state-fx\s*\{ display: none; \}/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-tool-key/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-waiting-ring/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-complete-spark/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-error-glow/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__sidebar-(?:aura|current|spirit)/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__heixiu-field/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__heixiu-body/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-heixiu-open/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-heixiu-blink/)
-  assert.doesNotMatch(XIAOHEI_HEIXIU_FEEDBACK_CSS, /heixiu--composer|feedback-send/)
-  assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /data-xiaohei-state='complete'/)
-  assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /data-xiaohei-state='error'/)
-  assert.match(XIAOHEI_HEIXIU_FEEDBACK_CSS, /prefers-reduced-motion:\s*reduce/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-heixiu-attention='true'/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-heixiu-greeting='true'/)
-  assert.doesNotMatch(XIAOHEI_HEIXIU_FEEDBACK_CSS, /scale\(|rotate\(/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /heixiu--random|xiaohei-heixiu-drift-four/)
-  assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion[\s\S]*xiaohei-scene__heixiu/)
-  assert.match(XIAOHEI_SCENE_CSS, /max-width:\s*768px[\s\S]*heixiu--sidebar\s*\{ display: none; \}/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /conversation\.composer\.bar|heixiu--composer|heixiu-drift-three/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-mascot-breathe/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__mascot::before/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__mascot-idle-viewport/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-scene__mascot-state[\s\S]*bottom:\s*0[\s\S]*transform:\s*translateX\(-50%\)/)
-  assert.match(XIAOHEI_SCENE_CSS, /brightness\(1\.32\) contrast\(1\.02\)/)
-  assert.match(XIAOHEI_SCENE_CSS, /drop-shadow\([^)]*83 218 193/)
-  assert.match(XIAOHEI_STATE_TRANSITION_CSS, /transition-duration:\s*220ms/)
-  assert.match(XIAOHEI_STATE_TRANSITION_CSS, /transition-delay:\s*70ms/)
-  assert.doesNotMatch(XIAOHEI_STATE_TRANSITION_CSS, /transform|scale|translate|requestAnimationFrame|setTimeout/)
-  assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
-  const sceneRuntimeSource = readFileSync(new URL('../src/scene/runtime.ts', import.meta.url), 'utf8')
-  assert.match(sceneRuntimeSource, /decoding = ['"]async['"]/)
-  assert.match(sceneRuntimeSource, /fetchPriority = ['"]low['"]/)
-  assert.match(installXiaoheiScene.toString(), /createHeixiuField/)
-  assert.match(installXiaoheiScene.toString(), /createWorldBackground/)
-  assert.match(installXiaoheiScene.toString(), /installSidebarHeixiu/)
-  assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: true }]), false)
-  assert.equal(shouldRestoreXiaoheiHeixiuCompanions([{ isConnected: true }, { isConnected: false }]), true)
-  assert.match(XIAOHEI_SCENE_CSS, /pointer-events:\s*none/)
+test('scene composes one static wallpaper without animation layers', () => {
+  assert.match(XIAOHEI_SCENE_CSS, /\[id='dsh-theme-xiaohei\/scene-layer'\] \{/)
+  assert.match(XIAOHEI_SCENE_CSS, /height: 100lvh/)
+  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-wallpaper-character\[data-pose='peek'\]/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /::after|linear-gradient/)
+  assert.equal(XIAOHEI_SCENE_PART_COUNT, 1)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__realm-/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__blob-cursor|xiaohei-spirit-blob-filter/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /realm-canvas|spirit-sphere|portal-ring/)
-  assert.doesNotMatch(sceneRuntimeSource, /realm|pointermove|requestAnimationFrame/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /--xiaohei-sidebar-(?:aura|current)/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'[\s\S]*background:[\s\S]*#E8EAEC/)
-  assert.match(XIAOHEI_SCENE_CSS, /::before[\s\S]*radial-gradient/)
-  assert.match(XIAOHEI_SCENE_CSS, /feTurbulence/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-ambient|@keyframes xiaohei-background/)
-  assert.doesNotMatch(installXiaoheiScene.toString(), /TreeHollow|Sylva|Pixi/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /sylva-living-world-scene|xiaohei-character__canvas/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__veil/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__aura/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-spirit-ring/)
-  assert.match(XIAOHEI_SCENE_CSS, /data-slot='sidebar'/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /data-slot='sidebar\.workspaces'/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /not\(\[class\*='_collapsed'\]\)/)
-  assert.match(XIAOHEI_SIDEBAR_CSS, /button:focus-visible/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /body\s*>\s*:not/)
-  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /backdrop-filter/)
-  assert.match(XIAOHEI_SCENE_CSS, /prefers-reduced-motion:\s*reduce/)
+  assert.match(XIAOHEI_SCENE_CSS, /background-size:\s*cover/)
+  assert.match(XIAOHEI_SCENE_CSS, /data:image\/webp;base64/)
+  assert.match(XIAOHEI_SCENE_CSS, /pointer-events:\s*none/)
   assert.match(XIAOHEI_SCENE_CSS, /forced-colors:\s*active/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-scene__mascot|xiaohei-scene__heixiu/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /@keyframes|feTurbulence|backdrop-filter/)
 
-  const keyframes = extractKeyframes(XIAOHEI_SCENE_CSS)
-  assert.doesNotMatch(keyframes, /\b(?:top|right|bottom|left|width|height|filter|background-position)\s*:/)
+  const sceneRuntimeSource = readFileSync(new URL('../src/scene/runtime.ts', import.meta.url), 'utf8')
+  assert.match(sceneRuntimeSource, /createWorldBackground/)
+  assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
+  assert.doesNotMatch(sceneRuntimeSource, /Heixiu|Mascot|pointermove|requestAnimationFrame/)
   assert.equal(typeof installXiaoheiScene(undefined), 'function')
+})
+
+test('runtime omits character companions while preserving the Heixiu send action', () => {
+  const pluginSource = readFileSync(new URL('../src/plugin.ts', import.meta.url), 'utf8')
+  assert.match(pluginSource, /installXiaoheiComposerSendHeixiu/)
+  assert.doesNotMatch(pluginSource, /installXiaoheiComposerAvatar|installXiaoheiSidebarHeixiuRoaming/)
+  assert.doesNotMatch(pluginSource, /installXiaoheiPortalTransit|installXiaoheiHeixiuInteractions/)
+  assert.doesNotMatch(XIAOHEI_CHROME_CSS, /\.xiaohei-composer-avatar\s*\{/)
+  assert.match(XIAOHEI_CHROME_CSS, /data-xiaohei-send-heixiu='true'/)
 })
 
 test('official state priority is error, waiting, tool, streaming, thinking, idle', () => {

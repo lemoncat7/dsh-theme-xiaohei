@@ -11,8 +11,7 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
   color: var(--xiaohei-conversation-text);
 }
 
-/* Message portraits are deliberately static. The single animated companion
-   lives beside the composer, while these only clarify who said each message. */
+/* Message portraits are deliberately static and only identify the speaker. */
 #root [data-chat-flow-kind='assistant-step'],
 #root [data-chat-flow-kind='user'] {
   position: relative;
@@ -72,7 +71,7 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
   box-sizing: border-box;
   inline-size: fit-content;
   max-inline-size: 100%;
-  padding: 14px 16px;
+  padding: 16px 28px !important;
   border: 1px solid var(--xiaohei-conversation-edge) !important;
   border-radius: 9px 18px 18px 18px;
   background: var(--xiaohei-conversation-assistant) !important;
@@ -99,10 +98,14 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
 }
 
 /* User and steering prose use a slightly denser companion bubble; image-only rows stay untouched. */
+#root [data-chat-flow-kind='user'] > [data-slot='conversation.chat.node']
+  > div:first-child > div:first-child > div:last-child:not([data-slot]):not(:has(img)),
 #root [data-chat-flow-kind='user'] [data-time-hover-root]
   > div:first-child > div:last-child:not(:has(img)),
 #root [data-pending-steering]
   > div:first-child > div:last-child:not(:has(img)) {
+  box-sizing: border-box;
+  padding: 14px 28px !important;
   color: var(--xiaohei-conversation-text) !important;
   border: 1px solid var(--xiaohei-conversation-edge);
   border-radius: 18px 9px 18px 18px;
@@ -137,6 +140,7 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
   box-sizing: border-box;
   inline-size: fit-content;
   max-inline-size: 100%;
+  padding: 6px 14px;
   border: 1px solid var(--xiaohei-conversation-meta-edge);
   border-radius: 11px;
   background: var(--xiaohei-conversation-meta-surface) !important;
@@ -150,7 +154,7 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
 
 #root [data-chat-flow-kind='turn-tail'] .dsh-knowledge-writeback-status {
   box-sizing: border-box;
-  padding: 4px 8px;
+  padding: 6px 14px;
   border: 1px solid var(--xiaohei-conversation-meta-edge);
   border-radius: 9px;
   background: var(--xiaohei-conversation-meta-surface) !important;
@@ -252,8 +256,17 @@ html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after 
   #root [data-chat-flow-kind='assistant-step']
     > [data-slot='conversation.chat.node']
     > div:first-child {
-    padding: 12px 13px;
+    padding: 12px 20px !important;
     border-radius: 8px 16px 16px 16px;
+  }
+
+  #root [data-chat-flow-kind='user'] > [data-slot='conversation.chat.node']
+    > div:first-child > div:first-child > div:last-child:not([data-slot]):not(:has(img)),
+  #root [data-chat-flow-kind='user'] [data-time-hover-root]
+    > div:first-child > div:last-child:not(:has(img)),
+  #root [data-pending-steering]
+    > div:first-child > div:last-child:not(:has(img)) {
+    padding-inline: 20px !important;
   }
 
   #root :is(

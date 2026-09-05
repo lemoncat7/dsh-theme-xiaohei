@@ -1,22 +1,16 @@
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import { bindXiaoheiAppearance } from './appearance.js'
-import { installXiaoheiBlink } from './blink.js'
 import { installXiaoheiChrome } from './chrome.js'
 import { installXiaoheiComposerSendHeixiu } from './composer-send-heixiu.js'
-import { installXiaoheiComposerAvatar } from './composer-avatar.js'
-import { installXiaoheiGaze } from './gaze.js'
-import { installXiaoheiHeixiuInteractions } from './heixiu-interactions.js'
 import { installXiaoheiPluginLoading } from './loading-heixiu.js'
-import { installXiaoheiPortalTransit } from './portal.js'
-import { installXiaoheiIdleReactions } from './reactions.js'
 import { installXiaoheiScene } from './scene.js'
 import { installXiaoheiSidebarGlass } from './sidebar-glass.js'
-import { installXiaoheiSidebarHeixiuRoaming } from './sidebar-heixiu-roaming.js'
-import { bindXiaoheiSessionState } from './state.js'
+import { installXiaoheiWallpaperCharacter } from './scene/wallpaper-character.js'
+import { installComposerBloub } from './bloub-heixiu/runtime.js'
+import { bindHeixiuSessions, createHeixiuSignals } from './bloub-heixiu/signals.js'
 import { XIAOHEI_THEME_TOKEN_OVERRIDES } from './theme.js'
 import { XiaoheiBrandName, XiaoheiMetallicBrandMark } from './metallic-brand-mark.js'
 
@@ -48,7 +42,7 @@ export function apply(ctx: ClientContext): void {
       disposeSidebarMark()
     }
   })
-  ctx.inject(['theme', 'sessions'], (readyCtx) => installXiaoheiTheme(readyCtx))
+  ctx.inject(['theme'], (readyCtx) => installXiaoheiTheme(readyCtx))
 }
 
 /** Mount the complete theme only after its runtime services become available. */
@@ -59,18 +53,11 @@ function installXiaoheiTheme(ctx: ClientContext): void {
 
   ctx.effect(() => bindXiaoheiAppearance(ctx), 'xiaohei-theme: follow resolved appearance')
   ctx.effect(installXiaoheiChrome, 'xiaohei-theme: install spirit control skin')
-  ctx.effect(installXiaoheiComposerAvatar, 'xiaohei-theme: keep one human Xiaohei beside the composer')
   ctx.effect(installXiaoheiComposerSendHeixiu, 'xiaohei-theme: turn the native send action into blinking Heixiu')
-  ctx.effect(installXiaoheiScene, 'xiaohei-theme: install quiet gradient scene')
+  ctx.effect(installXiaoheiScene, 'xiaohei-theme: install paired atmosphere')
   ctx.effect(installXiaoheiSidebarGlass, 'xiaohei-theme: install isolated sidebar glass')
-  ctx.effect(installXiaoheiSidebarHeixiuRoaming, 'xiaohei-theme: let sidebar Heixiu roam safely')
-  ctx.effect(installXiaoheiHeixiuInteractions, 'xiaohei-theme: bind Heixiu companion interactions')
-  ctx.effect(installXiaoheiPortalTransit, 'xiaohei-theme: install random Heixiu portal visits')
-  ctx.effect(installXiaoheiGaze, 'xiaohei-theme: install proximity gaze')
-  ctx.effect(installXiaoheiBlink, 'xiaohei-theme: synchronize complete-frame blinking')
-  ctx.effect(installXiaoheiIdleReactions, 'xiaohei-theme: install sparse idle reactions')
-  ctx.effect(
-    () => bindXiaoheiSessionState(ctx.sessions),
-    'xiaohei-theme: follow current session agent state',
-  )
+  ctx.effect(installXiaoheiWallpaperCharacter, 'xiaohei-theme: place responsive character poses')
+  const heixiuSignals = createHeixiuSignals()
+  ctx.effect(() => installComposerBloub(undefined, heixiuSignals), 'xiaohei-theme: mount bloub Heixiu beside composer')
+  ctx.inject(['sessions'], ready => bindHeixiuSessions(ready.sessions, heixiuSignals))
 }

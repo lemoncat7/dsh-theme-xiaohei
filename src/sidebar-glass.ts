@@ -49,6 +49,7 @@ export function installXiaoheiSidebarGlass(
   let resizeSettleTimer: number | undefined
   let resizing = false
   let appliedBounds: XiaoheiSidebarGlassBounds | undefined
+  let geometryDirty = true
 
   const clearResizeState = (): void => {
     if (resizeSettleTimer !== undefined) win.clearTimeout(resizeSettleTimer)
@@ -73,6 +74,7 @@ export function installXiaoheiSidebarGlass(
 
   const resizeObserver = typeof win.ResizeObserver === 'function'
     ? new win.ResizeObserver(() => {
+        geometryDirty = true
         markResizeActivity()
         scheduleReconcile()
       })
@@ -105,6 +107,7 @@ export function installXiaoheiSidebarGlass(
     if (nextSidebarShell !== sidebarShell) {
       resizeObserver?.disconnect()
       sidebarShell = nextSidebarShell
+      geometryDirty = true
       if (sidebarShell !== undefined) resizeObserver?.observe(sidebarShell)
     }
 
@@ -113,6 +116,7 @@ export function installXiaoheiSidebarGlass(
       glass?.remove()
       glass = undefined
       appliedBounds = undefined
+      geometryDirty = true
       return
     }
 
@@ -122,12 +126,20 @@ export function installXiaoheiSidebarGlass(
       glass.id = XIAOHEI_SIDEBAR_GLASS_ID
       glass.setAttribute('aria-hidden', 'true')
       appliedBounds = undefined
+      geometryDirty = true
 
       const world = sceneLayer.querySelector(`.${XIAOHEI_SCENE_WORLD_CLASS}`)
-      sceneLayer.insertBefore(glass, world?.nextSibling ?? sceneLayer.firstChild)
+      // null is meaningful here: insertBefore(node, null) appends after a
+      // last-child wallpaper. Falling back to firstChild hides glass UNDER it.
+      sceneLayer.insertBefore(glass, world !== null ? world.nextSibling : sceneLayer.firstChild)
     }
 
-    applyBounds()
+    // Streamed text mutates the host tree frequently. Recheck slot identity,
+    // but do not force layout unless sidebar geometry actually changed.
+    if (geometryDirty) {
+      applyBounds()
+      geometryDirty = false
+    }
   }
 
   function scheduleReconcile(): void {
@@ -139,7 +151,11 @@ export function installXiaoheiSidebarGlass(
   }
 
   const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, scheduleReconcile)
-  win.addEventListener('resize', scheduleReconcile, { passive: true })
+  const onViewportResize = (): void => {
+    geometryDirty = true
+    scheduleReconcile()
+  }
+  win.addEventListener('resize', onViewportResize, { passive: true })
   scheduleReconcile()
 
   return () => {
@@ -148,7 +164,7 @@ export function installXiaoheiSidebarGlass(
     animationFrame = undefined
     unsubscribeHostDom()
     resizeObserver?.disconnect()
-    win.removeEventListener('resize', scheduleReconcile)
+    win.removeEventListener('resize', onViewportResize)
     clearResizeState()
     glass?.remove()
     glass = undefined

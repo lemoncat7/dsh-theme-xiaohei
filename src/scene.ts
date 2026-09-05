@@ -9,7 +9,6 @@ export {
 export {
   configureXiaoheiWorldRenderer,
   installXiaoheiScene,
-  shouldRestoreXiaoheiHeixiuCompanions,
   XIAOHEI_SCENE_PART_COUNT,
 } from './scene/runtime.js'
 

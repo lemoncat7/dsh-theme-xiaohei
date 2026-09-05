@@ -1,0 +1,41 @@
+# bloub
+
+Source: https://github.com/jeremy-prt/bloub
+Revision: b4bb3c1b5f93c7b87a2e8d620f667c4093d97749
+
+`src/vendor/bloub/` contains the framework-free animation engine from bloub.
+Authored body profiles, state choreography, gaze projection and interruption
+blending are retained. Local changes: NodeNext `.js` import extensions; lazy
+custom-shape fitting table (unknown profiles bypass the catalogue); repeat the
+blink calendar for long-running sessions; expose eye bounds, uncompressed tangent
+and lid openness for a separate hollow-eye renderer; interpolate notification
+badge/notch radii during entry, exit and interrupted morphs. The theme supplies a custom
+Heixiu radial profile and face through the upstream customisation API. Its gesture
+tracks, DOM lifecycle, placement and scheduler are separate from the upstream core.
+No Vue application, editor, video exporter or media dependencies are included.
+
+The original project recreates an x.ai avatar; its MIT license covers code, not
+ownership of the character designs. This theme is an unofficial fan work and is
+not endorsed by the owners of Luo Xiaohei or x.ai.
+
+## MIT License
+
+Copyright (c) 2026 Jérémy Perret
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

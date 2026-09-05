@@ -12,9 +12,25 @@ export const XIAOHEI_SIDEBAR_CSS = `
   position: relative;
 }
 
+/* Hide the tree scrollbar's paint, retaining its gutter so rows do not grow
+ * into the glass edge. Wheel, touch and keyboard remain native; dialogs and
+ * other plugin panels keep their normal scrollbar affordance. */
+#root [data-slot='sidebar.workspaces'] [role='tree'] {
+  scrollbar-color: transparent transparent !important;
+}
+
+#root [data-slot='sidebar.workspaces'] [role='tree']::-webkit-scrollbar,
+#root [data-slot='sidebar.workspaces'] [role='tree']::-webkit-scrollbar-thumb,
+#root [data-slot='sidebar.workspaces'] [role='tree']::-webkit-scrollbar-track {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 /* The host shell remains paint- and filter-free because Settings is a fixed
  * descendant. The glass itself lives outside #root in the scene layer. */
 #root [data-slot='sidebar'] > div {
+  --dsh-sidebar-inline-padding: 18px;
   position: relative;
   background: transparent !important;
   border-right: 0;
@@ -137,101 +153,47 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
   filter: brightness(1.12) contrast(1.04);
 }
 
-/* Header toggle and the primary action keep the host's dimensions. */
+/* Keep native rail/wide geometry and one consistent control material. */
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child,
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session'] {
-  color: var(--xiaohei-sidebar-icon);
+  color: var(--xiaohei-sidebar-emphasis);
   transition:
-    color var(--xiaohei-motion-fast) ease,
-    background-color var(--xiaohei-motion-base) ease,
-    border-color var(--xiaohei-motion-base) ease;
+    background-color var(--xiaohei-motion-fast) ease,
+    border-color var(--xiaohei-motion-fast) ease,
+    transform var(--xiaohei-motion-fast) var(--xiaohei-motion-curve);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child:hover {
-  color: var(--xiaohei-sidebar-emphasis);
   background: var(--xiaohei-sidebar-hover);
 }
 
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session'] {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-color: transparent;
-  background: transparent !important;
-  box-shadow: none;
+  border: 1px solid var(--xiaohei-sidebar-control-edge);
+  border-radius: var(--xiaohei-radius-control);
+  background: var(--xiaohei-sidebar-control);
+  box-shadow: inset 0 1px var(--xiaohei-sidebar-control-highlight);
   justify-content: flex-start;
   gap: 8px;
   padding-inline: 12px;
   text-align: start;
 }
 
-/* One quiet horizontal ink stroke replaces the generic button card. The
- * brush is paint-only; the native button, label and focus target stay intact. */
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']::before,
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session']::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset: 3px 7px 3px 5px;
-  border-radius: 42% 9% 37% 12% / 28% 46% 36% 58%;
-  background: linear-gradient(
-    94deg,
-    transparent 0%,
-    var(--xiaohei-sidebar-brush-ink) 5%,
-    var(--xiaohei-sidebar-brush-ink) 72%,
-    transparent 100%
-  );
-  -webkit-mask-image:
-    radial-gradient(ellipse 12px 70% at 5% 48%, black 44%, transparent 76%),
-    linear-gradient(90deg, black 5%, black 76%, transparent 100%);
-  mask-image:
-    radial-gradient(ellipse 12px 70% at 5% 48%, black 44%, transparent 76%),
-    linear-gradient(90deg, black 5%, black 76%, transparent 100%);
-  -webkit-mask-composite: source-over;
-  mask-composite: add;
-  opacity: .9;
-  transform: scaleX(.985);
-  transform-origin: left center;
-  transition:
-    background-color var(--xiaohei-motion-base) ease,
-    opacity var(--xiaohei-motion-fast) ease,
-    transform var(--xiaohei-motion-base) var(--xiaohei-motion-curve);
-}
-
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']:hover,
 #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session']:hover {
-  color: var(--xiaohei-sidebar-emphasis);
-  border-color: transparent;
-  background: transparent !important;
+  border-color: var(--xiaohei-sidebar-control-edge-hover);
+  background: var(--xiaohei-sidebar-hover);
 }
 
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']:hover::before,
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session']:hover::before {
-  background: linear-gradient(
-    94deg,
-    transparent 0%,
-    var(--xiaohei-sidebar-brush-ink-hover) 5%,
-    var(--xiaohei-sidebar-brush-ink-hover) 72%,
-    transparent 100%
-  );
-  opacity: 1;
-  transform: scaleX(1);
-}
-
-/* Footer occupants keep their native layout. Only their interaction surface
- * is shaded, avoiding a second card inside the sidebar glass. */
+/* The footer uses a divider instead of another framed card. */
 #root [data-slot='sidebar'] > div:not([class*='_collapsed'])
   > :has(> div > [data-slot='sidebar.footer.action']) {
   box-sizing: border-box;
   gap: 2px;
-  margin: 8px 2px 4px;
-  padding: 4px;
-  border: 1px solid var(--xiaohei-sidebar-control-edge);
-  border-radius: calc(var(--xiaohei-radius-control) + 2px);
-  background: color-mix(in srgb, var(--xiaohei-sidebar-control) 76%, transparent);
-  box-shadow: inset 0 1px 0 var(--xiaohei-sidebar-control-highlight);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--xiaohei-sidebar-control-edge);
 }
 
 #root [data-slot='sidebar.footer.action'] > button,
@@ -267,10 +229,6 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
     transition-duration: 0ms !important;
   }
 
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']::before,
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session']::before {
-    transition-duration: 0ms !important;
-  }
 
   .xiaohei-brand-mark__fallback,
   .xiaohei-brand-mark__metal {
@@ -307,9 +265,5 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
     border-color: ButtonText;
   }
 
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']::before,
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session']::before {
-    display: none;
-  }
 }
 `
