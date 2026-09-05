@@ -33,7 +33,10 @@ test('streamed DOM changes do not remeasure glass; resize, remount and disposal 
       removeAttribute: k => attributes.delete(k),
     },
     getElementById: id => elements.get(id) ?? null,
-    querySelector: () => shell,
+    querySelector: selector => {
+      assert.equal(selector, "#root :has(> [data-slot='sidebar'])", 'observe the visible column, not the fixed-width fading shell')
+      return shell
+    },
     createElement: () => ({
       values: new Map(),
       get style() { return { setProperty: (k, v) => this.values.set(k, v) } },
@@ -73,6 +76,7 @@ test('streamed DOM changes do not remeasure glass; resize, remount and disposal 
 
   width = 360
   resize.callback()
+  assert.equal(elements.get(XIAOHEI_SIDEBAR_GLASS_ID).values.get('--xiaohei-sidebar-glass-width'), '346px', 'resize must update before the next paint, without waiting for RAF')
   await flush()
   assert.equal(reads, 2)
   assert.equal(elements.get(XIAOHEI_SIDEBAR_GLASS_ID).values.get('--xiaohei-sidebar-glass-width'), '346px')
@@ -95,9 +99,11 @@ test('streamed DOM changes do not remeasure glass; resize, remount and disposal 
   assert.equal(reads, 4)
 
   resize.callback()
+  const readsBeforeDisposal = reads
   dispose()
+  resize.callback()
   await flush()
-  assert.equal(reads, 4)
+  assert.equal(reads, readsBeforeDisposal)
   assert.equal(elements.has(XIAOHEI_SIDEBAR_GLASS_ID), false)
   assert.equal(frames.size, 0)
   assert.equal(timers.size, 0)

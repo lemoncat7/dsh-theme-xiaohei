@@ -20,21 +20,34 @@ export function bindXiaoheiAppearance(
 ): () => void {
   if (doc === undefined) return () => {}
 
+  const win = doc.defaultView
+  let handoff: number | undefined
+  let disposed = false
+  const cancelHandoff = (): void => {
+    if (handoff !== undefined) win?.clearTimeout(handoff)
+    handoff = undefined
+  }
   const sync = (snapshot: ThemeSnapshot): void => {
-    const bootAppearance = doc.documentElement.getAttribute(XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE)
-    if (bootAppearance === 'light' || bootAppearance === 'dark') {
-      doc.documentElement.setAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE, bootAppearance)
-      if (snapshot.active.colorScheme !== bootAppearance) return
-    } else {
-      doc.documentElement.setAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE, snapshot.active.colorScheme)
-    }
+    if (disposed) return
+    cancelHandoff()
+    doc.documentElement.setAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE, snapshot.active.colorScheme)
     releaseXiaoheiBootAppearance(doc)
   }
   const off = ctx.on('theme/change', sync)
-  sync(ctx.theme.getTheme())
+  const initial = ctx.theme.getTheme()
+  const boot = doc.documentElement.getAttribute(XIAOHEI_BOOT_APPEARANCE_ATTRIBUTE)
+  if ((boot === 'light' || boot === 'dark') && boot !== initial.active.colorScheme) {
+    // Preserve the Host's first frame during settings hydration, but never
+    // let a stale boot marker veto later theme events or lock a palette.
+    doc.documentElement.setAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE, boot)
+    if (win) handoff = win.setTimeout(() => sync(ctx.theme.getTheme()), 1000)
+  } else sync(initial)
 
   return () => {
+    disposed = true
+    cancelHandoff()
     off()
+    releaseXiaoheiBootAppearance(doc)
     doc.documentElement.removeAttribute(XIAOHEI_APPEARANCE_ATTRIBUTE)
   }
 }

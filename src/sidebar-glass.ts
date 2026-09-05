@@ -44,7 +44,7 @@ export function installXiaoheiSidebarGlass(
 
   let disposed = false
   let glass: HTMLElement | undefined
-  let sidebarShell: HTMLElement | undefined
+  let sidebarColumn: HTMLElement | undefined
   let animationFrame: number | undefined
   let resizeSettleTimer: number | undefined
   let resizing = false
@@ -74,15 +74,18 @@ export function installXiaoheiSidebarGlass(
 
   const resizeObserver = typeof win.ResizeObserver === 'function'
     ? new win.ResizeObserver(() => {
-        geometryDirty = true
+        if (disposed) return
+        // RO runs after host layout and before paint. Update the independent
+        // paint layer now, not in next frame's RAF (which visibly trails).
+        applyBounds()
+        geometryDirty = false
         markResizeActivity()
-        scheduleReconcile()
       })
     : undefined
 
   const applyBounds = (): void => {
-    if (glass === undefined || sidebarShell === undefined) return
-    const bounds = resolveXiaoheiSidebarGlassBounds(sidebarShell.getBoundingClientRect())
+    if (glass === undefined || sidebarColumn === undefined) return
+    const bounds = resolveXiaoheiSidebarGlassBounds(sidebarColumn.getBoundingClientRect())
     if (bounds.left !== appliedBounds?.left) {
       glass.style.setProperty('--xiaohei-sidebar-glass-left', `${bounds.left}px`)
     }
@@ -102,16 +105,16 @@ export function installXiaoheiSidebarGlass(
     if (disposed) return
 
     const sceneLayer = doc.getElementById(XIAOHEI_SCENE_LAYER_ID)
-    const nextSidebarShell = doc.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.sidebarShell) ?? undefined
+    const nextSidebarColumn = doc.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.sidebarColumn) ?? undefined
 
-    if (nextSidebarShell !== sidebarShell) {
+    if (nextSidebarColumn !== sidebarColumn) {
       resizeObserver?.disconnect()
-      sidebarShell = nextSidebarShell
+      sidebarColumn = nextSidebarColumn
       geometryDirty = true
-      if (sidebarShell !== undefined) resizeObserver?.observe(sidebarShell)
+      if (sidebarColumn !== undefined) resizeObserver?.observe(sidebarColumn)
     }
 
-    if (sceneLayer === null || sidebarShell === undefined) {
+    if (sceneLayer === null || sidebarColumn === undefined) {
       clearResizeState()
       glass?.remove()
       glass = undefined
@@ -168,7 +171,7 @@ export function installXiaoheiSidebarGlass(
     clearResizeState()
     glass?.remove()
     glass = undefined
-    sidebarShell = undefined
+    sidebarColumn = undefined
     appliedBounds = undefined
   }
 }
