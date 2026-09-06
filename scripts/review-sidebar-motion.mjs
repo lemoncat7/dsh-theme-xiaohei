@@ -32,10 +32,18 @@ try {
   const samples=[]
   for(let i=0;i<6;i++) {
    const sample=await page.evaluate(()=>new Promise(resolve=>{
-    window.audit={reads:0,compiles:0,gaps:[]}
+    const button=document.querySelector('[aria-label="Collapse sidebar"],[aria-label="Open sidebar"]')
+    const opening=button.getAttribute('aria-label')==='Open sidebar'
+    window.audit={reads:0,compiles:0,gaps:[],reveal:[]}
     const start=performance.now();let last=start
     const tick=now=>{
      audit.gaps.push(now-last);last=now
+     if(opening) {
+      const shell=document.querySelector('[data-slot="sidebar"]').firstElementChild
+      const column=shell.parentElement.parentElement
+      audit.reveal.push({width:column.getBoundingClientRect().width,target:Number.parseFloat(shell.style.width),
+       opacity:Number(getComputedStyle(shell.children[2]).opacity),state:shell.getAttribute('data-xiaohei-sidebar-reveal')})
+     }
      if(now-start<750)requestAnimationFrame(tick)
      else {
       const glass=document.getElementById('dsh-theme-xiaohei/sidebar-glass')
@@ -45,15 +53,32 @@ try {
       window.audit=null
      }
     }
-    document.querySelector('[aria-label="Collapse sidebar"],[aria-label="Open sidebar"]').click()
+    button.click()
     requestAnimationFrame(tick)
    }))
    assert.ok(Math.abs(sample.glassWidth-(sample.columnWidth-14))<1)
    assert.equal(sample.moving,false)
    if(modified || process.env.XIAOHEI_DEPLOYED)assert.equal(sample.compiles,0,'cached sidebar mark must not compile shaders during toggles')
+   if(modified || process.env.XIAOHEI_DEPLOYED)for(const frame of sample.reveal) {
+    if(Number.isFinite(frame.target) && frame.width<frame.target-2)assert.equal(frame.opacity,0,'wide text must not precede column expansion')
+   }
+   if(sample.reveal.length)console.log(JSON.stringify({modified,reveal:sample.reveal}))
    samples.push({reads:sample.reads,compiles:sample.compiles,maxGap:Math.max(...sample.gaps),slowFrames:sample.gaps.filter(t=>t>34).length,pose:sample.pose})
   }
   await page.screenshot({path:output+'/'+(modified?'updated':'installed')+'.png'})
+  if(modified || process.env.XIAOHEI_DEPLOYED) {
+   await page.evaluate(()=>document.querySelector('[aria-label="Collapse sidebar"]').click())
+   await page.waitForTimeout(900)
+   const cdp=await context.newCDPSession(page)
+   await cdp.send('Animation.enable');await cdp.send('Animation.setPlaybackRate',{playbackRate:.25})
+   await page.evaluate(()=>document.querySelector('[aria-label="Open sidebar"]').click())
+   await page.waitForTimeout(350)
+   await page.screenshot({path:output+'/reveal-early.png'})
+   await page.waitForTimeout(1000)
+   await page.screenshot({path:output+'/reveal-late.png'})
+   await cdp.send('Animation.setPlaybackRate',{playbackRate:1});await cdp.detach()
+   await page.waitForTimeout(500)
+  }
   await page.evaluate(async()=>{
    for(let i=0;i<8;i++){
     document.querySelector('[aria-label="Collapse sidebar"],[aria-label="Open sidebar"]').click()

@@ -1,6 +1,7 @@
 import { XIAOHEI_SCENE_LAYER_ID, XIAOHEI_SCENE_WORLD_CLASS } from './scene.js'
 import { subscribeXiaoheiHostDom } from './host-dom.js'
 import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
+import { createSidebarReveal } from './sidebar-reveal.js'
 
 /** Stable id for the paint-only glass surface behind DSH's native sidebar. */
 export const XIAOHEI_SIDEBAR_GLASS_ID = 'dsh-theme-xiaohei/sidebar-glass'
@@ -50,6 +51,7 @@ export function installXiaoheiSidebarGlass(
   let resizing = false
   let appliedBounds: XiaoheiSidebarGlassBounds | undefined
   let geometryDirty = true
+  const reveal = createSidebarReveal(doc)
 
   const clearResizeState = (): void => {
     if (resizeSettleTimer !== undefined) win.clearTimeout(resizeSettleTimer)
@@ -86,6 +88,7 @@ export function installXiaoheiSidebarGlass(
   const applyBounds = (): boolean => {
     if (glass === undefined || sidebarColumn === undefined) return false
     const bounds = resolveXiaoheiSidebarGlassBounds(sidebarColumn.getBoundingClientRect())
+    reveal.resize(bounds.width + HORIZONTAL_INSET_START + HORIZONTAL_INSET_END)
     const changed = appliedBounds !== undefined && (
       bounds.left !== appliedBounds.left || bounds.top !== appliedBounds.top ||
       bounds.width !== appliedBounds.width || bounds.height !== appliedBounds.height)
@@ -119,6 +122,7 @@ export function installXiaoheiSidebarGlass(
     }
 
     if (sceneLayer === null || sidebarColumn === undefined) {
+      reveal.setColumn(undefined)
       clearResizeState()
       glass?.remove()
       glass = undefined
@@ -126,6 +130,7 @@ export function installXiaoheiSidebarGlass(
       geometryDirty = true
       return
     }
+    reveal.setColumn(sidebarColumn)
 
     if (glass === undefined || glass.parentElement !== sceneLayer) {
       doc.getElementById(XIAOHEI_SIDEBAR_GLASS_ID)?.remove()
@@ -171,6 +176,7 @@ export function installXiaoheiSidebarGlass(
     animationFrame = undefined
     unsubscribeHostDom()
     resizeObserver?.disconnect()
+    reveal.dispose()
     win.removeEventListener('resize', onViewportResize)
     clearResizeState()
     glass?.remove()

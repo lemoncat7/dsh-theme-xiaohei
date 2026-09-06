@@ -12,6 +12,22 @@ export const XIAOHEI_SIDEBAR_CSS = `
   position: relative;
 }
 
+/* Reveal wide navigation only after its column has reached the target width.
+ * Keep the toggle itself native. Opacity is applied to content, never the shell
+ * (which also hosts fixed-position settings dialogs). */
+@media (prefers-reduced-motion: no-preference) {
+  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal]:not([class*='_collapsed']) > :not(:first-child),
+  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal]:not([class*='_collapsed']) > div:first-child > button:first-child {
+    transition: opacity 100ms ease-out;
+  }
+  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal='waiting']:not([class*='_collapsed']) > :not(:first-child),
+  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal='waiting']:not([class*='_collapsed']) > div:first-child > button:first-child {
+    opacity: 0 !important;
+    visibility: hidden;
+    transition: none;
+  }
+}
+
 /* Hide the tree scrollbar's paint, retaining its gutter so rows do not grow
  * into the glass edge. Wheel, touch and keyboard remain native; dialogs and
  * other plugin panels keep their normal scrollbar affordance. */

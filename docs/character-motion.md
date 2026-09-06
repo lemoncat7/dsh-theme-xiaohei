@@ -26,6 +26,8 @@
 
 ## 验证
 
+侧栏文字入场由 `sidebar-reveal.ts` 独立协调：观察原生宽/窄状态，复用玻璃层的实际列宽测量。展开时内容先隐藏，距目标宽度 2px 内再淡入 100ms；不另设固定等待计时器、不修改原生展开状态。快速反向操作保留尚未显示内容的隐藏状态，关闭或卸载时清理。减少动态模式跳过内容淡入。
+
 ```sh
 npm test
 XIAOHEI_PLAYWRIGHT=/path/to/playwright-core/index.mjs node scripts/review-character-motion.mjs
