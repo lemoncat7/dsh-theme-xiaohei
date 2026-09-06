@@ -26,7 +26,8 @@ export function createCharacterMotion(doc: Document) {
   function update() {
     if (disposed) return
     const mode=doc.documentElement.dataset.xiaoheiAppearance==='light'?'light':'dark'
-    const next=!doc.hidden && !reduced.matches && part ? CHARACTER_MOTION[pose]?.[mode] : undefined
+    const moving=doc.documentElement.hasAttribute('data-xiaohei-sidebar-resizing')
+    const next=!doc.hidden && !reduced.matches && !moving && part ? CHARACTER_MOTION[pose]?.[mode] : undefined
     if (next===rig && appearance===mode) return
     clock.setClips(undefined);render=undefined
     const current=++revision
@@ -65,7 +66,7 @@ export function createCharacterMotion(doc: Document) {
   doc.addEventListener('visibilitychange',update)
   doc.addEventListener('pointermove',pointer,{passive:true})
   const observer=new win.MutationObserver(update)
-  observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-xiaohei-appearance']})
+  observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-xiaohei-appearance','data-xiaohei-sidebar-resizing']})
   return {
     setPose(nextPart: HTMLElement | undefined,nextPose: string) {
       if (nextPart!==part || pose!==nextPose) {

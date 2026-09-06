@@ -77,15 +77,18 @@ export function installXiaoheiSidebarGlass(
         if (disposed) return
         // RO runs after host layout and before paint. Update the independent
         // paint layer now, not in next frame's RAF (which visibly trails).
-        applyBounds()
+        const changed = applyBounds()
         geometryDirty = false
-        markResizeActivity()
+        if (changed) markResizeActivity()
       })
     : undefined
 
-  const applyBounds = (): void => {
-    if (glass === undefined || sidebarColumn === undefined) return
+  const applyBounds = (): boolean => {
+    if (glass === undefined || sidebarColumn === undefined) return false
     const bounds = resolveXiaoheiSidebarGlassBounds(sidebarColumn.getBoundingClientRect())
+    const changed = appliedBounds !== undefined && (
+      bounds.left !== appliedBounds.left || bounds.top !== appliedBounds.top ||
+      bounds.width !== appliedBounds.width || bounds.height !== appliedBounds.height)
     if (bounds.left !== appliedBounds?.left) {
       glass.style.setProperty('--xiaohei-sidebar-glass-left', `${bounds.left}px`)
     }
@@ -99,6 +102,7 @@ export function installXiaoheiSidebarGlass(
       glass.style.setProperty('--xiaohei-sidebar-glass-height', `${bounds.height}px`)
     }
     appliedBounds = bounds
+    return changed
   }
 
   const reconcile = (): void => {

@@ -8,7 +8,7 @@ import { createCharacterMotion } from './character-motion.js'
 
 export const XIAOHEI_WALLPAPER_CHARACTER_ID = 'dsh-theme-xiaohei/wallpaper-character'
 
-/** Complete raster poses with bounded local eye/ear/tail patches. */
+/** Places the layered character only when the host geometry is settled. */
 export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): () => void {
   const win = doc?.defaultView
   if (!doc || !win) return () => {}
@@ -42,6 +42,16 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
 
   function reconcile(): void {
     if (disposed || !doc) return
+    // The glass owner already tracks the native column's animated geometry.
+    // Do not measure controls or rebuild a different rig at intermediate widths.
+    if (doc.documentElement?.hasAttribute('data-xiaohei-sidebar-resizing')) {
+      dirty = true
+      if (host && host.dataset.pose !== 'hidden') host.dataset.pose = 'hidden'
+      idle.setPaused(true)
+      motion?.setPose(undefined, 'hidden')
+      scheduleSettled()
+      return
+    }
     const layer = doc.getElementById(XIAOHEI_SCENE_LAYER_ID)
     const next = [
       doc.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.sidebarShell),

@@ -22,6 +22,8 @@
 
 同一套分层画面保持到静止，避免运动/原图切换时补绘石台跳变。加载失败保留原始静态图。隐藏页面、无安全位置、减少动态效果或卸载时停止并清理；没有透明点击层，不拦截会话交互。鼠标事件限频 100ms，只在靠近边界进入时触发短动作，不持续渲染。
 
+侧栏开合/拖宽期间复用玻璃层已有的移动状态：暂时隐藏装饰角色、停止骨骼绘制，不测量中间宽度和控件列表；宽度稳定后只重新定位一次。玻璃首次挂载的尺寸通知不再触发磨砂开关。侧栏品牌小图标缓存一次金属渲染结果，宽/窄模式重挂载不再创建 WebGL 或重新编译着色器；首页品牌动效保持原有实现。
+
 ## 验证
 
 ```sh
@@ -35,3 +37,5 @@ XIAOHEI_PLAYWRIGHT=/path/to/playwright-core/index.mjs node scripts/review-charac
 生成素材：`uv run --with pillow python scripts/prepare-character-motion.py`。
 快速分镜：给浏览器检查增加 `XIAOHEI_SEQUENCE_ONLY=1`，此模式不替代完整调度测试。
 部署后加 `XIAOHEI_DEPLOYED=1` 检查真实安装产物，不替换浏览器模块。
+
+侧栏对比检查：`XIAOHEI_PLAYWRIGHT=/path/to/playwright-core/index.mjs node scripts/review-sidebar-motion.mjs`，记录布局读取次数、切换时着色器编译次数、帧间隔，并检查快速反向切换、玻璃边界、手机横竖屏和减少动态。无头浏览器帧间隔受软件图形后端影响，用于同机对比，不作为真实设备的 FPS 承诺。

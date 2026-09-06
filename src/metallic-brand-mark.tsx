@@ -8,6 +8,10 @@ interface XiaoheiBrandMarkProps {
   className?: string | undefined
 }
 
+// Native wide/rail switches remount this slot. A tiny navigation mark does not
+// need a fresh GPU context and shader compilation on every toggle.
+let sidebarMetallicSnapshot: string | undefined
+
 const VERTEX_SHADER = `#version 300 es
 precision highp float;
 in vec2 a_position;
@@ -188,8 +192,10 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
   const [ready, setReady] = useState(false)
   const visualSize = Math.max(24, size + 4)
   const context = size >= 32 ? 'hero' : 'sidebar'
+  const [snapshot, setSnapshot] = useState(context === 'sidebar' ? sidebarMetallicSnapshot : undefined)
 
   useEffect(() => {
+    if (snapshot !== undefined) return
     const canvas = canvasRef.current
     if (canvas === null) return
     const gl = canvas.getContext('webgl2', {
@@ -300,6 +306,11 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
       gl.uniform1i(uniforms.u_tex, 0)
       draw()
+      if (context === 'sidebar') {
+        sidebarMetallicSnapshot = canvas.toDataURL()
+        setSnapshot(sidebarMetallicSnapshot)
+        return
+      }
       setReady(true)
       if (!reduceMotion.matches) animationFrame = window.requestAnimationFrame(render)
     }
@@ -320,8 +331,9 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
       if (texture !== null) gl.deleteTexture(texture)
       gl.deleteBuffer(buffer)
       gl.deleteProgram(program)
+      gl.getExtension('WEBGL_lose_context')?.loseContext()
     }
-  }, [visualSize])
+  }, [visualSize, context, snapshot])
 
   const geometry = {
     '--xiaohei-brand-mark-size': `${visualSize}px`,
@@ -331,12 +343,14 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
     <span
       className={className === undefined ? 'xiaohei-brand-mark' : `${className} xiaohei-brand-mark`}
       data-brand-context={context}
-      data-metallic-ready={ready ? 'true' : 'false'}
+      data-metallic-ready={ready || snapshot !== undefined ? 'true' : 'false'}
       style={geometry}
       aria-hidden="true"
     >
       <img className="xiaohei-brand-mark__fallback" src={XIAOHEI_BRAND_AVATAR} alt="" />
-      <canvas className="xiaohei-brand-mark__metal" ref={canvasRef} />
+      {snapshot !== undefined
+        ? <img className="xiaohei-brand-mark__metal" src={snapshot} alt="" />
+        : <canvas className="xiaohei-brand-mark__metal" ref={canvasRef} />}
     </span>
   )
 }

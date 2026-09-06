@@ -19,7 +19,8 @@ function fixture({failDecode=false}={}) {
   const sidebar={...box(0,0,280,900),querySelectorAll:()=>[]}
   const scroll=box(280,78,1920,900),flow=box(632,0,1552,20000),composer=box(616,770,1568,868)
   const listen=(type,fn)=>events.set(type,fn),unlisten=type=>events.delete(type)
-  const doc={body:{},hidden:false,
+  const attrs=new Set()
+  const doc={body:{},hidden:false,documentElement:{hasAttribute:key=>attrs.has(key)},
     createElement:element,getElementById:id=>elements.get(id),
     querySelector:selector=>selector.includes('sidebar')?sidebar:selector.includes('conversation-scroll')?scroll:selector.includes('chat-flow')?flow:composer,
     addEventListener:listen,removeEventListener:unlisten,
@@ -34,7 +35,7 @@ function fixture({failDecode=false}={}) {
   }
   async function flush(){for(let i=0;i<8;i++){await Promise.resolve();for(const[id,fn]of [...frames]){frames.delete(id);fn()}}}
   async function advance(ms){now+=ms;for(const[id,t]of [...timers])if(t.due<=now){timers.delete(id);t.fn()}await flush()}
-  return{doc,events,frames,timers,flush,advance,mutate:()=>mutation(),resize:()=>observer([]),
+  return{doc,events,frames,timers,flush,advance,attrs,mutate:()=>mutation(),resize:()=>observer([]),
     host:()=>elements.get(XIAOHEI_WALLPAPER_CHARACTER_ID),reads:()=>reads,decodes:()=>decodes}
 }
 
@@ -72,6 +73,22 @@ test('a broken image cannot start a decode retry/render loop',async()=>{
   assert.equal(f.host().dataset.pose,'hidden')
   dispose();await f.flush()
   assert.equal(f.frames.size,0);assert.equal(f.timers.size,0)
+})
+test('sidebar motion does not measure intermediate layouts or load alternate poses',async()=>{
+ const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc)
+ await f.flush()
+ const reads=f.reads(),decodes=f.decodes()
+ f.attrs.add('data-xiaohei-sidebar-resizing')
+ for(let i=0;i<24;i++){f.mutate();f.resize();await f.flush()}
+ assert.equal(f.reads(),reads)
+ assert.equal(f.decodes(),decodes)
+ assert.equal(f.host().dataset.pose,'hidden')
+ f.attrs.delete('data-xiaohei-sidebar-resizing')
+ await f.advance(250)
+ assert.equal(f.host().dataset.pose,'seated')
+ assert.ok(f.reads()<=reads+4,'one final geometry measurement')
+ dispose();await f.flush()
+ assert.equal(f.timers.size,0)
 })
 test('disposing before image decode completes never recreates a host or scheduled frame',async()=>{
   const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc)

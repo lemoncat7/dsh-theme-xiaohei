@@ -9,6 +9,9 @@ export const XIAOHEI_WALLPAPER_CHARACTER_CSS = `
   pointer-events: none;
   user-select: none;
 }
+html[data-xiaohei-sidebar-resizing] .xiaohei-wallpaper-character {
+  visibility: hidden;
+}
 html[data-xiaohei-appearance='light'] .xiaohei-wallpaper-character {
   ${CHARACTER_POSE_NAMES.map(pose => `--xiaohei-${pose}-art: url("${CHARACTER_POSES[pose].light}");`).join('\n  ')}
 }
