@@ -1,0 +1,386 @@
+{
+  "peek": {
+    "light": {
+      "blink": {
+        "file": "peek-light-blink.webp",
+        "box": [
+          36,
+          95,
+          112,
+          145
+        ],
+        "size": [
+          180,
+          287
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "peek-light-ear0.webp",
+        "box": [
+          13,
+          2,
+          75,
+          54
+        ],
+        "size": [
+          180,
+          287
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "ear1": {
+        "file": "peek-light-ear1.webp",
+        "box": [
+          140,
+          56,
+          180,
+          109
+        ],
+        "size": [
+          180,
+          287
+        ],
+        "frames": 7,
+        "interval": 80
+      }
+    },
+    "dark": {
+      "blink": {
+        "file": "peek-dark-blink.webp",
+        "box": [
+          36,
+          95,
+          112,
+          145
+        ],
+        "size": [
+          180,
+          287
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "peek-dark-ear0.webp",
+        "box": [
+          13,
+          2,
+          75,
+          54
+        ],
+        "size": [
+          180,
+          287
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "ear1": {
+        "file": "peek-dark-ear1.webp",
+        "box": [
+          140,
+          56,
+          180,
+          109
+        ],
+        "size": [
+          180,
+          287
+        ],
+        "frames": 7,
+        "interval": 80
+      }
+    }
+  },
+  "seated": {
+    "light": {
+      "blink": {
+        "file": "seated-light-blink.webp",
+        "box": [
+          136,
+          96,
+          213,
+          130
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "seated-light-ear0.webp",
+        "box": [
+          106,
+          29,
+          144,
+          71
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "ear1": {
+        "file": "seated-light-ear1.webp",
+        "box": [
+          214,
+          32,
+          268,
+          89
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "tail": {
+        "file": "seated-light-tail.webp",
+        "box": [
+          275,
+          325,
+          350,
+          477
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 10,
+        "interval": 100
+      }
+    },
+    "dark": {
+      "blink": {
+        "file": "seated-dark-blink.webp",
+        "box": [
+          136,
+          96,
+          213,
+          130
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "seated-dark-ear0.webp",
+        "box": [
+          106,
+          29,
+          144,
+          71
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "ear1": {
+        "file": "seated-dark-ear1.webp",
+        "box": [
+          214,
+          32,
+          268,
+          89
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "tail": {
+        "file": "seated-dark-tail.webp",
+        "box": [
+          275,
+          325,
+          350,
+          477
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 10,
+        "interval": 100
+      }
+    }
+  },
+  "chin": {
+    "light": {
+      "blink": {
+        "file": "chin-light-blink.webp",
+        "box": [
+          120,
+          101,
+          196,
+          143
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "chin-light-ear0.webp",
+        "box": [
+          75,
+          50,
+          110,
+          94
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "ear1": {
+        "file": "chin-light-ear1.webp",
+        "box": [
+          186,
+          16,
+          241,
+          78
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      }
+    },
+    "dark": {
+      "blink": {
+        "file": "chin-dark-blink.webp",
+        "box": [
+          120,
+          101,
+          196,
+          143
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "chin-dark-ear0.webp",
+        "box": [
+          75,
+          50,
+          110,
+          94
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      },
+      "ear1": {
+        "file": "chin-dark-ear1.webp",
+        "box": [
+          186,
+          16,
+          241,
+          78
+        ],
+        "size": [
+          360,
+          510
+        ],
+        "frames": 7,
+        "interval": 80
+      }
+    }
+  },
+  "halfpeek": {
+    "light": {
+      "blink": {
+        "file": "halfpeek-light-blink.webp",
+        "box": [
+          40,
+          175,
+          88,
+          223
+        ],
+        "size": [
+          180,
+          410
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "halfpeek-light-ear0.webp",
+        "box": [
+          110,
+          72,
+          179,
+          155
+        ],
+        "size": [
+          180,
+          410
+        ],
+        "frames": 7,
+        "interval": 80
+      }
+    },
+    "dark": {
+      "blink": {
+        "file": "halfpeek-dark-blink.webp",
+        "box": [
+          40,
+          175,
+          88,
+          223
+        ],
+        "size": [
+          180,
+          410
+        ],
+        "frames": 6,
+        "interval": 55
+      },
+      "ear0": {
+        "file": "halfpeek-dark-ear0.webp",
+        "box": [
+          110,
+          72,
+          179,
+          155
+        ],
+        "size": [
+          180,
+          410
+        ],
+        "frames": 7,
+        "interval": 80
+      }
+    }
+  }
+}

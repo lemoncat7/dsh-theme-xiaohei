@@ -4,10 +4,11 @@ import { XIAOHEI_SCENE_LAYER_ID } from './styles.js'
 import { resolveCharacterPlacement, type CharacterPlacement } from './character-layout.js'
 import { createCharacterIdleController } from './character-idle.js'
 import { CHARACTER_POSES, CHARACTER_POSE_NAMES, type CharacterPose } from './character-poses.js'
+import { createCharacterMotion } from './character-motion.js'
 
 export const XIAOHEI_WALLPAPER_CHARACTER_ID = 'dsh-theme-xiaohei/wallpaper-character'
 
-/** Complete raster poses, no skeleton deformation or perpetual animation loop. */
+/** Complete raster poses with bounded local eye/ear/tail patches. */
 export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): () => void {
   const win = doc?.defaultView
   if (!doc || !win) return () => {}
@@ -21,6 +22,7 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
   const ready = new Set<CharacterPose>()
   const loading = new Set<CharacterPose>()
   const failed = new Set<CharacterPose>()
+  const motion = typeof win.matchMedia === 'function' ? createCharacterMotion(doc) : undefined
   const idle = createCharacterIdleController({ now: () => win.performance.now(),
     setTimeout: (fn, delay) => win.setTimeout(fn, delay), clearTimeout: handle => win.clearTimeout(handle),
   }, () => schedule())
@@ -53,7 +55,7 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
       for (const element of targets) if (element) observer?.observe(element)
       dirty = true
     }
-    if (!layer) { host?.remove(); host = undefined; idle.setPaused(true); return }
+    if (!layer) { host?.remove(); host = undefined; idle.setPaused(true); motion?.setPose(undefined, 'hidden'); return }
     if (!host || host.parentElement !== layer) {
       host?.remove()
       doc.getElementById(XIAOHEI_WALLPAPER_CHARACTER_ID)?.remove()
@@ -93,8 +95,9 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
     if (!host || disposed) return
     idle.setPaused(doc!.hidden || placement.pose !== 'seated')
     const pose = doc!.hidden ? 'hidden' : placement.pose === 'seated' ? idle.pose : placement.pose
-    if (pose === 'hidden') { if (host.dataset.pose !== 'hidden') host.dataset.pose = 'hidden'; return }
+    if (pose === 'hidden') { if (host.dataset.pose !== 'hidden') host.dataset.pose = 'hidden'; motion?.setPose(undefined, 'hidden'); return }
     if (!ready.has(pose)) {
+      motion?.setPose(undefined, 'hidden')
       // Do not retain the old location across a layout change: it could now
       // overlap a message. Idle changes keep the already decoded seated pose.
       if (placement.pose !== 'seated' || !['seated', 'chin', 'doze'].includes(host.dataset.pose ?? '')) host.dataset.pose = 'hidden'
@@ -122,6 +125,7 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
     }
     if (!part.dataset.ready) part.dataset.ready = 'true'
     if (host.dataset.pose !== pose) host.dataset.pose = pose
+    motion?.setPose(part, pose)
   }
   function schedule(): void {
     if (disposed || frame !== undefined) return
@@ -149,6 +153,7 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
     unsubscribe()
     observer?.disconnect()
     idle.dispose()
+    motion?.dispose()
     for (const event of events) doc.removeEventListener(event, activity, true)
     doc.removeEventListener('visibilitychange', visibility)
     win.removeEventListener('resize', resized)

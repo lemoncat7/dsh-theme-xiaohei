@@ -6,6 +6,7 @@ src/generated-keyart.ts
 src/generated-identity.ts
 src/generated-loading-assets.ts
 src/generated-conversation.ts
+src/generated-character-motion.ts
 *.tgz
 .DS_Store
 tmp/

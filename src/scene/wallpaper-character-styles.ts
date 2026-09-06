@@ -22,6 +22,13 @@ html[data-xiaohei-appearance='light'] .xiaohei-wallpaper-character {
   opacity: 0;
   transition: opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1);
 }
+.xiaohei-wallpaper-character .xiaohei-character-motion {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; object-position: left center; pointer-events: none;
+}
+.xiaohei-wallpaper-character > span[data-motion]:not([data-motion='rest']) {
+  background-image: none;
+}
 ${CHARACTER_POSE_NAMES.map(pose => `
 .xiaohei-wallpaper-character__${pose}[data-ready] {
   background-image: var(--xiaohei-${pose}-art);
