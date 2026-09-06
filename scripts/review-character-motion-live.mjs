@@ -45,6 +45,7 @@ try {
  await capture('peek-ear')
  await page.screenshot({path:output+'/peek-ear.png'})
  await page.emulateMedia({reducedMotion:'reduce'})
+ await page.waitForFunction(()=>document.querySelectorAll('.xiaohei-character-motion').length===0)
  assert.equal(await page.locator('.xiaohei-character-motion').count(),0)
  await page.setViewportSize({width:375,height:812});await page.waitForTimeout(400)
  await page.screenshot({path:output+'/mobile-reduced.png'})

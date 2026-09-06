@@ -124,8 +124,8 @@ await writeFile(
 
 const motionRoot = new URL('../src/assets/character-motion/', import.meta.url)
 const motion = JSON.parse(await readFile(new URL('catalog.json', motionRoot), 'utf8'))
-for (const appearances of Object.values(motion)) for (const actions of Object.values(appearances)) {
-  for (const descriptor of Object.values(actions)) {
+for (const appearances of Object.values(motion)) for (const rig of Object.values(appearances)) {
+  for (const descriptor of Object.values(rig.layers)) {
     descriptor.src = `data:image/webp;base64,${(await readFile(new URL(descriptor.file, motionRoot))).toString('base64')}`
     delete descriptor.file
   }
