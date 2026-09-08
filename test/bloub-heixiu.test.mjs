@@ -40,8 +40,9 @@ test('rapid interruptions preserve the visible body and long sessions still blin
 })
 
 function fixture() {
-  let serial = 0, reads = 0, now = 0, mutation
+  let serial = 0, reads = 0, now = 0, mutation, paints = 0
   const frames = new Map(), timers = new Map(), listeners = new Map(), nodes = []
+  const deadlines = new Map()
   const listen = (type, fn) => listeners.set(type, fn), unlisten = type => listeners.delete(type)
   const element = (name = 'div') => {
     const attributes = new Map()
@@ -49,7 +50,10 @@ function fixture() {
       style: { setProperty: (key, value) => attributes.set(key, String(value)), getPropertyValue: key => attributes.get(key) },
       get parentElement() { return this.parentNode },
       get lastElementChild() { return this.children.at(-1) ?? null },
-      getAttribute: key => attributes.get(key), setAttribute: (key, value) => attributes.set(key, String(value)),
+      getAttribute: key => attributes.get(key), setAttribute: (key, value) => {
+        if (key === 'd' && attributes.has('data-heixiu-body')) paints++
+        attributes.set(key, String(value))
+      },
       removeAttribute: key => attributes.delete(key), addEventListener: listen, removeEventListener: unlisten,
       append(...children) { for (const child of children) { child.remove(); child.parentNode = this; this.children.push(child) } },
       insertBefore(child, reference) { child.remove(); child.parentNode = this; const i = this.children.indexOf(reference); this.children.splice(i < 0 ? this.children.length : i, 0, child) },
@@ -70,13 +74,34 @@ function fixture() {
       MutationObserver: class { constructor(fn) { mutation = fn } observe() {} disconnect() {} },
       ResizeObserver: class { observe() {} disconnect() {} },
       requestAnimationFrame(fn) { frames.set(++serial, fn); return serial }, cancelAnimationFrame: id => frames.delete(id),
-      setTimeout(fn) { timers.set(++serial, fn); return serial }, clearTimeout: id => timers.delete(id),
+      setTimeout(fn, delay = 0) { timers.set(++serial, fn); deadlines.set(serial, now + delay); return serial }, clearTimeout: id => { timers.delete(id); deadlines.delete(id) },
       addEventListener: listen, removeEventListener: unlisten,
     },
   }
-  function step() { now += 16; for (const [id, fn] of [...frames]) { frames.delete(id); fn(now) } }
-  return { doc, composer, toolbar, input, nodes, frames, timers, listeners, step, mutate: () => mutation(), reads: () => reads }
+  function step(milliseconds = 16) {
+    now += milliseconds
+    for (const [id, fn] of [...timers]) if (deadlines.get(id) <= now) {
+      timers.delete(id); deadlines.delete(id); fn()
+    }
+    for (const [id, fn] of [...frames]) { frames.delete(id); fn(now) }
+  }
+  return { doc, composer, toolbar, input, nodes, frames, timers, listeners, step, mutate: () => mutation(), reads: () => reads, paints: () => paints }
 }
+test('held animation has a bounded paint rate on high-refresh displays and zero hidden work', () => {
+  const f = fixture(), signals = createHeixiuSignals(), dispose = installComposerBloub(f.doc, signals)
+  f.step()
+  signals.publish({ sessionId: 'performance', running: true, notice: null })
+  const before = f.paints()
+  for (let i = 0; i < 1200; i++) f.step(1000 / 120)
+  const painted = f.paints() - before
+  assert.ok(painted > 100 && painted <= 301, `10 seconds at 120 Hz: ${painted} paints`)
+  f.doc.hidden = true; f.listeners.get('visibilitychange')()
+  const hidden = f.paints()
+  for (let i = 0; i < 120; i++) f.step(1000 / 120)
+  assert.equal(f.paints(), hidden)
+  assert.equal(f.frames.size + f.timers.size, 0)
+  dispose()
+})
 test('renderer uses persistent hollow eyes and bounded SVG nodes', () => {
   const f = fixture(), renderer = createHeixiuRenderer(f.doc), count = f.nodes.length, engine = new BotEngine()
   for (let i = 0; i < 100; i++) {
@@ -183,7 +208,7 @@ test('double click cycles original actions, keyboard works, and no timers queue'
     f.listeners.get('dblclick')(event(2)); assert.equal(bot.dataset.action, state)
     f.step()
   }
-  assert.equal(f.timers.size, 1, 'one ambient timer, no click queue')
+  assert.ok(f.timers.size <= 2, 'one ambient timer and at most one frame timer, no click queue')
   f.listeners.get('click')(event(0)); assert.equal(bot.dataset.action, 'hop', 'keyboard activation remains available')
   let prevented = false
   f.listeners.get('keydown')({ key: 'Enter', shiftKey: true, repeat: false, preventDefault() { prevented = true }, stopPropagation() {} })
@@ -314,7 +339,7 @@ test('runtime does not measure on animation/stream updates; pauses and fully dis
   f.doc.hidden = true; f.listeners.get('visibilitychange')()
   assert.equal(f.frames.size, 0); assert.equal(f.timers.size, 0)
   f.doc.hidden = false; f.listeners.get('visibilitychange')(); f.step()
-  assert.ok(f.frames.size > 0)
+  assert.ok(f.frames.size > 0 || f.timers.size > 0)
   dispose(); dispose()
   assert.equal(f.frames.size, 0); assert.equal(f.timers.size, 0); assert.equal(f.listeners.size, 0)
   assert.deepEqual(f.composer.children, [f.input, f.toolbar]); assert.equal(f.doc.head.children.length, 0)

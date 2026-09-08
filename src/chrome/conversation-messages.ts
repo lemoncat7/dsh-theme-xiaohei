@@ -79,8 +79,8 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
     inset 0 1px 0 var(--xiaohei-conversation-highlight),
     inset 1px 0 0 color-mix(in srgb, var(--xiaohei-conversation-highlight) 42%, transparent),
     0 7px 22px var(--xiaohei-conversation-shadow) !important;
-  -webkit-backdrop-filter: blur(var(--xiaohei-conversation-blur)) saturate(124%);
-  backdrop-filter: blur(var(--xiaohei-conversation-blur)) saturate(124%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   overflow-wrap: anywhere;
 }
 
@@ -114,8 +114,8 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
     inset 0 1px 0 var(--xiaohei-conversation-highlight),
     inset -1px 0 0 color-mix(in srgb, var(--xiaohei-conversation-highlight) 42%, transparent),
     0 7px 22px var(--xiaohei-conversation-shadow) !important;
-  -webkit-backdrop-filter: blur(var(--xiaohei-conversation-blur)) saturate(124%);
-  backdrop-filter: blur(var(--xiaohei-conversation-blur)) saturate(124%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   overflow-wrap: anywhere;
 }
 
@@ -147,8 +147,8 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--xiaohei-conversation-highlight) 52%, transparent),
     0 4px 14px color-mix(in srgb, var(--xiaohei-conversation-shadow) 58%, transparent);
-  -webkit-backdrop-filter: blur(12px) saturate(118%);
-  backdrop-filter: blur(12px) saturate(118%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   overflow: hidden;
 }
 
@@ -159,8 +159,8 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
   border-radius: 9px;
   background: var(--xiaohei-conversation-meta-surface) !important;
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--xiaohei-conversation-highlight) 48%, transparent);
-  -webkit-backdrop-filter: blur(10px) saturate(116%);
-  backdrop-filter: blur(10px) saturate(116%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 #root [data-chat-flow-kind='context'],

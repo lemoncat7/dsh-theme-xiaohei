@@ -39,6 +39,8 @@ export function installComposerBloub(doc: Document | undefined = typeof document
   let hero: HTMLElement | null = null, heroRow: HTMLElement | null = null
   let bounds: HeixiuBox | undefined
   let layoutFrame: number | undefined, animationFrame: number | undefined, wake: number | undefined
+  let frameTimer: number | undefined
+  let lastPointerStamp = -Infinity
   let time = 0, lastStamp: number | undefined, activeUntil = 2.5, actionUntil = 0, reactionIndex = 0
   let pointerSide = 1
   let special = false, specialIndex = 0
@@ -61,8 +63,9 @@ export function installComposerBloub(doc: Document | undefined = typeof document
     ambientTimer = undefined
     flight.cancel()
     if (animationFrame !== undefined) win!.cancelAnimationFrame(animationFrame)
+    if (frameTimer !== undefined) win!.clearTimeout(frameTimer)
     if (wake !== undefined) win!.clearTimeout(wake)
-    animationFrame = undefined; wake = undefined; lastStamp = undefined
+    animationFrame = undefined; frameTimer = undefined; wake = undefined; lastStamp = undefined
   }
   function follow(dx: number, dy: number) {
     const offset = resolveHeixiuFollow(dx, dy, win!.innerWidth <= 760 || composer?.dataset.heixiuDock === 'compact')
@@ -84,7 +87,7 @@ export function installComposerBloub(doc: Document | undefined = typeof document
   }
   function animateFor(seconds: number) {
     activeUntil = Math.max(activeUntil, time + seconds)
-    if (!allowed() || animationFrame !== undefined) return
+    if (!allowed() || animationFrame !== undefined || frameTimer !== undefined) return
     if (wake !== undefined) win!.clearTimeout(wake)
     wake = undefined; lastStamp = undefined
     animationFrame = win!.requestAnimationFrame(tick)
@@ -103,10 +106,15 @@ export function installComposerBloub(doc: Document | undefined = typeof document
     // Stop only with open eyes. The next short life window resumes the same
     // clock, so neither gaze nor a partly completed blink can jump on waking.
     if (time < activeUntil || actionUntil || liveliness(time).lid < .99) {
-      animationFrame = win!.requestAnimationFrame(tick)
+      // SVG path deformation needs painting. Cap it instead of following a
+      // 120/144 Hz desktop display; preserve elapsed time and action continuity.
+      frameTimer = win!.setTimeout(() => {
+        frameTimer = undefined
+        if (allowed()) animationFrame = win!.requestAnimationFrame(tick)
+      }, 1000 / 30)
     } else {
       lastStamp = undefined
-      wake = win!.setTimeout(() => { wake = undefined; animateFor(2) }, 3200)
+      wake = win!.setTimeout(() => { wake = undefined; animateFor(1) }, 8000)
     }
   }
   function syncPlayback() {
@@ -183,6 +191,8 @@ export function installComposerBloub(doc: Document | undefined = typeof document
   const move = (event: PointerEvent) => {
     if (!allowed() || flight.active || !bounds?.width) return
     if (event.pointerType === 'touch') { leave(); return }
+    if (event.timeStamp - lastPointerStamp < 1000 / 30) return
+    lastPointerStamp = event.timeStamp
     const dx = event.clientX - (bounds.left + bounds.width / 2)
     const dy = event.clientY - (bounds.top + bounds.height / 2)
     follow(dx, dy)

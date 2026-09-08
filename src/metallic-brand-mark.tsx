@@ -10,7 +10,7 @@ interface XiaoheiBrandMarkProps {
 
 // Native wide/rail switches remount this slot. A tiny navigation mark does not
 // need a fresh GPU context and shader compilation on every toggle.
-let sidebarMetallicSnapshot: string | undefined
+const metallicSnapshots = new Map<number, string>()
 
 const VERTEX_SHADER = `#version 300 es
 precision highp float;
@@ -192,7 +192,7 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
   const [ready, setReady] = useState(false)
   const visualSize = Math.max(24, size + 4)
   const context = size >= 32 ? 'hero' : 'sidebar'
-  const [snapshot, setSnapshot] = useState(context === 'sidebar' ? sidebarMetallicSnapshot : undefined)
+  const [snapshot, setSnapshot] = useState(metallicSnapshots.get(visualSize))
 
   useEffect(() => {
     if (snapshot !== undefined) return
@@ -200,7 +200,7 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
     if (canvas === null) return
     const gl = canvas.getContext('webgl2', {
       alpha: true,
-      antialias: true,
+      antialias: false,
       powerPreference: 'low-power',
       premultipliedAlpha: true,
     })
@@ -237,7 +237,7 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
       UNIFORM_NAMES.map(name => [name, gl.getUniformLocation(program, name)]),
     ) as UniformMap
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
-    const renderSize = Math.max(96, Math.ceil(visualSize * pixelRatio * 2))
+    const renderSize = Math.max(64, Math.ceil(visualSize * pixelRatio))
     canvas.width = renderSize
     canvas.height = renderSize
     gl.viewport(0, 0, renderSize, renderSize)
@@ -270,28 +270,13 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
     setRgb(gl, uniforms.u_tint, [0.84, 0.92, 0.89])
 
     let disposed = false
-    let visible = true
-    let animationFrame: number | undefined
-    let lastFrame = 0
-    let metallicTime = 1450
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const metallicTime = 1450
     const texture = gl.createTexture()
     const image = new Image()
 
     const draw = (): void => {
       gl.uniform1f(uniforms.u_time, metallicTime)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-    }
-
-    const render = (now: number): void => {
-      if (disposed) return
-      if (visible && document.visibilityState !== 'hidden' && now - lastFrame >= 40) {
-        const delta = lastFrame === 0 ? 0 : Math.min(80, now - lastFrame)
-        lastFrame = now
-        metallicTime += delta * 0.11
-        draw()
-      }
-      animationFrame = window.requestAnimationFrame(render)
     }
 
     image.onload = () => {
@@ -306,28 +291,18 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
       gl.uniform1i(uniforms.u_tex, 0)
       draw()
-      if (context === 'sidebar') {
-        sidebarMetallicSnapshot = canvas.toDataURL()
-        setSnapshot(sidebarMetallicSnapshot)
-        return
-      }
+      // Preserve the metallic appearance without a permanent GPU animation.
+      // Updating snapshot unmounts the canvas and runs the resource cleanup.
+      const result = canvas.toDataURL()
+      metallicSnapshots.set(visualSize, result)
+      setSnapshot(result)
       setReady(true)
-      if (!reduceMotion.matches) animationFrame = window.requestAnimationFrame(render)
     }
     image.src = XIAOHEI_BRAND_AVATAR
 
-    const visibilityObserver = typeof IntersectionObserver === 'function'
-      ? new IntersectionObserver(entries => {
-          visible = entries.some(entry => entry.isIntersecting)
-          if (visible) lastFrame = 0
-        })
-      : undefined
-    visibilityObserver?.observe(canvas)
-
     return () => {
       disposed = true
-      if (animationFrame !== undefined) window.cancelAnimationFrame(animationFrame)
-      visibilityObserver?.disconnect()
+      image.onload = null
       if (texture !== null) gl.deleteTexture(texture)
       gl.deleteBuffer(buffer)
       gl.deleteProgram(program)

@@ -66,14 +66,14 @@ export function installXiaoheiGaze(
   }
 
   const wake = (): void => {
-    if (disposed || frameId !== 0 || gaze === undefined) return
+    if (disposed || doc.hidden || frameId !== 0 || gaze === undefined) return
     setMoving(true)
     frameId = win.requestAnimationFrame(tick)
   }
 
   const tick = (time: number): void => {
     frameId = 0
-    if (disposed || gaze === undefined || mascot === undefined) return
+    if (disposed || doc.hidden || gaze === undefined || mascot === undefined) return
 
     const target = resolveGazeTarget(doc, mascot, pointer, portalActive, behaviorDisabled())
     const elapsed = lastFrameTime === 0 ? 16 : Math.min(48, Math.max(1, time - lastFrameTime))
@@ -135,6 +135,12 @@ export function installXiaoheiGaze(
 
   const onPreferenceChange = (): void => wake()
   const onStateChange = (): void => wake()
+  const onVisibilityChange = (): void => {
+    if (doc.hidden) {
+      if (frameId !== 0) win.cancelAnimationFrame(frameId)
+      frameId = 0; lastFrameTime = 0; setMoving(false)
+    } else wake()
+  }
 
   const unsubscribeHostDom = subscribeXiaoheiHostDom(doc, attach)
   const stateObserver = new win.MutationObserver(onStateChange)
@@ -144,6 +150,7 @@ export function installXiaoheiGaze(
   })
 
   doc.addEventListener('pointermove', onPointerMove, { passive: true })
+  doc.addEventListener('visibilitychange', onVisibilityChange)
   doc.addEventListener('pointerleave', clearPointer)
   doc.addEventListener(XIAOHEI_PORTAL_ACTIVITY_EVENT, onPortalActivity)
   win.addEventListener('blur', clearPointer)
@@ -157,6 +164,7 @@ export function installXiaoheiGaze(
     unsubscribeHostDom()
     stateObserver.disconnect()
     doc.removeEventListener('pointermove', onPointerMove)
+    doc.removeEventListener('visibilitychange', onVisibilityChange)
     doc.removeEventListener('pointerleave', clearPointer)
     doc.removeEventListener(XIAOHEI_PORTAL_ACTIVITY_EVENT, onPortalActivity)
     win.removeEventListener('blur', clearPointer)
