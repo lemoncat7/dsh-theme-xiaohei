@@ -318,6 +318,7 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
     <span
       className={className === undefined ? 'xiaohei-brand-mark' : `${className} xiaohei-brand-mark`}
       data-brand-context={context}
+      data-xiaohei-sidebar-brand={context === 'sidebar' ? '' : undefined}
       data-metallic-ready={ready || snapshot !== undefined ? 'true' : 'false'}
       style={geometry}
       aria-hidden="true"
@@ -332,5 +333,5 @@ export function XiaoheiMetallicBrandMark({ size, className }: XiaoheiBrandMarkPr
 
 /** Official sidebar brand-name occupant paired with the Xiaohei mark. */
 export function XiaoheiBrandName() {
-  return <span className="xiaohei-brand-name">罗小黑 · 妖灵会馆</span>
+  return <span className="xiaohei-brand-name" data-xiaohei-sidebar-brand="">罗小黑 · 妖灵会馆</span>
 }

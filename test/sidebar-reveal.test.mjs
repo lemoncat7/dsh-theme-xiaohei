@@ -5,14 +5,16 @@ import {createSidebarReveal} from '../lib/sidebar-reveal.js'
 function fixture() {
  let notify,disconnected=false
  const attrs=new Map()
- const shell={className:'native_collapsed',style:{width:''},
+ let collapsed=true
+ const shell={className:'unrelated',style:{width:''},
+  closest:()=>({getAttribute:()=>String(collapsed)}),
   getAttribute:k=>attrs.get(k),setAttribute:(k,v)=>attrs.set(k,v),removeAttribute:k=>attrs.delete(k)}
  const doc={defaultView:{MutationObserver:class{
   constructor(fn){notify=fn}observe(){}disconnect(){disconnected=true}
  }}}
  const reveal=createSidebarReveal(doc)
  reveal.setColumn({querySelector:()=>shell});reveal.resize(56)
- const change=(phase,target='280px')=>{shell.className=phase;shell.style.width=target;notify()}
+ const change=(phase,target='280px')=>{collapsed=phase==='native_collapsed'||phase==='native_fading';shell.style.width=target;notify()}
  return {reveal,attrs,change,disconnected:()=>disconnected}
 }
 test('opening content waits for actual target width, not an elapsed timeout',()=>{
@@ -31,7 +33,7 @@ test('reverse mid-open does not flash waiting text or leak stale reveal state',(
  const f=fixture()
  f.change('native_root');f.reveal.resize(140)
  f.change('native_fading')
- assert.equal(f.attrs.get('data-xiaohei-sidebar-reveal'),'waiting')
+ assert.equal(f.attrs.get('data-xiaohei-sidebar-reveal'),'ready')
  f.change('native_collapsed','');f.reveal.resize(56)
  assert.equal(f.attrs.get('data-xiaohei-sidebar-reveal'),'ready')
  f.change('native_root');f.reveal.resize(200)

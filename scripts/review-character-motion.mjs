@@ -12,7 +12,8 @@ import {createCharacterMotion} from './src/scene/character-motion';
 import {CHARACTER_POSES} from './src/scene/character-poses';
 import {CHARACTER_MOTION} from './src/generated-character-motion';
 import {createRigRenderer} from './src/scene/character-rig-renderer';
-Math.random=()=>.99;
+import {EYE_RIGS} from './src/scene/character-eye-rig';
+Math.random=()=>.5;
 const motion=createCharacterMotion(document);
 window.mount=(pose,appearance)=>{
  motion.setPose(undefined,'hidden');
@@ -25,6 +26,16 @@ window.mount=(pose,appearance)=>{
  motion.setPose(part,pose);
 };
 window.dispose=()=>motion.dispose();
+window.eyeDetail=(pose)=>{
+ const eyes=EYE_RIGS[pose];
+ const left=Math.min(...eyes.map(e=>e.left[0]))/2-8,top=Math.min(...eyes.map(e=>e.upper[1]))/2-8;
+ const right=Math.max(...eyes.map(e=>e.right[0]))/2+8,bottom=Math.max(...eyes.map(e=>e.lower[1]))/2+8;
+ for(const canvas of document.querySelectorAll('#audit canvas')){
+  const copy=document.createElement('canvas');copy.width=canvas.width;copy.height=canvas.height;copy.getContext('2d').drawImage(canvas,0,0);
+  canvas.width=240;canvas.height=200;canvas.style.width='180px';canvas.style.height='150px';
+  canvas.getContext('2d').drawImage(copy,left,top,right-left,bottom-top,0,0,240,200);
+ }
+};
 window.sample=async(pose,appearance,action)=>{
  motion.setPose(undefined,'hidden');
  document.getElementById('part').style.display='none';
@@ -34,13 +45,25 @@ window.sample=async(pose,appearance,action)=>{
  document.body.style.background=appearance==='light'?'#c4c9ce':'#30353c';
  const rig=CHARACTER_MOTION[pose][appearance],images=new Map();
  for(const layer of Object.values(rig.layers)){const image=new Image();image.src=layer.src;await image.decode();images.set(layer.src,image)}
- const durations=[];
+ const durations=[],frames=[];
  for(const t of [0,.15,.3,.45,.6,.75,.9,1]){
   const canvas=document.createElement('canvas');canvas.width=rig.size[0];canvas.height=rig.size[1];
   canvas.style.width=pose==='halfpeek'?'90px':pose==='peek'?'120px':'180px';canvas.style.height='auto';canvas.style.alignSelf='start';
   audit.append(canvas);
-  const render=createRigRenderer(canvas.getContext('2d'),rig,images);
-  const started=performance.now();render(action,t);durations.push(performance.now()-started);
+  const render=createRigRenderer(canvas.getContext('2d'),rig,images,EYE_RIGS[pose]);
+  const started=performance.now();render(action==='gaze'?undefined:action,t,action==='gaze'?[Math.cos(t*Math.PI*2),Math.sin(t*Math.PI*2)]:[0,0]);durations.push(performance.now()-started);
+  frames.push(canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data);
+ }
+ if(action==='blink'||action==='ear0'){
+  if(frames[0].some((v,i)=>v!==frames[7][i]))throw new Error(action+' does not return to rest: '+pose);
+  if(!frames[0].some((v,i)=>v!==frames[2][i]))throw new Error(action+' has no visible movement: '+pose);
+ }
+ if(action==='blink'){
+  for(let i=0;i<frames[0].length;i+=4){
+   if(frames[0].slice(i,i+4).every((v,k)=>v===frames[2][i+k]))continue;
+   const x=(i/4)%rig.size[0],y=Math.floor(i/4/rig.size[0]);
+   if(!EYE_RIGS[pose].some(e=>x>=e.left[0]/2-10 && x<=e.right[0]/2+10 && y>=e.upper[1]/2-10 && y<=e.lower[1]/2+10))throw new Error('Blink modified face outside eye bounds: '+pose);
+  }
  }
  return durations;
 };
@@ -65,11 +88,12 @@ try{
    await page.screenshot({path:output+'/'+pose+'-'+appearance+'-blink.png'})
    await page.waitForSelector('[data-motion="rig-rest"]')
    const count=await page.evaluate(()=>paints);await page.waitForTimeout(250);assert.equal(await page.evaluate(()=>paints),count,'no idle drawing')
-   if(appearance==='light'){
-     await page.waitForFunction(action=>document.getElementById('part').dataset.motion===action,pose==='seated'||pose==='chin'?'tail':pose==='halfpeek'?'ear0':'ear1',{timeout:15000})
-     await page.waitForTimeout(pose==='seated'?300:160)
-     await page.screenshot({path:output+'/'+pose+'-gesture.png'})
-   }
+   await page.mouse.move(374,449)
+   await page.waitForTimeout(850)
+   const settled=await page.evaluate(()=>paints)
+   await page.waitForTimeout(200)
+   assert.equal(await page.evaluate(()=>paints),settled,'gaze sleeps after settling')
+   await page.mouse.move(0,0)
  }
  await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>!document.querySelector('canvas'));assert.equal(await page.locator('canvas').count(),0)
  await page.emulateMedia({reducedMotion:'no-preference'});await page.waitForSelector('canvas')
@@ -80,6 +104,14 @@ try{
  for(const appearance of ['light','dark']) for(const pose of ['seated','peek','chin','halfpeek']){
    timings.push(...await page.evaluate(({pose,appearance})=>sample(pose,appearance,'attention'),{pose,appearance}))
    await page.screenshot({path:output+'/'+pose+'-'+appearance+'-rig-sequence.png'})
+   await page.evaluate(({pose,appearance})=>sample(pose,appearance,'blink'),{pose,appearance})
+   await page.screenshot({path:output+'/'+pose+'-'+appearance+'-blink-sequence.png'})
+   await page.evaluate(pose=>eyeDetail(pose),pose)
+   await page.screenshot({path:output+'/'+pose+'-'+appearance+'-eye-detail.png'})
+   await page.evaluate(({pose,appearance})=>sample(pose,appearance,'gaze'),{pose,appearance})
+   await page.screenshot({path:output+'/'+pose+'-'+appearance+'-gaze-sequence.png'})
+   await page.evaluate(({pose,appearance})=>sample(pose,appearance,'ear0'),{pose,appearance})
+   await page.screenshot({path:output+'/'+pose+'-'+appearance+'-ear-sequence.png'})
  }
  console.log(JSON.stringify({maxPaintMs:Math.max(...timings),meanPaintMs:timings.reduce((a,b)=>a+b,0)/timings.length}))
  assert.deepEqual(errors,[]);console.log(JSON.stringify({errors,output,poses:4,appearances:2,reducedMotion:true,hidden:true,idleSleep:true}))

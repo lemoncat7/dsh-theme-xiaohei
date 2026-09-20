@@ -1,8 +1,13 @@
 import type { CharacterRig, Point } from './character-motion-types.js'
-import { bindVertex, rigAngles, skinVertex, solveBones, TAIL_JOINTS } from './character-rig.js'
+import { attentionBlink, blinkClosure } from './character-expression.js'
+import { createEyeRenderer } from './character-eye-renderer.js'
+import type { EyeRig } from './character-eye-rig.js'
+import { bindVertex, earOffset, rigAngles, skinVertex, solveBones, TAIL_JOINTS } from './character-rig.js'
 
 /** Small CPU-skinned tail only; body and ears use normal image draws. */
-export function createRigRenderer(ctx: CanvasRenderingContext2D, rig: CharacterRig, images: ReadonlyMap<string, HTMLImageElement | null>) {
+export function createRigRenderer(ctx: CanvasRenderingContext2D, rig: CharacterRig, images: ReadonlyMap<string, HTMLImageElement | null>, eyes: readonly EyeRig[] = []) {
+  const body=images.get(rig.layers.body!.src)
+  const drawEyes=body ? createEyeRenderer(ctx,body,eyes) : undefined
   const tail = rig.layers.tail
   const vertices: ReturnType<typeof bindVertex>[] = [], triangles: number[][] = []
   if (tail) {
@@ -52,19 +57,26 @@ export function createRigRenderer(ctx: CanvasRenderingContext2D, rig: CharacterR
       ctx.restore()
     }
   }
-  return (action: string | undefined, progress: number) => {
+  return (action: string | undefined, progress: number, gaze: Point=[0,0]) => {
     ctx.clearRect(0,0,rig.size[0],rig.size[1])
-    const ears=rigAngles(progress,rig.ears.length,false)
-    rig.ears.forEach(([x,y],i) => {
-      ctx.save();ctx.translate(x,y)
-      ctx.rotate(action === 'attention' || action === 'ear'+i ? ears[i]! : 0)
-      ctx.translate(-x,-y);layer('ear'+i);ctx.restore()
+    const earProgress=action==='attention' ? Math.max(0,Math.min(1,(progress-.03)/.65)) : progress
+    const ears=rigAngles(earProgress,rig.ears.length,false)
+    rig.ears.forEach(([,root],i) => {
+      const part=rig.layers['ear'+i], image=part && images.get(part.src)
+      if (!part || !image) return
+      const angle=action === 'attention' || action === 'ear'+i ? ears[i]! : 0
+      if (Math.abs(angle)<1e-8) { layer('ear'+i); return }
+      const [x,top,right,bottom]=part.box
+      // Non-overlapping source rows preserve alpha and never rotate a rectangle
+      // of hair out from behind the head. The lower attachment stays identical.
+      for (let row=0;row<image.height;row++) {
+        const y=top+row*(bottom-top)/image.height
+        ctx.drawImage(image,0,row,image.width,1,x+earOffset(y,top,root,angle),y,right-x,(bottom-top)/image.height)
+      }
     })
     layer('body')
-    drawTail(action === 'tail' || action === 'attention' ? progress : 0)
-    if (action === 'blink') {
-      ctx.save();ctx.globalAlpha=Math.min(1,Math.sin(Math.PI*progress)*2)
-      layer('blink');ctx.restore()
-    }
+    drawTail(action === 'attention' ? Math.max(0,Math.min(1,(progress-.22)/.78)) : action === 'tail' ? progress : 0)
+    const closure=action==='blink' ? blinkClosure(progress) : action==='attention' ? attentionBlink(progress) : 0
+    drawEyes?.(gaze,closure)
   }
 }

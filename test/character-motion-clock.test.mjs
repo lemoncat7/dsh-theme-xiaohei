@@ -12,15 +12,23 @@ function fixture() {
 }
 const clips={blink:{duration:330},ear0:{duration:1050},tail:{duration:2400},attention:{duration:2400}}
 
-test('short eye and gesture sequences alternate, separated by real idle time',()=>{
+test('ear gestures cannot starve even when randomness always chooses blink',()=>{
+ const f=fixture();f.motion.setClips({...clips,ear1:{duration:1050}})
+ f.advance(24000)
+ const starts=f.frames.filter(x=>x.frame===0 && x.action).map(x=>x.action)
+ assert.deepEqual(starts.slice(0,6),['blink','blink','ear0','blink','blink','ear1'])
+ f.motion.dispose()
+})
+
+test('short eye sequences are smooth and separated by real idle time',()=>{
   const f=fixture();f.motion.setClips(clips)
   f.advance(1199);assert.equal(f.frames.filter(x=>x.action).length,0)
   f.advance(400);const active=f.frames.filter(x=>x.action)
   assert.equal(active[0].frame,0);assert.equal(active.at(-1).frame,1)
-  assert.ok(active.length<=12)
-  for(let i=1;i<active.length;i++)assert.ok(active[i].at-active[i-1].at>=1000/30-.001)
+  assert.ok(active.length>12 && active.length<=22)
+  for(let i=1;i<active.length;i++)assert.ok(active[i].at-active[i-1].at>=1000/60-.001)
   const count=f.frames.length;f.advance(2000);assert.equal(f.frames.length,count,'no periodic redraw between gestures')
-  f.advance(1700);assert.ok(f.frames.some(x=>x.action==='ear0'))
+  f.advance(1700);assert.ok(f.frames.length>count)
   f.motion.dispose();assert.equal(f.timers.size,0)
 })
 test('pointer attention does not restart active gestures or keep an idle renderer awake',()=>{

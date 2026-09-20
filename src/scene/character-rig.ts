@@ -7,6 +7,13 @@ export const TAIL_JOINTS: readonly Point[] = [
 ]
 export interface Joint { x: number; y: number; angle: number }
 export interface Vertex { x: number; y: number; bone: number; weight: number }
+/** Keep the ear root (and any hair below it) fixed; only flex the upper tip. */
+export function earOffset(y: number, top: number, root: number, angle: number): number {
+  const span = Math.max(1, root - top)
+  const weight = Math.max(0, Math.min(1, (root - y) / span))
+  if (weight === 0) return 0
+  return Math.sin(angle) * Math.min(20, span * .55) * weight * weight
+}
 export function solveBones(rest: readonly Point[], angles: readonly number[]): Joint[] {
   return rest.reduce<Joint[]>((out, p, i) => {
     const parent = out[i - 1]
@@ -45,6 +52,6 @@ export function rigAngles(progress: number, count: number, tail: boolean): numbe
   const envelope = Math.sin(Math.PI*t)**2
   // Delayed distal joints create follow-through, with zero displacement/velocity
   // at both ends; no discrete frame lookup and no idle simulation.
-  return Array.from({length:count}, (_,i) => envelope * (tail ? (i ? .12 : 0) : .22)
+  return Array.from({length:count}, (_,i) => envelope * (tail ? (i ? .12 : 0) : .32)
     * Math.sin(t*Math.PI*(tail ? 3 : 4)-i*(tail ? .65 : 1.1)))
 }

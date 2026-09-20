@@ -5,8 +5,13 @@ export function createSidebarReveal(doc: Document) {
   let observer: MutationObserver | undefined
   let phase = '', width = 0, waiting = false
   const attribute = 'data-xiaohei-sidebar-reveal'
-  const readPhase = () => shell?.className.includes('_collapsed') ? 'rail'
-    : shell?.className.includes('_fading') ? 'closing' : 'wide'
+  const readPhase = () => {
+    const state = shell?.closest('[data-sidebar-collapsed]')?.getAttribute('data-sidebar-collapsed')
+    if (state === 'true') return 'rail'
+    if (state === 'false') return 'wide'
+    if (shell?.querySelector("button[aria-label='Collapse sidebar'], button[aria-label='收起侧边栏']")) return 'wide'
+    return 'rail'
+  }
   const apply = () => {
     if (!shell) return
     // The Host freezes its shell at the requested width during grid motion.
@@ -31,7 +36,7 @@ export function createSidebarReveal(doc: Document) {
       shell = next; waiting = false; phase = readPhase()
       if (!shell) return
       observer = new doc.defaultView!.MutationObserver(changed)
-      observer.observe(shell, { attributes: true, attributeFilter: ['class', 'style'] })
+      observer.observe(column!, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-sidebar-collapsed', 'aria-label', 'style'] })
       apply()
     },
     resize(nextWidth: number) { width = nextWidth; apply() },

@@ -1,6 +1,19 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {bindVertex,skinVertex,solveBones,rigAngles,TAIL_JOINTS} from '../lib/scene/character-rig.js'
+import {bindVertex,skinVertex,solveBones,rigAngles,TAIL_JOINTS,earOffset} from '../lib/scene/character-rig.js'
+
+test('ear roots and hair stay fixed while tips have visible bounded travel',()=>{
+ let peak=0
+ for(let t=0;t<=1;t+=.01){
+  const angle=rigAngles(t,1,false)[0]
+  assert.equal(earOffset(45,5,45,angle),0)
+  assert.equal(earOffset(55,5,45,angle),0)
+  const displacement=Math.abs(earOffset(5,5,45,angle))
+  peak=Math.max(peak,displacement);assert.ok(displacement<7)
+  assert.ok(Math.abs(earOffset(44.99,5,45,angle))<.001)
+ }
+ assert.ok(peak>3,'ear tips must not shrink to subpixel motion')
+})
 
 test('inverse bind/forward transforms reproduce original vertices exactly at rest',()=>{
  const joints=solveBones(TAIL_JOINTS,[])

@@ -16,12 +16,10 @@ export const XIAOHEI_SIDEBAR_CSS = `
  * Keep the toggle itself native. Opacity is applied to content, never the shell
  * (which also hosts fixed-position settings dialogs). */
 @media (prefers-reduced-motion: no-preference) {
-  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal]:not([class*='_collapsed']) > :not(:first-child),
-  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal]:not([class*='_collapsed']) > div:first-child > button:first-child {
+  #root [data-xiaohei-sidebar-reveal] [data-xiaohei-sidebar-brand] {
     transition: opacity 100ms ease-out;
   }
-  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal='waiting']:not([class*='_collapsed']) > :not(:first-child),
-  #root [data-slot='sidebar'] > div[data-xiaohei-sidebar-reveal='waiting']:not([class*='_collapsed']) > div:first-child > button:first-child {
+  #root [data-xiaohei-sidebar-reveal='waiting'] [data-xiaohei-sidebar-brand] {
     opacity: 0 !important;
     visibility: hidden;
     transition: none;
@@ -170,9 +168,9 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
 }
 
 /* Keep native rail/wide geometry and one consistent control material. */
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child,
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session'] {
+#root [data-slot='sidebar'] button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏']),
+#root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='新建会话'],
+#root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='New session'] {
   color: var(--xiaohei-sidebar-emphasis);
   transition:
     background-color var(--xiaohei-motion-fast) ease,
@@ -180,12 +178,12 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
     transform var(--xiaohei-motion-fast) var(--xiaohei-motion-curve);
 }
 
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > div:first-child button:last-child:hover {
+#root [data-slot='sidebar'] button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏']):hover {
   background: var(--xiaohei-sidebar-hover);
 }
 
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session'] {
+#root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='新建会话'],
+#root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='New session'] {
   border: 1px solid var(--xiaohei-sidebar-control-edge);
   border-radius: var(--xiaohei-radius-control);
   background: var(--xiaohei-sidebar-control);
@@ -196,14 +194,14 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
   text-align: start;
 }
 
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话']:hover,
-#root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session']:hover {
+#root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='新建会话']:hover,
+#root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='New session']:hover {
   border-color: var(--xiaohei-sidebar-control-edge-hover);
   background: var(--xiaohei-sidebar-hover);
 }
 
 /* The footer uses a divider instead of another framed card. */
-#root [data-slot='sidebar'] > div:not([class*='_collapsed'])
+#root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏']))
   > :has(> div > [data-slot='sidebar.footer.action']) {
   box-sizing: border-box;
   gap: 2px;
@@ -276,8 +274,8 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
     backdrop-filter: none;
   }
 
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='新建会话'],
-  #root [data-slot='sidebar'] > div:not([class*='_collapsed']) > button[aria-label='New session'] {
+  #root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='新建会话'],
+  #root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏'])) > button[aria-label='New session'] {
     border-color: ButtonText;
   }
 

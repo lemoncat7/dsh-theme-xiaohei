@@ -4,10 +4,11 @@ interface Clock {
   performance: { now(): number }
 }
 export interface CharacterMotionClip { duration: number }
-/** One deadline; elapsed-time continuous sampling, capped at 30 fps. */
+/** One deadline; 60 fps only during a short gesture, no idle frame loop. */
 export function createCharacterMotionClock(clock: Clock, changed: (action: string | undefined, progress: number) => void, random = Math.random) {
-  let timer: number | undefined, disposed = false, turn = 0, active = ''
+  let timer: number | undefined, disposed = false, active = ''
   let clips: Readonly<Record<string, CharacterMotionClip>> | undefined
+  let blinksSinceEar=0, nextEar=0
   const clear = () => { if (timer !== undefined) clock.clearTimeout(timer); timer = undefined }
   function rest() {
     active = ''; changed(undefined, 0)
@@ -24,7 +25,7 @@ export function createCharacterMotionClock(clock: Clock, changed: (action: strin
       const t=Math.min(1,(clock.performance.now()-started)/clip.duration)
       changed(active,t)
       if (t>=1) { rest(); return }
-      timer=clock.setTimeout(step,1000/30)
+      timer=clock.setTimeout(step,1000/60)
     }
     step()
   }
@@ -32,12 +33,20 @@ export function createCharacterMotionClock(clock: Clock, changed: (action: strin
     timer=undefined
     if (!clips || disposed) return
     const gestures=Object.keys(clips).filter(name=>name!=='blink' && name!=='attention')
-    play((turn++ % 2 === 0 && clips.blink) || !gestures.length ? 'blink' : gestures[Math.floor(random()*gestures.length)]!)
+    const ears=gestures.filter(name=>name.startsWith('ear'))
+    // Random selection alone can starve ear motion indefinitely. Keep a quiet,
+    // bounded cadence, alternating ears instead of twitching both in lockstep.
+    const action=ears.length && blinksSinceEar>=2 ? ears[nextEar++%ears.length]!
+      : (random()<.72 && clips.blink) || !gestures.length ? 'blink'
+      : gestures[Math.floor(random()*gestures.length)]!
+    if(action.startsWith('ear'))blinksSinceEar=0
+    else blinksSinceEar++
+    play(action)
   }
   return {
     setClips(next: typeof clips) {
       if (disposed || next === clips) return
-      clear(); clips=next; active=''; changed(undefined,0)
+      clear(); clips=next; active=''; blinksSinceEar=0;nextEar=0;changed(undefined,0)
       if (clips) timer=clock.setTimeout(start,1200+random()*800)
     },
     attention() { if (!active) play('attention') },
