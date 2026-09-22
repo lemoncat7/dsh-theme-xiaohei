@@ -12,6 +12,15 @@ export const XIAOHEI_SIDEBAR_CSS = `
   position: relative;
 }
 
+/* Target the native control by its accessible identity, not DOM order.
+ * Do not resurrect controls explicitly hidden/disabled by the Host. */
+#root [data-slot='sidebar'] button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏']):not([hidden]):not([disabled]):not([aria-hidden='true']) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 /* Reveal wide navigation only after its column has reached the target width.
  * Keep the toggle itself native. Opacity is applied to content, never the shell
  * (which also hosts fixed-position settings dialogs). */

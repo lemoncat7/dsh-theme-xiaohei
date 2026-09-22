@@ -1,5 +1,10 @@
 import { XIAOHEI_AVATAR_2D_FRONT } from '../generated-keyart.js'
 
+// AssistantMarkdown > body > ProcessReasoning > ReasoningRow. Require the
+// reasoning wrapper to be the only body child: mixed replies/images/interrupted
+// messages keep their bubble. No hashed classes or nested :has selectors.
+const thinkingOnlyRow = `#root [data-chat-flow-kind='assistant-step']:has(> [data-slot='conversation.chat.node'] > div:first-child > div:only-child > div:only-child > [data-variant='think']:only-child)`
+
 /** Native conversation messages restyled without changing their DOM contract. */
 export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
 /* Keep DSH's native max width; only tune vertical reading rhythm. */
@@ -9,6 +14,24 @@ export const XIAOHEI_CONVERSATION_MESSAGES_CSS = `
 
 #root [data-chat-flow-kind='assistant-step'] {
   color: var(--xiaohei-conversation-text);
+}
+
+${thinkingOnlyRow} {
+  padding-inline: 0 !important;
+}
+
+${thinkingOnlyRow}::before {
+  content: none !important;
+  display: none !important;
+}
+
+${thinkingOnlyRow} > [data-slot='conversation.chat.node'] > div:first-child {
+  inline-size: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Message portraits are deliberately static and only identify the speaker. */
