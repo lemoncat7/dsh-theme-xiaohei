@@ -1,4 +1,6 @@
 import type { ISessions, SessionFace } from '@deepseek-ai/dsh-api-session-controller/client'
+import type {} from '@deepseek-ai/dsh-client-ui-session/client'
+import { currentSession } from '../current-session.js'
 
 export interface HeixiuSignal {
   sessionId?: string
@@ -41,7 +43,8 @@ export function bindHeixiuSessions(sessions: ISessions, signals: HeixiuSignals) 
     previous = next
   }
   const select = () => {
-    const id = sessions.list.getSnapshot().current
+    const snapshot = sessions.list.getSnapshot()
+    const id = currentSession(snapshot)
     const next = id ? sessions.binding(id)?.session : undefined
     if (next === face) return
     removeSession(); previous = undefined; face = next

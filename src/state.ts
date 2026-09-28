@@ -1,3 +1,5 @@
+import type {} from '@deepseek-ai/dsh-client-ui-session/client'
+import { currentSession as selectedSession } from './current-session.js'
 import type {
   ISessions,
   SessionSnapshot,
@@ -32,7 +34,7 @@ export function resolveXiaoheiState(
 
     const pending = 'pending' in snapshot
       ? snapshot.pending
-      : [...snapshot.queue, ...snapshot.pendingSubmissions]
+      : snapshot.pendingSubmissions
     const runningCalls = 'runningCalls' in snapshot ? snapshot.runningCalls : []
     const partial = 'partial' in snapshot ? snapshot.partial : null
     if (pending.length > 0 || legacyPendingInteraction(summary) !== undefined) return 'waiting'
@@ -72,7 +74,7 @@ export function bindXiaoheiSessionState(
 
   const root = doc.documentElement
   const timerWindow = doc.defaultView ?? undefined
-  let currentId: ReturnType<typeof sessions.list.getSnapshot>['current']
+  let currentId: SessionSummary['id'] | undefined
   let currentSession: NonNullable<ReturnType<typeof sessions.binding>>['session'] | undefined
   let unsubscribeSession = (): void => {}
   let previousRunning: boolean | undefined
@@ -125,7 +127,7 @@ export function bindXiaoheiSessionState(
   const updateList = (): void => {
     if (disposed) return
     const listSnapshot = sessions.list.getSnapshot()
-    const nextId = listSnapshot.current
+    const nextId = selectedSession(listSnapshot)
     const nextSession = nextId === undefined ? undefined : sessions.binding(nextId)?.session
     const changed = nextId !== currentId || nextSession !== currentSession
 
