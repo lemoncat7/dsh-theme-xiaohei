@@ -18,13 +18,14 @@ const rawImportPlugin = {
 }
 
 await build({
-  entryPoints: ['src/client.ts'],
+  entryPoints: ['src/client-entry.ts'],
   outfile: 'lib/client.js',
   bundle: true,
   format: 'cjs',
   platform: 'browser',
   target: 'es2022',
   jsx: 'automatic',
+  minify: true,
   sourcemap: true,
   plugins: [rawImportPlugin],
   external: [
