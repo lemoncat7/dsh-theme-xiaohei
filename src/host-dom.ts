@@ -5,6 +5,7 @@ interface XiaoheiHostDomHub {
   listeners: Set<XiaoheiHostDomListener>
   observer?: MutationObserver
   queued: boolean
+  frame?: number
 }
 
 const hubs = new WeakMap<Document, XiaoheiHostDomHub>()
@@ -35,6 +36,7 @@ export function subscribeXiaoheiHostDom(
 
     const flush = (): void => {
       nextHub.queued = false
+      delete nextHub.frame
       if (hubs.get(doc) !== nextHub) return
       for (const subscriber of [...listeners]) {
         try {
@@ -48,7 +50,10 @@ export function subscribeXiaoheiHostDom(
     nextHub.observer = new win.MutationObserver(() => {
       if (nextHub.queued) return
       nextHub.queued = true
-      queueMicrotask(flush)
+      // React can commit several batches within one frame. Do not run every
+      // theme reconciler in each microtask before the host finishes layout.
+      if (typeof win.requestAnimationFrame === 'function') nextHub.frame = win.requestAnimationFrame(flush)
+      else queueMicrotask(flush)
     })
     nextHub.observer.observe(doc.body, { childList: true, subtree: true })
     hubs.set(doc, nextHub)
@@ -65,6 +70,7 @@ export function subscribeXiaoheiHostDom(
     activeHub.listeners.delete(listener)
     if (activeHub.listeners.size > 0) return
     activeHub.observer?.disconnect()
+    if (activeHub.frame !== undefined) win.cancelAnimationFrame(activeHub.frame)
     hubs.delete(doc)
   }
 }

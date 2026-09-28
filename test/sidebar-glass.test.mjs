@@ -64,7 +64,9 @@ test('streamed DOM changes do not remeasure glass; resize, remount and disposal 
   }
   const flush = async () => {
     await Promise.resolve()
-    for (const [id, callback] of [...frames]) { frames.delete(id); callback() }
+    // Shared DOM reconciliation runs at a frame boundary, then the glass
+    // schedules its own paint. Drain both without assuming microtask delivery.
+    for (let pass = 0; pass < 2; pass++) for (const [id, callback] of [...frames]) { frames.delete(id); callback() }
   }
   const dispose = installXiaoheiSidebarGlass(doc)
   await flush()

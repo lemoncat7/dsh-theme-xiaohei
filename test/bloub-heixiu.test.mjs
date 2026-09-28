@@ -334,7 +334,7 @@ test('runtime does not measure on animation/stream updates; pauses and fully dis
   for (let i = 0; i < 400; i++) f.step()
   assert.equal(f.reads(), reads)
   assert.equal(f.frames.size, 0); assert.equal(f.timers.size, 2, 'life wake and one ambient timer')
-  f.mutate(); await Promise.resolve(); f.step()
+  f.mutate(); await Promise.resolve(); f.step(); f.step()
   assert.equal(f.reads(), reads)
   f.doc.hidden = true; f.listeners.get('visibilitychange')()
   assert.equal(f.frames.size, 0); assert.equal(f.timers.size, 0)
