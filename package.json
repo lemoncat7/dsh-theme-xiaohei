@@ -1,6 +1,6 @@
 {
   "name": "@lemoncat7/dsh-theme-xiaohei",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A Luo Xiaohei-inspired animated dark theme for DeepSeek Harness",
   "keywords": [
     "deepseek-harness",
@@ -26,6 +26,7 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "docs/releases/0.4.3.md",
     "lib/**/*.js",
     "lib/**/*.d.ts",
     "cordis.patch.yml",
@@ -33,7 +34,8 @@
     "docs/releases/0.3.5.md",
     "THIRD_PARTY_NOTICES.md",
     "LICENSE",
-    "docs/releases/0.4.2.md"
+    "docs/releases/0.4.2.md",
+    "docs/dsh-020-compatibility.md"
   ],
   "dsh": {
     "bundle": {
@@ -62,23 +64,25 @@
     "pack:docker": "docker build --output type=local,dest=./dist ."
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.4"
+    "@deepseek-ai/cordis": "^4.0.4",
+    "@deepseek-ai/dsh-client-ui-renderer": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-theme": "^0.2.0-rc.2"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",
-    "@deepseek-ai/dsh-api-session-controller": "0.1.7-rc.2",
-    "@deepseek-ai/dsh-client-ui-conversation": "0.1.7-rc.2",
-    "@deepseek-ai/dsh-client-ui-renderer": "0.1.7-rc.2",
-    "@deepseek-ai/dsh-client-ui-sidebar": "0.1.7-rc.2",
-    "@deepseek-ai/dsh-client-ui-slots": "0.1.7-rc.2",
-    "@deepseek-ai/dsh-client-ui-theme": "0.1.7-rc.2",
-    "@deepseek-ai/dsh-host-webserver": "0.1.7-rc.2",
+    "@deepseek-ai/dsh-api-session-controller": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-conversation": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-sidebar": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-slots": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-theme": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-host-webserver": "0.2.0-rc.2",
     "@types/node": "^24.0.0",
     "@types/react": "^18.3.28",
     "esbuild": "^0.25.0",
     "react": "^18.3.1",
     "typescript": "^5.9.3",
-    "@deepseek-ai/dsh-client-ui-session": "0.1.7-rc.2"
+    "@deepseek-ai/dsh-client-ui-session": "0.2.0-rc.2"
   },
   "publishConfig": {
     "access": "public"
