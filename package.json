@@ -1,6 +1,6 @@
 {
   "name": "@lemoncat7/dsh-theme-xiaohei",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "A Luo Xiaohei-inspired animated dark theme for DeepSeek Harness",
   "keywords": [
     "deepseek-harness",
@@ -26,6 +26,7 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "docs/releases/0.4.4.md",
     "docs/releases/0.4.3.md",
     "lib/**/*.js",
     "lib/**/*.d.ts",

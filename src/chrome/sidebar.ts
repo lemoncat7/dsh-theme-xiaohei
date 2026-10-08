@@ -209,6 +209,26 @@ html[data-xiaohei-sidebar-resizing] #dsh-theme-xiaohei\\/sidebar-glass {
   background: var(--xiaohei-sidebar-hover);
 }
 
+/* rc.2 renders footer contributions in a horizontal flex row. Stack only
+ * this slot and its immediate host so full-width actions cannot displace
+ * siblings. Leave settings, plugin interiors, hidden states and order alone.
+ * This is also idempotent with Desktop's column-layout compatibility patch. */
+#root [data-slot='sidebar'] :has(> [data-slot='sidebar.footer.action']),
+#root [data-slot='sidebar'] [data-slot='sidebar.footer.action'] {
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  max-width: 100%;
+  gap: 4px;
+}
+
+#root [data-slot='sidebar'] [data-slot='sidebar.footer.action'] > * {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* The footer uses a divider instead of another framed card. */
 #root [data-slot='sidebar'] > div:has(button:is([aria-label='Collapse sidebar'], [aria-label='收起侧边栏']))
   > :has(> div > [data-slot='sidebar.footer.action']) {
