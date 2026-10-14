@@ -4,10 +4,12 @@ import { installXiaoheiWallpaperCharacter, XIAOHEI_WALLPAPER_CHARACTER_ID } from
 import { XIAOHEI_SCENE_LAYER_ID } from '../lib/scene/styles.js'
 
 function fixture({failDecode=false}={}) {
+  const setProperty=()=>{}
   const elements=new Map(), frames=new Map(), timers=new Map(), events=new Map()
-  let now=0, serial=0, reads=0, decodes=0, mutation, observer
+  let now=0, serial=0, reads=0, decodes=0, observer
+  const mutations=new Set(), requests=[]
   function element() {
-    return { dataset:{}, style:{}, children:[], parentElement:null,
+    return { dataset:{}, style:{setProperty}, children:[], parentElement:null,
       setAttribute(){},
       append(child){this.children.push(child);child.parentElement=this;elements.set(child.id,child)},
       querySelector(selector){return this.children.find(c=>'.'+c.className===selector)??null},
@@ -20,13 +22,13 @@ function fixture({failDecode=false}={}) {
   const scroll=box(280,78,1920,900),flow=box(632,0,1552,20000),composer=box(616,770,1568,868)
   const listen=(type,fn)=>events.set(type,fn),unlisten=type=>events.delete(type)
   const attrs=new Set()
-  const doc={body:{},hidden:false,documentElement:{hasAttribute:key=>attrs.has(key)},
+  const doc={body:{},hidden:false,documentElement:{dataset:{xiaoheiAppearance:'dark'},hasAttribute:key=>attrs.has(key)},
     createElement:element,getElementById:id=>elements.get(id),
     querySelector:selector=>selector.includes('sidebar')?sidebar:selector.includes('conversation-scroll')?scroll:selector.includes('chat-flow')?flow:composer,
     addEventListener:listen,removeEventListener:unlisten,
     defaultView:{innerWidth:1920,innerHeight:900,performance:{now:()=>now},
       Image:class {decode(){decodes++;return failDecode?Promise.reject(new Error('decode failed')):Promise.resolve()}},
-      MutationObserver:class {constructor(fn){mutation=fn}observe(){}disconnect(){}},
+      MutationObserver:class {constructor(fn){this.fn=fn;mutations.add(fn)}observe(){}disconnect(){mutations.delete(this.fn)}},
       ResizeObserver:class {constructor(fn){observer=fn}observe(){}disconnect(){}},
       requestAnimationFrame(fn){frames.set(++serial,fn);return serial},cancelAnimationFrame:id=>frames.delete(id),
       setTimeout(fn,delay){timers.set(++serial,{fn,due:now+delay});return serial},clearTimeout:id=>timers.delete(id),
@@ -35,27 +37,28 @@ function fixture({failDecode=false}={}) {
   }
   async function flush(){for(let i=0;i<8;i++){await Promise.resolve();for(const[id,fn]of [...frames]){frames.delete(id);fn()}}}
   async function advance(ms){now+=ms;for(const[id,t]of [...timers])if(t.due<=now){timers.delete(id);t.fn()}await flush()}
-  return{doc,events,frames,timers,flush,advance,attrs,mutate:()=>mutation(),resize:()=>observer([]),
+  return{doc,events,frames,timers,flush,advance,attrs,requests,load:async(pose,mode)=>{requests.push(`${pose}-${mode}`);return `data:${pose}-${mode}`},mutate:()=>[...mutations].forEach(fn=>fn()),resize:()=>observer([]),
     host:()=>elements.get(XIAOHEI_WALLPAPER_CHARACTER_ID),reads:()=>reads,decodes:()=>decodes}
 }
 
 test('complete poses preload lazily, align seated states and clean up all listeners/timers',async()=>{
-  const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc)
+  const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc,f.load)
   await f.flush()
-  assert.equal(f.host().dataset.pose,'seated');assert.equal(f.decodes(),2)
+  assert.equal(f.host().dataset.pose,'seated');assert.equal(f.decodes(),1)
+  assert.deepEqual(f.requests,['seated-dark'])
   const initialReads=f.reads(),bounds={...f.host().querySelector('.xiaohei-wallpaper-character__seated').style}
   for(let i=0;i<30;i++){f.mutate();await f.flush()}
   assert.equal(f.reads(),initialReads)
   await f.advance(30_000)
-  assert.equal(f.host().dataset.pose,'chin');assert.equal(f.decodes(),4)
+  assert.equal(f.host().dataset.pose,'chin');assert.equal(f.decodes(),2)
   assert.deepEqual(f.host().querySelector('.xiaohei-wallpaper-character__chin').style,bounds)
   await f.advance(150_000)
-  assert.equal(f.host().dataset.pose,'doze');assert.equal(f.decodes(),6)
+  assert.equal(f.host().dataset.pose,'doze');assert.equal(f.decodes(),3)
   assert.deepEqual(f.host().querySelector('.xiaohei-wallpaper-character__doze').style,bounds)
   assert.equal(f.reads(),initialReads,'idle must not force layout reads')
   assert.equal(f.timers.size,0)
   f.events.get('pointerdown')();await f.flush()
-  assert.equal(f.host().dataset.pose,'seated');assert.equal(f.decodes(),6)
+  assert.equal(f.host().dataset.pose,'seated');assert.equal(f.decodes(),3)
   f.doc.hidden=true;f.events.get('visibilitychange')();await f.flush()
   assert.equal(f.host().dataset.pose,'hidden');assert.equal(f.timers.size,0)
   await f.advance(600_000)
@@ -66,16 +69,16 @@ test('complete poses preload lazily, align seated states and clean up all listen
   assert.equal(f.host(),undefined)
 })
 test('a broken image cannot start a decode retry/render loop',async()=>{
-  const f=fixture({failDecode:true}),dispose=installXiaoheiWallpaperCharacter(f.doc)
+  const f=fixture({failDecode:true}),dispose=installXiaoheiWallpaperCharacter(f.doc,f.load)
   await f.flush()
   for(let i=0;i<30;i++){f.mutate();await f.flush()}
-  assert.equal(f.decodes(),2)
+  assert.equal(f.decodes(),1)
   assert.equal(f.host().dataset.pose,'hidden')
   dispose();await f.flush()
   assert.equal(f.frames.size,0);assert.equal(f.timers.size,0)
 })
 test('sidebar motion does not measure intermediate layouts or load alternate poses',async()=>{
- const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc)
+ const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc,f.load)
  await f.flush()
  const reads=f.reads(),decodes=f.decodes()
  f.attrs.add('data-xiaohei-sidebar-resizing')
@@ -91,8 +94,19 @@ test('sidebar motion does not measure intermediate layouts or load alternate pos
  assert.equal(f.timers.size,0)
 })
 test('disposing before image decode completes never recreates a host or scheduled frame',async()=>{
-  const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc)
+  const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc,f.load)
   for(const[id,fn]of [...f.frames]){f.frames.delete(id);fn()}
   dispose();await f.flush()
   assert.equal(f.host(),undefined);assert.equal(f.frames.size,0);assert.equal(f.timers.size,0)
+})
+
+test('theme switching loads only the selected appearance and reuses decoded poses',async()=>{
+  const f=fixture(),dispose=installXiaoheiWallpaperCharacter(f.doc,f.load)
+  await f.flush()
+  f.doc.documentElement.dataset.xiaoheiAppearance='light';f.mutate();await f.flush()
+  assert.deepEqual(f.requests,['seated-dark','seated-light'])
+  assert.equal(f.host().querySelector('.xiaohei-wallpaper-character__seated').dataset.appearance,'light')
+  f.doc.documentElement.dataset.xiaoheiAppearance='dark';f.mutate();await f.flush()
+  assert.equal(f.requests.length,2);assert.equal(f.decodes(),2)
+  dispose()
 })

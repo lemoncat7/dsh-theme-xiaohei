@@ -1,4 +1,4 @@
-import { XIAOHEI_SCENE_LAYER_ID, XIAOHEI_SCENE_WORLD_CLASS } from './scene.js'
+import { XIAOHEI_SCENE_LAYER_ID, XIAOHEI_SCENE_WORLD_CLASS } from './scene/ids.js'
 import { subscribeXiaoheiHostDom } from './host-dom.js'
 import { XIAOHEI_HOST_SELECTORS } from './host-contract.js'
 import { createSidebarReveal } from './sidebar-reveal.js'

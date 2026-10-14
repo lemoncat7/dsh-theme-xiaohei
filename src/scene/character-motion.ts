@@ -1,4 +1,4 @@
-import { CHARACTER_MOTION } from '../generated-character-motion.js'
+import { characterAssets } from './character-assets.js'
 import { createCharacterMotionClock } from './character-motion-clock.js'
 import { createRigRenderer } from './character-rig-renderer.js'
 import type { CharacterRig } from './character-motion-types.js'
@@ -13,6 +13,7 @@ export function createCharacterMotion(doc: Document) {
   let disposed=false, part: HTMLElement | undefined, rig: CharacterRig | undefined
   let canvas: HTMLCanvasElement | undefined, render: ReturnType<typeof createRigRenderer> | undefined
   let pose='', appearance='', revision=0, nearby=false, lastPointer=0
+  let selection = ''
   let attentionTimer: number | undefined, lastAttention=-Infinity
   let gazePoint: Point=[0,0], activeAction: string | undefined, activeProgress=0
   let bounds: DOMRect | undefined
@@ -36,18 +37,22 @@ export function createCharacterMotion(doc: Document) {
     if (disposed) return
     const mode=doc.documentElement.dataset.xiaoheiAppearance==='light'?'light':'dark'
     const moving=doc.documentElement.hasAttribute('data-xiaohei-sidebar-resizing')
-    const next=!doc.hidden && !reduced.matches && !moving && part ? CHARACTER_MOTION[pose]?.[mode] : undefined
-    if (next===rig && appearance===mode) return
+    const key=!doc.hidden && !reduced.matches && !moving && part ? `${pose}-${mode}` : ''
+    if (key===selection && appearance===mode) return
+    selection=key
     cancelAttention();render=undefined;clock.setClips(undefined);gaze.reset();bounds=undefined
     activeAction=undefined;activeProgress=0
     const current=++revision
     canvas?.remove();canvas=undefined
     if (part) part.dataset.motion='rest'
-    rig=next;appearance=mode;nearby=false
-    if (!next || !part) return
+    rig=undefined;appearance=mode;nearby=false
+    if (!key || !part) return
     const currentPart=part
-    void Promise.all(Object.values(next.layers).map(layer=>decode(layer.src))).then(()=>{
+    void characterAssets.rig(pose, mode).then(async next=>{
+      if (!next || disposed || current!==revision) return
+      await Promise.all(Object.values(next.layers).map(layer=>decode(layer.src)))
       if (disposed || current!==revision || Object.values(next.layers).some(layer=>!images.get(layer.src))) return
+      rig=next
       canvas=doc.createElement('canvas');canvas.className='xiaohei-character-motion'
       canvas.width=next.size[0];canvas.height=next.size[1]
       const ctx=canvas.getContext('2d')
@@ -59,7 +64,7 @@ export function createCharacterMotion(doc: Document) {
         ...(next.layers.tail ? {tail:{duration:2400}} : {}),
         attention:{duration:2400},
       })
-    })
+    }).catch(()=>{ /* Keep the decoded static pose when motion resources fail. */ })
   }
   const pointer=(event: PointerEvent)=>{
     if (!part || !render || event.pointerType!=='mouse') return
@@ -102,7 +107,7 @@ export function createCharacterMotion(doc: Document) {
   return {
     setPose(nextPart: HTMLElement | undefined,nextPose: string) {
       if (nextPart!==part || pose!==nextPose) {
-        cancelAttention();revision++;render=undefined;clock.setClips(undefined);gaze.reset();bounds=undefined;canvas?.remove();canvas=undefined;rig=undefined
+        cancelAttention();revision++;selection='';render=undefined;clock.setClips(undefined);gaze.reset();bounds=undefined;canvas?.remove();canvas=undefined;rig=undefined
         if (part) part.dataset.motion='rest'
       }
       part=nextPart;pose=nextPose;update()

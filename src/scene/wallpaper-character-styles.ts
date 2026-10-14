@@ -1,9 +1,8 @@
-import { CHARACTER_POSES, CHARACTER_POSE_NAMES } from './character-poses.js'
+import { CHARACTER_POSE_NAMES } from './character-assets.js'
 
 /** Complete raster poses remain crisp; only entry/exit opacity and transform move. */
 export const XIAOHEI_WALLPAPER_CHARACTER_CSS = `
 .xiaohei-wallpaper-character {
-  ${CHARACTER_POSE_NAMES.map(pose => `--xiaohei-${pose}-art: url("${CHARACTER_POSES[pose].dark}");`).join('\n  ')}
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -11,9 +10,6 @@ export const XIAOHEI_WALLPAPER_CHARACTER_CSS = `
 }
 html[data-xiaohei-sidebar-resizing] .xiaohei-wallpaper-character {
   visibility: hidden;
-}
-html[data-xiaohei-appearance='light'] .xiaohei-wallpaper-character {
-  ${CHARACTER_POSE_NAMES.map(pose => `--xiaohei-${pose}-art: url("${CHARACTER_POSES[pose].light}");`).join('\n  ')}
 }
 .xiaohei-wallpaper-character > span {
   position: absolute;

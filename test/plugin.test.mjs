@@ -49,6 +49,7 @@ import {
 import { XIAOHEI_CONTROL_PRIMITIVES_CSS } from '../lib/chrome/controls.js'
 import { XIAOHEI_CONVERSATION_CSS } from '../lib/chrome/conversation.js'
 import { XIAOHEI_CONVERSATION_MESSAGES_CSS } from '../lib/chrome/conversation-messages.js'
+import { XIAOHEI_CONVERSATION_SUBMISSIONS_CSS } from '../lib/chrome/conversation-submissions.js'
 import { XIAOHEI_FRAME_SYSTEM_CSS } from '../lib/chrome/frames.js'
 import { XIAOHEI_IDENTITY_CSS } from '../lib/chrome/identity.js'
 import { XIAOHEI_OVERLAY_CSS } from '../lib/chrome/overlays.js'
@@ -507,6 +508,10 @@ test('shades DSH native palettes without forcing a theme preference', () => {
 
   apply(ctx)
 
+  assert.deepEqual(calls.splice(2, 2), [
+    ['slotInject', 'conversation.input.dock'],
+    ['slotRegister', { name: 'conversation.input.dock', id: 'xiaohei-draft-preview', order: 100 }],
+  ])
   assert.deepEqual(calls[0], ['effect', 'xiaohei-theme: replace plugin spinner with hopping Heixiu'])
   assert.deepEqual(calls[1], ['inject', ['slots']])
   assert.deepEqual(calls[2], ['slotInject', 'sidebar.brand.mark'])
@@ -534,10 +539,10 @@ test('shades DSH native palettes without forcing a theme preference', () => {
   assert.deepEqual(calls.slice(11).map(call => call[1]), [
     'xiaohei-theme: follow resolved appearance',
     'xiaohei-theme: install spirit control skin',
+    'xiaohei-theme: paint wallpaper immediately',
     'xiaohei-theme: turn the native send action into blinking Heixiu',
-    'xiaohei-theme: install paired atmosphere',
+    'xiaohei-theme: load decorations after first paint',
     'xiaohei-theme: install isolated sidebar glass',
-    'xiaohei-theme: place responsive character poses',
     'xiaohei-theme: mount bloub Heixiu beside composer',
     ['sessions'],
   ])
@@ -677,11 +682,19 @@ test('control skin composes isolated responsibility layers in a stable order', (
     XIAOHEI_WORKSPACE_CSS,
     XIAOHEI_CONVERSATION_CSS,
     XIAOHEI_CONVERSATION_MESSAGES_CSS,
+    XIAOHEI_CONVERSATION_SUBMISSIONS_CSS,
     XIAOHEI_COMPOSER_CSS,
     XIAOHEI_COMPOSER_SEND_HEIXIU_CSS,
     XIAOHEI_OVERLAY_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
   ].join('\n'))
+})
+
+test('submission echo skin preserves native visibility, state ownership and attachment boundaries', () => {
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /div\[data-submission-echo\]/)
+  assert.match(XIAOHEI_CONVERSATION_MESSAGES_CSS, /not\(\[data-message-attachments\]\)/)
+  assert.match(XIAOHEI_CONVERSATION_SUBMISSIONS_CSS, /li\[data-submission-echo\]/)
+  assert.doesNotMatch(XIAOHEI_CONVERSATION_SUBMISSIONS_CSS, /display:\s*none|visibility:\s*hidden|pointer-events|content:|animation:/)
 })
 
 test('sidebar hides only tree scrollbar paint without changing scrolling geometry', () => {
@@ -1259,7 +1272,7 @@ test('persisted Host appearance remains authoritative during ThemeRuntime hydrat
 test('scene composes one static wallpaper without animation layers', () => {
   assert.match(XIAOHEI_SCENE_CSS, /\[id='dsh-theme-xiaohei\/scene-layer'\] \{/)
   assert.match(XIAOHEI_SCENE_CSS, /height: 100lvh/)
-  assert.match(XIAOHEI_SCENE_CSS, /xiaohei-wallpaper-character\[data-pose='peek'\]/)
+  assert.doesNotMatch(XIAOHEI_SCENE_CSS, /xiaohei-wallpaper-character/)
   assert.doesNotMatch(XIAOHEI_SCENE_CSS, /::after|linear-gradient/)
   assert.equal(XIAOHEI_SCENE_PART_COUNT, 1)
   assert.match(XIAOHEI_SCENE_CSS, /data-xiaohei-appearance='light'/)
@@ -1272,7 +1285,7 @@ test('scene composes one static wallpaper without animation layers', () => {
 
   const sceneRuntimeSource = readFileSync(new URL('../src/scene/runtime.ts', import.meta.url), 'utf8')
   assert.match(sceneRuntimeSource, /createWorldBackground/)
-  assert.match(installXiaoheiScene.toString(), /requestIdleCallback/)
+  assert.doesNotMatch(installXiaoheiScene.toString(), /requestIdleCallback|setTimeout/)
   assert.doesNotMatch(sceneRuntimeSource, /Heixiu|Mascot|pointermove|requestAnimationFrame/)
   assert.equal(typeof installXiaoheiScene(undefined), 'function')
 })

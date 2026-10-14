@@ -36,12 +36,14 @@ ${thinkingOnlyRow} > [data-slot='conversation.chat.node'] > div:first-child {
 
 /* Message portraits are deliberately static and only identify the speaker. */
 #root [data-chat-flow-kind='assistant-step'],
+#root div[data-submission-echo],
 #root [data-chat-flow-kind='user'] {
   position: relative;
   overflow: visible;
 }
 
 #root [data-chat-flow-kind='assistant-step']::before,
+#root div[data-submission-echo]::after,
 #root [data-chat-flow-kind='user']::after {
   position: absolute;
   inset-block-start: 2px;
@@ -72,6 +74,7 @@ ${thinkingOnlyRow} > [data-slot='conversation.chat.node'] > div:first-child {
   background-size: 76px auto, auto;
 }
 
+#root div[data-submission-echo]::after,
 #root [data-chat-flow-kind='user']::after {
   content: '我';
   inset-inline-end: -50px;
@@ -125,8 +128,10 @@ ${thinkingOnlyRow} > [data-slot='conversation.chat.node'] > div:first-child {
   > div:first-child > div:first-child > div:last-child:not([data-slot]):not(:has(img)),
 #root [data-chat-flow-kind='user'] [data-time-hover-root]
   > div:first-child > div:last-child:not(:has(img)),
-#root [data-pending-steering]
-  > div:first-child > div:last-child:not(:has(img)) {
+#root :is(div[data-submission-echo], [data-pending-steering])
+  > div:first-child > div:first-child:not([data-message-attachments]),
+#root :is(div[data-submission-echo], [data-pending-steering])
+  > div:first-child > [data-message-attachments] + div {
   box-sizing: border-box;
   padding: 14px 28px !important;
   color: var(--xiaohei-conversation-text) !important;
@@ -231,6 +236,7 @@ html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='assistant-step
 }
 
 html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='assistant-step']::before,
+html[data-xiaohei-appearance='light'] #root div[data-submission-echo]::after,
 html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after {
   border-color: rgb(42 48 52 / 11%);
   color: rgb(48 54 58 / 72%);
@@ -240,6 +246,7 @@ html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after 
     0 6px 16px rgb(34 40 43 / 9%);
 }
 
+html[data-xiaohei-appearance='light'] #root div[data-submission-echo]::after,
 html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after {
   background-image:
     linear-gradient(145deg, rgb(255 255 255 / 74%), transparent 58%),
@@ -252,12 +259,14 @@ html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after 
     padding-inline-start: 38px;
   }
 
+  #root div[data-submission-echo],
   #root [data-chat-flow-kind='user'] {
     box-sizing: border-box;
     padding-inline-end: 38px;
   }
 
   #root [data-chat-flow-kind='assistant-step']::before,
+  #root div[data-submission-echo]::after,
   #root [data-chat-flow-kind='user']::after {
     inline-size: 32px;
     block-size: 36px;
@@ -269,6 +278,7 @@ html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after 
     background-size: 62px auto, auto;
   }
 
+  #root div[data-submission-echo]::after,
   #root [data-chat-flow-kind='user']::after {
     inset-inline-end: 0;
     block-size: 32px;
@@ -287,8 +297,10 @@ html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after 
     > div:first-child > div:first-child > div:last-child:not([data-slot]):not(:has(img)),
   #root [data-chat-flow-kind='user'] [data-time-hover-root]
     > div:first-child > div:last-child:not(:has(img)),
-  #root [data-pending-steering]
-    > div:first-child > div:last-child:not(:has(img)) {
+  #root :is(div[data-submission-echo], [data-pending-steering])
+    > div:first-child > div:first-child:not([data-message-attachments]),
+  #root :is(div[data-submission-echo], [data-pending-steering])
+    > div:first-child > [data-message-attachments] + div {
     padding-inline: 20px !important;
   }
 
@@ -304,6 +316,7 @@ html[data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user']::after 
 
 @media (prefers-contrast: more), (forced-colors: active) {
   #root [data-chat-flow-kind='assistant-step']::before,
+  #root div[data-submission-echo]::after,
   #root [data-chat-flow-kind='user']::after {
     display: none;
   }

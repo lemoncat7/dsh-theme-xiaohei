@@ -2,12 +2,10 @@ import {
   XIAOHEI_WALLPAPER_LIGHT,
   XIAOHEI_WALLPAPER_DARK,
 } from '../generated-backgrounds.js'
-import { XIAOHEI_WALLPAPER_CHARACTER_CSS } from './wallpaper-character-styles.js'
+import { XIAOHEI_SCENE_LAYER_ID, XIAOHEI_SCENE_WORLD_CLASS } from './ids.js'
+export { XIAOHEI_SCENE_STYLE_ID, XIAOHEI_SCENE_LAYER_ID, XIAOHEI_SCENE_WORLD_CLASS } from './ids.js'
 
 /** Stable scene and material ids, shared with lifecycle and browser checks. */
-export const XIAOHEI_SCENE_STYLE_ID = 'dsh-theme-xiaohei/scene-style'
-export const XIAOHEI_SCENE_LAYER_ID = 'dsh-theme-xiaohei/scene-layer'
-export const XIAOHEI_SCENE_WORLD_CLASS = 'xiaohei-scene__world'
 
 /** Static paired wallpapers; no per-frame effects or session-state dependency. */
 export const XIAOHEI_SCENE_CSS = `
@@ -61,10 +59,6 @@ html[data-xiaohei-appearance='light'] [id='${XIAOHEI_SCENE_LAYER_ID}'] {
 html[data-xiaohei-appearance='light'] .${XIAOHEI_SCENE_WORLD_CLASS} {
   --xiaohei-wallpaper-wide: url("${XIAOHEI_WALLPAPER_LIGHT}");
 }
-
-/* The atmosphere contains no character; responsive poses are placed separately
- * against measured free space, never by cropping a portrait into messages. */
-${XIAOHEI_WALLPAPER_CHARACTER_CSS}
 
 .${XIAOHEI_SCENE_WORLD_CLASS} > * {
   width: 100%;

@@ -1,15 +1,18 @@
 import { subscribeXiaoheiHostDom } from '../host-dom.js'
 import { XIAOHEI_HOST_SELECTORS } from '../host-contract.js'
-import { XIAOHEI_SCENE_LAYER_ID } from './styles.js'
+import { XIAOHEI_SCENE_LAYER_ID } from './ids.js'
 import { resolveCharacterPlacement, type CharacterPlacement } from './character-layout.js'
 import { createCharacterIdleController } from './character-idle.js'
-import { CHARACTER_POSES, CHARACTER_POSE_NAMES, type CharacterPose } from './character-poses.js'
+import { characterAssets, CHARACTER_POSE_NAMES, type CharacterPose, type CharacterAppearance } from './character-assets.js'
 import { createCharacterMotion } from './character-motion.js'
 
 export const XIAOHEI_WALLPAPER_CHARACTER_ID = 'dsh-theme-xiaohei/wallpaper-character'
 
 /** Places the layered character only when the host geometry is settled. */
-export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): () => void {
+export function installXiaoheiWallpaperCharacter(
+  doc: Document | undefined = typeof document === 'undefined' ? undefined : document,
+  loadPose: (pose: CharacterPose, appearance: CharacterAppearance) => Promise<string> = characterAssets.pose,
+): () => void {
   const win = doc?.defaultView
   if (!doc || !win) return () => {}
   let disposed = false
@@ -19,9 +22,9 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
   let targets: (HTMLElement | null)[] = []
   let dirty = true
   let placement: CharacterPlacement = { pose: 'hidden', left: 0, top: 0, width: 0, height: 0 }
-  const ready = new Set<CharacterPose>()
-  const loading = new Set<CharacterPose>()
-  const failed = new Set<CharacterPose>()
+  const ready = new Map<string, string>()
+  const loading = new Set<string>()
+  const failed = new Set<string>()
   const motion = typeof win.matchMedia === 'function' ? createCharacterMotion(doc) : undefined
   const idle = createCharacterIdleController({ now: () => win.performance.now(),
     setTimeout: (fn, delay) => win.setTimeout(fn, delay), clearTimeout: handle => win.clearTimeout(handle),
@@ -106,29 +109,34 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
     idle.setPaused(doc!.hidden || placement.pose !== 'seated')
     const pose = doc!.hidden ? 'hidden' : placement.pose === 'seated' ? idle.pose : placement.pose
     if (pose === 'hidden') { if (host.dataset.pose !== 'hidden') host.dataset.pose = 'hidden'; motion?.setPose(undefined, 'hidden'); return }
-    if (!ready.has(pose)) {
+    const appearance = doc!.documentElement.dataset.xiaoheiAppearance === 'light' ? 'light' : 'dark'
+    const key = `${pose}-${appearance}`
+    if (!ready.has(key)) {
       motion?.setPose(undefined, 'hidden')
       // Do not retain the old location across a layout change: it could now
       // overlap a message. Idle changes keep the already decoded seated pose.
       if (placement.pose !== 'seated' || !['seated', 'chin', 'doze'].includes(host.dataset.pose ?? '')) host.dataset.pose = 'hidden'
-      if (!loading.has(pose) && !failed.has(pose)) {
-        loading.add(pose)
-        // Decode only a requested pose, in both appearances so changing theme
-        // cannot produce a blank frame. No image fetch or perpetual RAF loop.
-        void Promise.all(Object.values(CHARACTER_POSES[pose]).map(src => {
+      if (!loading.has(key) && !failed.has(key)) {
+        loading.add(key)
+        // Fetch only the requested pose and palette, not the complete catalog.
+        void loadPose(pose, appearance).then(async src => {
+          if (disposed) return
           const image = new win!.Image()
           image.src = src
-          return image.decode()
-        })).then(() => {
+          await image.decode()
           if (disposed) return
-          loading.delete(pose); ready.add(pose); schedule()
-        }, () => { loading.delete(pose); failed.add(pose) })
+          loading.delete(key); ready.set(key, src); schedule()
+        }).catch(() => { loading.delete(key); failed.add(key) })
       }
       return
     }
     // Each pose keeps its own coordinates during the short crossfade. No
     // travelling from the right edge through the conversation to the sidebar.
     const part = host.querySelector<HTMLElement>(`.xiaohei-wallpaper-character__${pose}`)!
+    if (part.dataset.appearance !== appearance) {
+      part.style.setProperty(`--xiaohei-${pose}-art`, `url("${ready.get(key)}")`)
+      part.dataset.appearance = appearance
+    }
     for (const key of ['left', 'top', 'width', 'height'] as const) {
       const value = `${Math.round(placement[key] * 100) / 100}px`
       if (part.style[key] !== value) part.style[key] = value
@@ -148,6 +156,8 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
     settled = win!.setTimeout(() => { settled = undefined; dirty = true; schedule() }, 240)
   }
   const unsubscribe = subscribeXiaoheiHostDom(doc, schedule)
+  const appearanceObserver = new win.MutationObserver(schedule)
+  appearanceObserver.observe(doc.documentElement, { attributes: true, attributeFilter: ['data-xiaohei-appearance'] })
   const resized = (): void => { dirty = true; schedule(); scheduleSettled() }
   win.addEventListener('resize', resized, { passive: true })
   const activity = () => idle.activity()
@@ -162,6 +172,7 @@ export function installXiaoheiWallpaperCharacter(doc: Document | undefined = typ
     if (settled !== undefined) win.clearTimeout(settled)
     unsubscribe()
     observer?.disconnect()
+    appearanceObserver.disconnect()
     idle.dispose()
     motion?.dispose()
     for (const event of events) doc.removeEventListener(event, activity, true)

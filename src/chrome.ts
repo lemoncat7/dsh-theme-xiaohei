@@ -4,6 +4,7 @@ import { XIAOHEI_COMPOSER_SEND_HEIXIU_CSS } from './chrome/composer-send-heixiu.
 import { XIAOHEI_CONTROL_PRIMITIVES_CSS } from './chrome/controls.js'
 import { XIAOHEI_CONVERSATION_CSS } from './chrome/conversation.js'
 import { XIAOHEI_CONVERSATION_MESSAGES_CSS } from './chrome/conversation-messages.js'
+import { XIAOHEI_CONVERSATION_SUBMISSIONS_CSS } from './chrome/conversation-submissions.js'
 import { XIAOHEI_FRAME_SYSTEM_CSS } from './chrome/frames.js'
 import { XIAOHEI_IDENTITY_CSS } from './chrome/identity.js'
 import { XIAOHEI_OVERLAY_CSS } from './chrome/overlays.js'
@@ -27,6 +28,7 @@ export const XIAOHEI_CHROME_CSS = [
   XIAOHEI_WORKSPACE_CSS,
   XIAOHEI_CONVERSATION_CSS,
   XIAOHEI_CONVERSATION_MESSAGES_CSS,
+  XIAOHEI_CONVERSATION_SUBMISSIONS_CSS,
   XIAOHEI_COMPOSER_CSS,
   XIAOHEI_COMPOSER_SEND_HEIXIU_CSS,
   XIAOHEI_OVERLAY_CSS,

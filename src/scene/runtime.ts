@@ -24,7 +24,7 @@ const PARTS = [
 export const XIAOHEI_SCENE_PART_COUNT = PARTS.length
 
 /**
- * Install the static wallpaper after plugin boot becomes idle. Appearance is
+ * Install the small static wallpaper immediately with the theme. Appearance is
  * CSS-driven; no image load handlers or per-frame character animation.
  */
 export function installXiaoheiScene(
@@ -79,21 +79,10 @@ export function installXiaoheiScene(
     }
   }
 
-  const win = doc.defaultView
-  let cancelSchedule = (): void => {}
-  if (win !== null && typeof win.requestIdleCallback === 'function') {
-    const idleId = win.requestIdleCallback(mount, { timeout: 800 })
-    cancelSchedule = () => win.cancelIdleCallback(idleId)
-  } else if (win !== null) {
-    const timeoutId = win.setTimeout(mount, 0)
-    cancelSchedule = () => win.clearTimeout(timeoutId)
-  } else {
-    mount()
-  }
+  mount()
 
   return () => {
     disposed = true
-    cancelSchedule()
     removeMountedScene()
   }
 }

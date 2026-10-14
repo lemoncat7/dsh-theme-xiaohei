@@ -5,10 +5,11 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import { bindXiaoheiAppearance } from './appearance.js'
 import { installXiaoheiChrome } from './chrome.js'
 import { installXiaoheiComposerSendHeixiu } from './composer-send-heixiu.js'
+import { XiaoheiDraftPreview } from './composer-draft-preview.js'
 import { installXiaoheiPluginLoading } from './loading-heixiu.js'
-import { installXiaoheiScene } from './scene.js'
+import { installDeferredDecorations } from './deferred-decorations.js'
+import { installXiaoheiScene } from './scene/runtime.js'
 import { installXiaoheiSidebarGlass } from './sidebar-glass.js'
-import { installXiaoheiWallpaperCharacter } from './scene/wallpaper-character.js'
 import { installComposerBloub } from './bloub-heixiu/runtime.js'
 import { bindHeixiuSessions, createHeixiuSignals } from './bloub-heixiu/signals.js'
 import { XIAOHEI_THEME_TOKEN_OVERRIDES } from './theme.js'
@@ -21,6 +22,11 @@ export const inject: string[] = []
 export function apply(ctx: ClientContext): void {
   ctx.effect(installXiaoheiPluginLoading, 'xiaohei-theme: replace plugin spinner with hopping Heixiu')
   ctx.inject(['slots'], readyCtx => {
+    const disposeDraftPreview = readyCtx.slots.inject('conversation.input.dock', () => readyCtx.slots.register({
+      name: 'conversation.input.dock',
+      id: 'xiaohei-draft-preview',
+      order: 100,
+    }, XiaoheiDraftPreview))
     const disposeSidebarMark = readyCtx.slots.inject('sidebar.brand.mark', () => readyCtx.slots.register({
       name: 'sidebar.brand.mark',
       priority: -20,
@@ -37,6 +43,7 @@ export function apply(ctx: ClientContext): void {
       }, XiaoheiMetallicBrandMark),
     )
     return () => {
+      disposeDraftPreview()
       disposeHeroMark()
       disposeSidebarName()
       disposeSidebarMark()
@@ -53,10 +60,10 @@ function installXiaoheiTheme(ctx: ClientContext): void {
 
   ctx.effect(() => bindXiaoheiAppearance(ctx), 'xiaohei-theme: follow resolved appearance')
   ctx.effect(installXiaoheiChrome, 'xiaohei-theme: install spirit control skin')
+  ctx.effect(installXiaoheiScene, 'xiaohei-theme: paint wallpaper immediately')
   ctx.effect(installXiaoheiComposerSendHeixiu, 'xiaohei-theme: turn the native send action into blinking Heixiu')
-  ctx.effect(installXiaoheiScene, 'xiaohei-theme: install paired atmosphere')
+  ctx.effect(installDeferredDecorations, 'xiaohei-theme: load decorations after first paint')
   ctx.effect(installXiaoheiSidebarGlass, 'xiaohei-theme: install isolated sidebar glass')
-  ctx.effect(installXiaoheiWallpaperCharacter, 'xiaohei-theme: place responsive character poses')
   const heixiuSignals = createHeixiuSignals()
   ctx.effect(() => installComposerBloub(undefined, heixiuSignals), 'xiaohei-theme: mount bloub Heixiu beside composer')
   ctx.inject(['sessions'], ready => bindHeixiuSessions(ready.sessions, heixiuSignals))
