@@ -71,6 +71,7 @@ for (const [pose, modes] of Object.entries(catalog)) for (const [mode, rig] of O
 // revisions from client.js and serves these immutable resources on every carrier.
 for (const [entry, output, chunk] of [
   ['src/decorations-entry.ts', 'lib/client.decorations.js', 'client.decorations.js'],
+  ['src/companion-entry.ts', 'lib/client.companion.js', 'client.companion.js'],
   ['src/client-entry.ts', 'lib/client.js', undefined],
 ]) await build({
   ...shared,

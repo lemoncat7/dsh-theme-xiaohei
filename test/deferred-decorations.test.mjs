@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 import { readFileSync, statSync } from 'node:fs'
 import vm from 'node:vm'
 import { installDeferredDecorations } from '../lib/deferred-decorations.js'
+import { installDeferredCompanion } from '../lib/deferred-companion.js'
+import { createHeixiuSignals } from '../lib/bloub-heixiu/signals.js'
 
 function fixture() {
   const timers = new Map(), idles = new Map()
@@ -51,4 +53,31 @@ test('native chunk registration is self-contained and startup excludes large sce
   const exports = registration.factory(() => { throw Error('chunk must be self-contained') })
   assert.equal(typeof exports.installDecorations, 'function')
   assert.ok(statSync(new URL('../lib/client.decorations.js', import.meta.url)).mtimeMs <= statSync(new URL('../lib/client.js', import.meta.url)).mtimeMs)
+})
+test('companion is deferred, receives latest signals, and ignores results after disposal', async () => {
+  const f = fixture(), signals = createHeixiuSignals(); let loads = 0, mounted, cleaned = 0
+  const stop = installDeferredCompanion(signals, f.doc, async () => {
+    loads++; return { installComposerBloub(doc, input) { mounted = input.getSnapshot(); return () => cleaned++ } }
+  })
+  assert.equal(loads, 0); await f.ready(); assert.equal(loads, 0)
+  signals.publish({ sessionId: 'latest', running: true, notice: null })
+  await f.flush(); await Promise.resolve(); await Promise.resolve()
+  assert.equal(loads, 1); assert.equal(mounted.sessionId, 'latest'); stop(); assert.equal(cleaned, 1)
+  const g = fixture(); let resolve, late = 0
+  const cancel = installDeferredCompanion(signals, g.doc, () => new Promise(r => { resolve = r }))
+  await g.ready(); await g.flush(); cancel()
+  resolve({ installComposerBloub() { late++; return () => {} } })
+  await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); assert.equal(late, 0)
+})
+test('companion uses a native self-contained chunk, not the startup bundle', () => {
+  const entry = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
+  assert.match(entry, /\.async\(["']\.\/client\.companion\.js/)
+  assert.doesNotMatch(entry, /data-heixiu-body/)
+  let registration
+  vm.runInNewContext(readFileSync(new URL('../lib/client.companion.js', import.meta.url), 'utf8'), {
+    window: { __ModuleLoader__: { load(value) { registration = value } } },
+  })
+  assert.equal(registration.chunk, 'client.companion.js')
+  const exported = registration.factory(() => { throw Error('unexpected shared dependency') })
+  assert.equal(typeof exported.installComposerBloub, 'function')
 })

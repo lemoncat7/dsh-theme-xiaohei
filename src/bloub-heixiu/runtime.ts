@@ -4,7 +4,7 @@ import { STATE_BY_ID } from '../vendor/bloub/states.js'
 import { subscribeXiaoheiHostDom } from '../host-dom.js'
 import { XIAOHEI_HOST_SELECTORS } from '../host-contract.js'
 import { createHeixiuRenderer } from './renderer.js'
-import { resolveHeixiuDock, resolveHeixiuWelcome } from './layout.js'
+import { resolveHeixiuDock, resolveHeixiuWelcome, resolveHeixiuBox } from './layout.js'
 import { resolveHeixiuFollow, resolveHeixiuGaze } from './follow.js'
 import { createHeixiuFlight, type HeixiuBox } from './flight.js'
 import { heixiuAmbientDelay, heixiuAmbientIndex } from './ambient.js'
@@ -138,6 +138,7 @@ export function installComposerBloub(doc: Document | undefined = typeof document
     const next = doc!.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.composerCard)
     const nextSidebar = doc!.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.sidebarShell)
     const nextHero = doc!.querySelector<HTMLElement>(XIAOHEI_HOST_SELECTORS.composerHeroMark)
+    let mounted = false
     if (composer !== next || sidebar !== nextSidebar || hero !== nextHero) {
       composer?.removeAttribute('data-heixiu-dock'); ro?.disconnect()
       heroRow?.removeAttribute('data-heixiu-hero-row')
@@ -148,37 +149,47 @@ export function installComposerBloub(doc: Document | undefined = typeof document
       if (sidebar) ro?.observe(sidebar)
       if (hero) ro?.observe(hero)
       if (heroRow) ro?.observe(heroRow)
+      mounted = true
     }
     if (!composer) { button.remove(); visible = false; stop(); return }
     if (button.parentElement !== composer || composer.lastElementChild === button) {
       // The native trailing toolbar must stay last: DSH and the existing send
       // skin use its structural position. The overlay must not replace it.
       const toolbar = [...composer.children].reverse().find(child => child !== button)
+      button.hidden = true
       composer.insertBefore(button, toolbar ?? null)
       io?.observe(button); dirty = true
+      mounted = true
     }
+    // Let the host lay out the new dock before reading geometry. Do not force
+    // a synchronous layout of the entire newly mounted conversation here.
+    if (mounted) { scheduleLayout(); return }
     if (!dirty) return
     dirty = false
     const wasFlying = flight.active
     const viewportChanged = viewportWidth !== win!.innerWidth || viewportHeight !== win!.innerHeight
     const origin = flight.capture(bounds)
-    follow(0, 0)
     const rect = composer.getBoundingClientRect()
+    const border = { left: composer.clientLeft || 0, top: composer.clientTop || 0 }
     const sidebarRight = sidebar?.getBoundingClientRect().right ?? 0
     const dock = resolveHeixiuDock(rect.left, sidebarRight, win!.innerWidth)
     const heroRect = hero?.getBoundingClientRect()
     const welcome = heroRect && resolveHeixiuWelcome(heroRect, rect, sidebarRight, win!.innerWidth)
+    const target = resolveHeixiuBox(rect, border, dock, welcome || undefined)
+    // All geometry reads are complete. Everything below only writes.
+    follow(0, 0)
     if (welcome) {
-      button.style.setProperty('--heixiu-welcome-left', `${welcome.left}px`)
-      button.style.setProperty('--heixiu-welcome-top', `${welcome.top}px`)
-      button.style.setProperty('--heixiu-welcome-size', `${welcome.size}px`)
+      for (const [key, value] of Object.entries(welcome)) {
+        const property = `--heixiu-welcome-${key}`, css = `${value}px`
+        if (button.style.getPropertyValue(property) !== css) button.style.setProperty(property, css)
+      }
     }
     const mode = welcome ? 'welcome' : dock.mode
     const fly = !viewportChanged && (wasFlying || !!dockMode && dockMode !== mode && (dockMode === 'welcome' || mode === 'welcome'))
     dockMode = mode; viewportWidth = win!.innerWidth; viewportHeight = win!.innerHeight
     if (composer.dataset.heixiuDock !== mode) composer.dataset.heixiuDock = mode
-    // One read after layout configuration; never inside the animation loop.
-    bounds = flight.target(button.getBoundingClientRect())
+    bounds = target
+    button.hidden = false
     visible = rect.width > 0 && rect.height > 0 && bounds.top + bounds.height > 0 && bounds.top < win!.innerHeight
     syncPlayback()
     if (allowed() && fly) flight.move(origin, bounds, motion.matches)
@@ -264,7 +275,21 @@ export function installComposerBloub(doc: Document | undefined = typeof document
     if (!changedSession && next.notice) playState(next.notice, 'session')
     else if (next.running && (!actionUntil || button.dataset.actionSource !== 'session')) playState('thinking', 'session', true)
   }) ?? (() => {})
-  const unsubscribe = subscribeXiaoheiHostDom(doc, scheduleLayout)
+  const unsubscribe = subscribeXiaoheiHostDom(doc, records => {
+    // Streamed paragraphs and our own SVG effects do not replace host slots.
+    // Parent removals still reach us, so session/composer replacement is safe.
+    if (records.length && records.every(record => {
+      const target = record.target.nodeType === 1 ? record.target as Element : record.target.parentElement
+      return target?.closest('[data-chat-flow], .xiaohei-bloub')
+    })) return
+    scheduleLayout()
+  })
+  const scrolled = (event: Event) => {
+    const target = event.target
+    // Captured scrolls from history/code blocks cannot move a fixed composer.
+    if (target === doc || target === win || target instanceof win.Element &&
+      (target.contains(composer) || target.contains(sidebar))) resized()
+  }
   doc.addEventListener('pointermove', move, { passive: true })
   doc.addEventListener('pointerleave', leave)
   doc.addEventListener('visibilitychange', syncPlayback)
@@ -273,7 +298,7 @@ export function installComposerBloub(doc: Document | undefined = typeof document
   button.addEventListener('dblclick', doubleClick)
   button.addEventListener('keydown', keydown)
   win.addEventListener('resize', resized, { passive: true })
-  win.addEventListener('scroll', resized, { passive: true, capture: true })
+  win.addEventListener('scroll', scrolled, { passive: true, capture: true })
   motion.addEventListener('change', syncPlayback)
   scheduleLayout()
   return () => {
@@ -284,7 +309,7 @@ export function installComposerBloub(doc: Document | undefined = typeof document
     doc.removeEventListener('input', input)
     button.removeEventListener('dblclick', doubleClick)
     button.removeEventListener('keydown', keydown)
-    win.removeEventListener('resize', resized); win.removeEventListener('scroll', resized, true)
+    win.removeEventListener('resize', resized); win.removeEventListener('scroll', scrolled, true)
     motion.removeEventListener('change', syncPlayback)
     heroRow?.removeAttribute('data-heixiu-hero-row')
     composer?.removeAttribute('data-heixiu-dock'); button.remove(); style.remove()

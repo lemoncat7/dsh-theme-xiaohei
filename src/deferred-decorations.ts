@@ -7,6 +7,7 @@ declare const require: { async(path: string): Promise<typeof Decorations> }
 export function installDeferredDecorations(
   doc: Document | undefined = typeof document === 'undefined' ? undefined : document,
   load: () => Promise<typeof Decorations> = () => require.async('./client.decorations.js'),
+  readySelector = '[data-slot="sidebar"]',
 ): () => void {
   const win = doc?.defaultView
   if (!doc || !win) return () => {}
@@ -26,7 +27,7 @@ export function installDeferredDecorations(
     })
   }
   const check = () => {
-    if (disposed || started || !doc.querySelector('[data-slot="sidebar"]')) return
+    if (disposed || started || !doc.querySelector(readySelector)) return
     started = true
     unsubscribe()
     // Let the committed app paint before starting the independent resource request.

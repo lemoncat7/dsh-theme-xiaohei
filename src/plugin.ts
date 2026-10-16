@@ -10,7 +10,7 @@ import { installXiaoheiPluginLoading } from './loading-heixiu.js'
 import { installDeferredDecorations } from './deferred-decorations.js'
 import { installXiaoheiScene } from './scene/runtime.js'
 import { installXiaoheiSidebarGlass } from './sidebar-glass.js'
-import { installComposerBloub } from './bloub-heixiu/runtime.js'
+import { installDeferredCompanion } from './deferred-companion.js'
 import { bindHeixiuSessions, createHeixiuSignals } from './bloub-heixiu/signals.js'
 import { XIAOHEI_THEME_TOKEN_OVERRIDES } from './theme.js'
 import { XiaoheiBrandName, XiaoheiMetallicBrandMark } from './metallic-brand-mark.js'
@@ -65,6 +65,6 @@ function installXiaoheiTheme(ctx: ClientContext): void {
   ctx.effect(installDeferredDecorations, 'xiaohei-theme: load decorations after first paint')
   ctx.effect(installXiaoheiSidebarGlass, 'xiaohei-theme: install isolated sidebar glass')
   const heixiuSignals = createHeixiuSignals()
-  ctx.effect(() => installComposerBloub(undefined, heixiuSignals), 'xiaohei-theme: mount bloub Heixiu beside composer')
+  ctx.effect(() => installDeferredCompanion(heixiuSignals), 'xiaohei-theme: mount Heixiu after conversation paint')
   ctx.inject(['sessions'], ready => bindHeixiuSessions(ready.sessions, heixiuSignals))
 }

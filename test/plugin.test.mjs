@@ -543,7 +543,7 @@ test('shades DSH native palettes without forcing a theme preference', () => {
     'xiaohei-theme: turn the native send action into blinking Heixiu',
     'xiaohei-theme: load decorations after first paint',
     'xiaohei-theme: install isolated sidebar glass',
-    'xiaohei-theme: mount bloub Heixiu beside composer',
+    'xiaohei-theme: mount Heixiu after conversation paint',
     ['sessions'],
   ])
   assert.equal(calls.some(call => call[0] === 'setTheme' || call[0] === 'register'), false)

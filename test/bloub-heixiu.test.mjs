@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import { BotEngine } from '../lib/vendor/bloub/engine.js'
 import { liveliness } from '../lib/vendor/bloub/face.js'
 import { createHeixiuRenderer, heixiuEyeRadii, heixiuEyeSeparation } from '../lib/bloub-heixiu/renderer.js'
-import { resolveHeixiuDock, resolveHeixiuWelcome } from '../lib/bloub-heixiu/layout.js'
+import { resolveHeixiuDock, resolveHeixiuWelcome, resolveHeixiuBox } from '../lib/bloub-heixiu/layout.js'
 import { heixiuAmbientDelay, heixiuAmbientIndex } from '../lib/bloub-heixiu/ambient.js'
 import { createHeixiuFlight } from '../lib/bloub-heixiu/flight.js'
 import { resolveHeixiuFollow, resolveHeixiuGaze } from '../lib/bloub-heixiu/follow.js'
@@ -40,7 +40,7 @@ test('rapid interruptions preserve the visible body and long sessions still blin
 })
 
 function fixture() {
-  let serial = 0, reads = 0, now = 0, mutation, paints = 0
+  let serial = 0, reads = 0, now = 0, mutation, paints = 0, queries = 0
   const frames = new Map(), timers = new Map(), listeners = new Map(), nodes = []
   const deadlines = new Map()
   const listen = (type, fn) => listeners.set(type, fn), unlisten = type => listeners.delete(type)
@@ -68,7 +68,7 @@ function fixture() {
   sidebar.getBoundingClientRect = () => { reads++; return { right: 280 } }
   const doc = { head: element(), body: element(), hidden: false,
     createElement: element, createElementNS: (_, name) => element(name),
-    querySelector: selector => selector.includes('brand-context') ? null : selector.includes('sidebar') ? sidebar : composer,
+    querySelector: selector => { queries++; return selector.includes('brand-context') ? null : selector.includes('sidebar') ? sidebar : composer },
     addEventListener: listen, removeEventListener: unlisten,
     defaultView: { innerWidth: 1920, innerHeight: 900, matchMedia: () => media,
       MutationObserver: class { constructor(fn) { mutation = fn } observe() {} disconnect() {} },
@@ -85,11 +85,11 @@ function fixture() {
     }
     for (const [id, fn] of [...frames]) { frames.delete(id); fn(now) }
   }
-  return { doc, composer, toolbar, input, nodes, frames, timers, listeners, step, mutate: () => mutation(), reads: () => reads, paints: () => paints }
+  return { doc, composer, toolbar, input, nodes, frames, timers, listeners, step, mutate: records => mutation(records), reads: () => reads, paints: () => paints, queries: () => queries }
 }
 test('held animation has a bounded paint rate on high-refresh displays and zero hidden work', () => {
   const f = fixture(), signals = createHeixiuSignals(), dispose = installComposerBloub(f.doc, signals)
-  f.step()
+  f.step(); f.step()
   signals.publish({ sessionId: 'performance', running: true, notice: null })
   const before = f.paints()
   for (let i = 0; i < 1200; i++) f.step(1000 / 120)
@@ -195,7 +195,7 @@ test('special effects allocate once on interaction, render layers, and fully dis
 })
 test('double click cycles original actions, keyboard works, and no timers queue', () => {
   const f = fixture(), dispose = installComposerBloub(f.doc)
-  f.step()
+  f.step(); f.step()
   const bot = f.composer.children[1], event = detail => ({ detail, stopPropagation() {} })
   f.listeners.get('click')(event(1)); assert.equal(bot.dataset.action, 'greet')
   f.step()
@@ -301,7 +301,7 @@ test('official adapter ignores history/reconnect, deduplicates streams and isola
 })
 test('session thinking holds, completion settles, reduced motion and hidden state do not replay notices', () => {
   const f = fixture(), signals = createHeixiuSignals(), dispose = installComposerBloub(f.doc, signals)
-  f.step(); const bot = f.composer.children[1]
+  f.step(); f.step(); const bot = f.composer.children[1]
   signals.publish({ sessionId: 'a', running: true, notice: null })
   assert.equal(bot.dataset.action, 'thinking')
   for (let i = 0; i < 300; i++) f.step()
@@ -328,7 +328,7 @@ test('session thinking holds, completion settles, reduced motion and hidden stat
 })
 test('runtime does not measure on animation/stream updates; pauses and fully disposes', async () => {
   const f = fixture(), dispose = installComposerBloub(f.doc)
-  f.step(); const reads = f.reads()
+  f.step(); f.step(); const reads = f.reads()
   assert.equal(f.composer.lastElementChild, f.toolbar, 'native send toolbar must remain last')
   assert.equal(f.composer.children[0], f.input, 'native input must remain first')
   for (let i = 0; i < 400; i++) f.step()
@@ -350,6 +350,35 @@ test('dock reserves narrow-screen space and install is SSR safe', () => {
   assert.equal(resolveHeixiuDock(200, 55, 390).mode, 'compact')
   installComposerBloub(undefined)()
 })
+test('dock mounting yields before layout and never measures its own written button', () => {
+  const f = fixture(), dispose = installComposerBloub(f.doc)
+  f.step(); assert.equal(f.reads(), 0, 'mount must not force a new conversation layout')
+  const bot = f.composer.children[1]
+  bot.getBoundingClientRect = () => { throw Error('read after write') }
+  f.step(); assert.equal(f.reads(), 2, 'only composer and sidebar read before writes')
+  f.listeners.get('resize')(); f.step()
+  assert.equal(f.reads(), 4)
+  dispose()
+})
+test('stream and own SVG mutations skip queries but host replacement is reconciled', () => {
+  const f = fixture(), dispose = installComposerBloub(f.doc)
+  f.step(); f.step(); const queries = f.queries()
+  for (let i = 0; i < 20; i++) {
+    f.mutate([{ target: { nodeType: 1, closest: () => ({}) } }]); f.step(); f.step()
+  }
+  assert.equal(f.queries(), queries)
+  f.mutate([{ target: { nodeType: 1, closest: () => null } }]); f.step(); f.step()
+  assert.ok(f.queries() > queries)
+  dispose()
+})
+test('dock boxes match owned CSS for outside, compact and welcome modes', () => {
+  const rect = { left: 600, top: 700, height: 100 }, border = { left: 1, top: 1 }
+  const wide = resolveHeixiuDock(600, 280, 1920), compact = resolveHeixiuDock(600, 580, 1920)
+  assert.deepEqual(resolveHeixiuBox(rect, border, wide), { left: 487, top: 702, width: 96, height: 96 })
+  assert.deepEqual(resolveHeixiuBox(rect, border, compact), { left: 605, top: 707, width: 52, height: 52 })
+  assert.deepEqual(resolveHeixiuBox(rect, border, wide, { left: 20, top: -100, size: 96 }),
+    { left: 621, top: 601, width: 96, height: 96 })
+})
 test('welcome dock sits above the composer and to the left of the hero', () => {
   const dock = resolveHeixiuWelcome({ left: 680, top: 320, width: 38, height: 38 }, { left: 460, top: 420 }, 280, 1440)
   assert.equal(dock.left + 460 + dock.size, 656)
@@ -365,7 +394,7 @@ test('ambient actions use bounded random intervals and avoid immediate repeats',
       assert.ok(n >= 0 && n < 4); assert.notEqual(n, previous)
     }
   }
-  const f = fixture(), dispose = installComposerBloub(f.doc); f.step()
+  const f = fixture(), dispose = installComposerBloub(f.doc); f.step(); f.step()
   const bot = f.composer.children[1], [id, callback] = [...f.timers][0]
   f.timers.delete(id); callback()
   assert.equal(bot.dataset.actionSource, 'ambient')
@@ -426,11 +455,11 @@ test('pointer attraction has the same direction, a soft radius and small bounded
   assert.deepEqual(resolveHeixiuFollow(NaN, 0, false), { x: 0, y: 0 })
 })
 test('float uses a stationary dock, resets attraction on leave and pauses offscreen', () => {
-  const f = fixture(), dispose = installComposerBloub(f.doc); f.step()
+  const f = fixture(), dispose = installComposerBloub(f.doc); f.step(); f.step()
   const bot = f.composer.children[1], reads = f.reads()
   assert.equal(bot.dataset.floating, 'true')
   assert.equal(bot.children[0].className, 'xiaohei-bloub-drift')
-  for (let i = 0; i < 20; i++) f.listeners.get('pointermove')({ pointerType: 'mouse', clientX: 498, clientY: 728 })
+  for (let i = 0; i < 20; i++) f.listeners.get('pointermove')({ pointerType: 'mouse', clientX: 550, clientY: 728, timeStamp: i * 40 })
   assert.ok(parseFloat(bot.style.getPropertyValue('--heixiu-follow-x')) > 0)
   assert.ok(parseFloat(bot.style.getPropertyValue('--heixiu-follow-y')) < 0)
   assert.equal(f.reads(), reads)

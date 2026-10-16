@@ -1,11 +1,12 @@
 /** A listener that reconciles plugin-owned DOM after the DSH host tree changes. */
-export type XiaoheiHostDomListener = () => void
+export type XiaoheiHostDomListener = (records: readonly MutationRecord[]) => void
 
 interface XiaoheiHostDomHub {
   listeners: Set<XiaoheiHostDomListener>
   observer?: MutationObserver
   queued: boolean
   frame?: number
+  records: MutationRecord[]
 }
 
 const hubs = new WeakMap<Document, XiaoheiHostDomHub>()
@@ -32,22 +33,26 @@ export function subscribeXiaoheiHostDom(
     const nextHub: XiaoheiHostDomHub = {
       listeners,
       queued: false,
+      records: [],
     }
 
     const flush = (): void => {
       nextHub.queued = false
       delete nextHub.frame
       if (hubs.get(doc) !== nextHub) return
+      const records = nextHub.records
+      nextHub.records = []
       for (const subscriber of [...listeners]) {
         try {
-          subscriber()
+          subscriber(records)
         } catch (error) {
           win.setTimeout(() => { throw error }, 0)
         }
       }
     }
 
-    nextHub.observer = new win.MutationObserver(() => {
+    nextHub.observer = new win.MutationObserver((records = []) => {
+      nextHub.records.push(...records)
       if (nextHub.queued) return
       nextHub.queued = true
       // React can commit several batches within one frame. Do not run every
