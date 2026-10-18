@@ -62,15 +62,21 @@ html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-composer-card
  --rift-muted:#24342e; --dsw-alias-label-secondary:#24342e; --dsw-alias-label-tertiary:#24342e;
  box-shadow:0 12px 32px -24px var(--rift-shadow),inset 0 0 0 1px rgb(255 255 255 / 20%) !important;
 }
-html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind='user'] [class*='_actions'] {
- --dsw-alias-label-secondary:#3c4e50; --dsw-alias-label-tertiary:#3c4e50;
- color:#3c4e50; background:rgb(244 250 246 / 80%); border-radius:5px;
+/* Small metadata must not inherit the message's wallpaper text outline. */
+html[data-rift-theme] #root [data-chat-flow-kind] [class*='_actions'] {
+ --dsw-alias-label-secondary:var(--rift-text); --dsw-alias-label-tertiary:var(--rift-text);
+ color:var(--rift-text); background:none; border:0; border-radius:0; box-shadow:none;
+ -webkit-text-stroke:0; text-shadow:0 1px 2px var(--rift-base);
+}
+html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind] [class*='_actions'] {
+ --dsw-alias-label-secondary:#242832; --dsw-alias-label-tertiary:#242832;
+ color:#242832;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind]:not([data-chat-flow-kind='user']):not([data-chat-flow-kind='assistant-step']):not(:has(> [data-slot='conversation.chat.node']:empty)) {
  background:transparent;
 }
 /* Only the content receives a local reading surface; the scroll area stays clear. */
-html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind]:not([data-chat-flow-kind='user']):not([data-chat-flow-kind='assistant-step']) > [data-slot='conversation.chat.node'] > :first-child {
+html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind]:not([data-chat-flow-kind='user']):not([data-chat-flow-kind='assistant-step']):not([data-chat-flow-kind='turn-tail']) > [data-slot='conversation.chat.node'] > :first-child {
  background:rgb(244 250 246 / 68%); border-radius:3px 10px 3px 10px;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind='assistant-step']:not(:has(> [data-slot='conversation.chat.node']:empty)) {
@@ -85,7 +91,7 @@ html[data-rift-theme][data-xiaohei-appearance='light'] :is([data-submission-echo
 }
 /* Fade paint only, never the bubble element: text, links and selection remain
    fully opaque. Remove the outgoing bubble's hard right rim and cast shadow. */
-html[data-rift-theme][data-xiaohei-appearance='light'] #root :is([data-chat-flow-kind='user'],[data-chat-flow-kind='steering'],[data-submission-echo],[data-pending-steering]) [class*='_bubble'],
+html[data-rift-theme][data-xiaohei-appearance='light'] #root :is([data-chat-flow-kind='user'],[data-chat-flow-kind='steering'],[data-submission-echo],[data-pending-steering]) [class*='_bubble']:not([role='tooltip']),
 html[data-rift-theme][data-xiaohei-appearance='light'] .xiaohei-draft-bubble {
  border-color:transparent; border-left-color:var(--rift-rim); box-shadow:none;
 }
@@ -94,6 +100,14 @@ html[data-rift-theme][data-xiaohei-appearance='light'] .xiaohei-draft-bubble {
  -webkit-text-stroke:2px rgb(249 252 249 / 90%); paint-order:stroke fill; text-shadow:none;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind] :is(pre,code,button) { -webkit-text-stroke:0; text-shadow:none; }
+/* Native Tooltip lives inside the message DOM and also names its class
+   "bubble". Clear inherited outlines without changing its positioning. */
+html[data-rift-theme] [role='tooltip'] { -webkit-text-stroke:0; text-shadow:none; }
+/* Message metadata and its hints are plain text, not miniature chat bubbles. */
+html[data-rift-theme] #root [data-chat-flow-kind] [role='tooltip'] {
+ color:var(--rift-text); background:none; border:0; border-radius:0; box-shadow:none;
+ text-shadow:0 1px 2px var(--rift-base);
+}
 /* A fully transparent right edge cannot guarantee contrast over all artwork.
    Honor the explicit increased-contrast preference with the solid fallback. */
 @media(prefers-contrast:more){

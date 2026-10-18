@@ -1,11 +1,16 @@
 /** Source-pixel displacement fields. Broad C1 falloff avoids cut-out seams.
- * Architecture translates as a body inside each plateau; hand/cloth movement
- * fades before the shoulder and head so the character stays connected.
+ * Architecture translates as a body inside each plateau. Only loose cloth
+ * sways; exposed arms/hands are pinned against every displacement field.
  * No particles, extra textures, timers or additional draw calls.
  */
 export const SCENE_MOTION_SHADER=`
 float floatRegion(vec2 p,vec2 center,vec2 radius){
  return 1.-smoothstep(.62,1.,length((p-center)/radius));
+}
+float armPin(vec2 p,vec2 a,vec2 b,float radius){
+ vec2 ab=b-a;
+ float along=clamp(dot(p-a,ab)/dot(ab,ab),0.,1.);
+ return 1.-smoothstep(radius,radius+14.,length(p-a-ab*along));
 }
 vec2 sceneMotion(vec2 uv,float t){
  vec2 p=uv*vec2(1672.,940.);
@@ -21,13 +26,14 @@ vec2 sceneMotion(vec2 uv,float t){
  float satellite=floatRegion(p,vec2(810.,485.),vec2(52.,85.));
  drift+=slab*vec2(sin(t*.57)*4.2,sin(t*.68)*9.0);
  drift+=satellite*vec2(sin(t*.51)*3.0,sin(t*.62)*7.0);
- // Hand translates with the sleeve; motion eases to zero toward the shoulder.
- float hand=floatRegion(p,vec2(1140.,478.),vec2(92.,85.));
- float sleeve=floatRegion(p,vec2(1220.,540.),vec2(85.,95.));
- drift+=hand*vec2(sin(t*.78)*3.0,sin(t*.72)*4.8);
+ // Only the hanging lower cuff moves. Its upper attachment stays fixed.
+ float sleeve=floatRegion(p,vec2(1210.,578.),vec2(65.,40.))*smoothstep(548.,572.,p.y);
  drift+=sleeve*vec2(sin(t*.78)*2.4,sin(t*.72)*4.0);
  float hem=floatRegion(p,vec2(1265.,696.),vec2(190.,97.));
  drift+=hem*vec2(sin(t*.92+p.y*.012)*8.5,sin(t*.76)*3.8);
+ // Also block overlapping scenery/hem fields from pulling either arm.
+ float arms=max(armPin(p,vec2(1118.,480.),vec2(1220.,508.),54.),armPin(p,vec2(1448.,632.),vec2(1490.,708.),32.));
+ drift*=1.-arms;
  return uv+drift/vec2(1672.,940.);
 }
 `

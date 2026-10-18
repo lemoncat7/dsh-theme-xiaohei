@@ -13,7 +13,7 @@ test('eye tracking samples the original face continuously, never an extracted ir
 })
 test('scenery motion is continuous, source-scaled and confined to existing art',()=>{
  assert.match(SCENE_MOTION_SHADER,/1\.-smoothstep\(\.62,1\./)
- for(const region of ['farLeft','farRight','nearBase','slab','satellite','hand','sleeve','hem'])assert.match(SCENE_MOTION_SHADER,new RegExp('float '+region+'='))
+ for(const region of ['farLeft','farRight','nearBase','slab','satellite','sleeve','hem'])assert.match(SCENE_MOTION_SHADER,new RegExp('float '+region+'='))
  assert.match(SCENE_MOTION_SHADER,/return uv\+drift\/vec2\(1672\.,940\.\)/)
  assert.doesNotMatch(SCENE_MOTION_SHADER,/fract\(|mod\(|texture2D|sampler2D/)
 })
@@ -37,7 +37,9 @@ test('daylight bubbles fade the paint, not the text, with an increased-contrast 
 })
 test('float and sway are visibly stronger without changing the eye rig',()=>{
  assert.match(SCENE_MOTION_SHADER,/sin\(t\*\.52\)\*12\.0/)
- assert.match(SCENE_MOTION_SHADER,/sin\(t\*\.72\)\*4\.8/)
+ assert.doesNotMatch(SCENE_MOTION_SHADER,/float hand=|drift\+=hand/)
+ assert.match(SCENE_MOTION_SHADER,/drift\*=1\.-arms/)
+ assert.match(SCENE_MOTION_SHADER,/smoothstep\(548\.,572\.,p.y\)/)
  assert.match(SCENE_MOTION_SHADER,/sin\(t\*\.92\+p.y\*\.012\)\*8\.5/)
  assert.match(CHARACTER_SHADER,/gaze\*\.65\*aperture/)
 })

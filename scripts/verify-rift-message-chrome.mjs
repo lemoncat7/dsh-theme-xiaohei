@@ -1,0 +1,58 @@
+// Native rc.2 DOM contract; no live session or credentials required.
+import assert from 'node:assert/strict'
+import {pathToFileURL} from 'node:url'
+import {RIFT_CSS} from '../lib/rift/styles.js'
+import {RIFT_DARK,RIFT_LIGHT} from '../lib/rift/palette.js'
+const {chromium}=await import(process.env.XIAOHEI_PLAYWRIGHT
+ ? pathToFileURL(process.env.XIAOHEI_PLAYWRIGHT).href : 'playwright-core')
+const browser=await chromium.launch({headless:true,args:['--no-sandbox']})
+const lum=rgb=>rgb.slice(0,3).map(n=>n/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0)
+const rgb=value=>value.match(/[\d.]+/g).map(Number)
+const contrast=(fg,bg)=>{const a=lum(rgb(fg)),b=lum(rgb(bg));return(Math.max(a,b)+.05)/(Math.min(a,b)+.05)}
+try{
+ const page=await browser.newPage()
+ for(const mode of ['light','dark'])for(const width of [390,1440]){
+  await page.setViewportSize({width,height:900})
+  const tokens=mode==='light'?RIFT_LIGHT:RIFT_DARK
+  await page.setContent(`<html data-rift-theme data-xiaohei-appearance="${mode}"><head><style>
+   :root {${Object.entries(tokens).map(([k,v])=>`${k}:${v}`).join(';')};--dsw-static-neutral-bluish-00:#fff}
+   .native_bubble[role=tooltip] {position:fixed;background:var(--dsw-alias-tooltip-bg);color:var(--dsw-static-neutral-bluish-00);border-radius:8px;padding:3px 7px;display:none}
+   .native_actions:hover [role=tooltip],.native_actions:focus-within [role=tooltip] {display:block}
+   .native_timeStart,.native_action {color:var(--dsw-alias-label-tertiary)}
+   ${RIFT_CSS}
+  </style></head><body><div id="root">
+   <div data-chat-flow-kind="user"><div data-slot="conversation.chat.node"><div><div>
+    <div id="message" class="native_bubble">用户消息</div>
+    <div class="native_actions"><span class="native_timeStart">2026/10/18 12:30</span><button class="native_action">复制</button>
+     <span class="native_bubble" role="tooltip"><span>复制</span></span>
+    </div>
+   </div></div></div></div>
+   <div data-chat-flow-kind="turn-tail"><div data-slot="conversation.chat.node"><div id="tail"><div data-slot="conversation.chat.turnTail">
+    <div class="dsh-knowledge-writeback-notice"><div role="status">知识库回写 @lemoncat7/dsh-knowledge 无需收录 <button id="retry">重试</button></div></div>
+   </div></div></div></div>
+   <div data-chat-flow-kind="tool-call"><div data-slot="conversation.chat.node"><div id="tool">工具结果</div></div></div>
+  </div></body></html>`)
+  const sample=selector=>page.locator(selector).evaluate(el=>{
+   const s=getComputedStyle(el);return{color:s.color,bg:s.backgroundColor,image:s.backgroundImage,stroke:s.webkitTextStrokeWidth,border:s.borderWidth,radius:s.borderRadius,shadow:s.boxShadow}
+  })
+  await page.locator('.native_action').hover()
+  await page.getByRole('tooltip').waitFor({state:'visible'})
+  const tooltip=await sample('[role=tooltip]'),time=await sample('.native_timeStart'),actions=await sample('.native_actions'),tail=await sample('#tail')
+  assert.equal(tooltip.stroke,'0px');assert.equal(tooltip.image,'none');assert.equal(tooltip.border,'0px');assert.equal(tooltip.radius,'0px')
+  assert.equal(tooltip.bg,'rgba(0, 0, 0, 0)');assert.equal(tooltip.shadow,'none')
+  assert.ok(contrast(tooltip.color,mode==='light'?'rgb(233,233,230)':'rgb(16,18,24)')>=4.5)
+  assert.equal(time.stroke,'0px')
+  assert.equal(actions.bg,'rgba(0, 0, 0, 0)');assert.equal(actions.shadow,'none')
+  assert.ok(contrast(time.color,mode==='light'?'rgb(233,233,230)':'rgb(16,18,24)')>=4.5)
+  assert.equal(tail.bg,'rgba(0, 0, 0, 0)');assert.equal(tail.border,'0px');assert.equal(tail.shadow,'none')
+  // Loading/unmounted status must not briefly paint an empty bubble.
+  await page.locator('.dsh-knowledge-writeback-notice').evaluate(el=>el.classList.remove('dsh-knowledge-writeback-notice'))
+  assert.equal((await sample('#tail')).bg,'rgba(0, 0, 0, 0)')
+  assert.notEqual((await sample('#tool')).border,'0px')
+  assert.notEqual((await sample('#message')).image,'none')
+  await page.mouse.move(width-1,899);await page.locator('.native_action').focus()
+  await page.getByRole('tooltip').waitFor({state:'visible'})
+  await page.locator('#retry').click()
+ }
+ console.log('PASS: light/dark × mobile/desktop; plain writeback, readable metadata and tooltips, hover/focus and tool cards preserved')
+}finally{await browser.close()}

@@ -97,7 +97,7 @@ html[data-rift-theme] #root [data-composer-card='true'] button { border-radius:4
 html[data-rift-theme] #root [data-composer-card='true'] button[class*='_primary']:not(:disabled) { background:var(--rift-aura) !important; color:var(--rift-base); box-shadow:0 0 20px -6px rgb(var(--rift-aura-rgb) / 70%); }
 /* Conversation: different structures for outgoing messages, responses and investigation. */
 html[data-rift-theme] #root [data-chat-flow-kind='user'] { position:relative; }
-html[data-rift-theme] #root :is([data-chat-flow-kind='user'],[data-chat-flow-kind='steering'],[data-submission-echo],[data-pending-steering]) [class*='_bubble'],
+html[data-rift-theme] #root :is([data-chat-flow-kind='user'],[data-chat-flow-kind='steering'],[data-submission-echo],[data-pending-steering]) [class*='_bubble']:not([role='tooltip']),
 html[data-rift-theme] .xiaohei-draft-bubble {
  border:1px solid var(--rift-rim); border-right:3px solid var(--rift-aura); border-radius:18px 3px 18px 3px;
  background:var(--rift-plate); box-shadow:0 8px 22px -16px #000;
