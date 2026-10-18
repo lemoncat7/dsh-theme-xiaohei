@@ -89,7 +89,7 @@ export function bindXiaoheiSessionState(
   }
 
   const setState = (state: XiaoheiState): void => {
-    root.setAttribute(XIAOHEI_STATE_ATTRIBUTE, state)
+    if (root.getAttribute(XIAOHEI_STATE_ATTRIBUTE) !== state) root.setAttribute(XIAOHEI_STATE_ATTRIBUTE, state)
   }
 
   const updateCurrent = (): void => {

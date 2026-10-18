@@ -20,17 +20,16 @@ test('a failed asset request can be explicitly retried',async()=>{
   await assert.rejects(loader.pose('peek','light'))
   assert.equal(await loader.pose('peek','light'),'ok');assert.equal(attempts,2)
 })
-test('every native pose/rig chunk is self-contained and controller has no raster catalog',()=>{
+test('Rift replaces legacy pose catalog with one self-contained deferred scene chunk',()=>{
   const root=new URL('../lib/',import.meta.url)
-  assert.ok(fs.statSync(new URL('client.decorations.js',root)).size<100000)
-  const files=fs.readdirSync(root).filter(f=>/^client\.(pose|rig)-.*\.js$/.test(f))
-  assert.equal(files.length,18)
+  // Two independently authored, compressed day/night illustrations.
+  assert.ok(fs.statSync(new URL('client.decorations.js',root)).size<500000)
+  const files=['client.decorations.js']
   for(const file of files){
     let module
     vm.runInNewContext(fs.readFileSync(new URL(file,root),'utf8'),{window:{__ModuleLoader__:{load:m=>module=m}}})
     assert.equal(module.chunk,file)
     const value=module.factory(()=>{throw Error('unexpected dependency')})
-    if(file.includes('.pose-'))assert.match(value.image,/^data:image\/webp;base64,/)
-    else assert.ok(Object.values(value.rig.layers).every(l=>l.src.startsWith('data:image/webp;base64,')))
+    assert.equal(typeof value.installDecorations,'function')
   }
 })

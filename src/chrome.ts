@@ -11,6 +11,7 @@ import { XIAOHEI_OVERLAY_CSS } from './chrome/overlays.js'
 import { XIAOHEI_SIDEBAR_CSS } from './chrome/sidebar.js'
 import { XIAOHEI_CHROME_TOKENS_CSS } from './chrome/tokens.js'
 import { XIAOHEI_WORKSPACE_CSS } from './chrome/workspace.js'
+import { SPIRIT_REALM_CSS } from './spirit-realm/styles.js'
 
 /** Stable public style id used for lifecycle cleanup and regression checks. */
 export const XIAOHEI_CHROME_STYLE_ID = 'dsh-theme-xiaohei/chrome-style'
@@ -33,6 +34,7 @@ export const XIAOHEI_CHROME_CSS = [
   XIAOHEI_COMPOSER_SEND_HEIXIU_CSS,
   XIAOHEI_OVERLAY_CSS,
   XIAOHEI_CHROME_ACCESSIBILITY_CSS,
+  SPIRIT_REALM_CSS,
 ].join('\n')
 
 /** Install the control skin and remove it with the plugin lifecycle. */

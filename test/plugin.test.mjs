@@ -12,11 +12,8 @@ import {
   resolveXiaoheiSylvaPointer,
 } from '../lib/scene.js'
 import { apply } from '../lib/plugin.js'
-import {
-  apply as applyHostTheme,
-  injectXiaoheiBootLoader,
-  XIAOHEI_BOOT_LOADER_SCRIPT_ID,
-} from '../lib/index.js'
+import { apply as applyHostTheme, injectRiftBoot } from '../lib/index.js'
+import { injectXiaoheiBootLoader, XIAOHEI_BOOT_LOADER_SCRIPT_ID } from '../lib/boot-loader.js'
 import {
   bindXiaoheiAppearance,
   XIAOHEI_APPEARANCE_ATTRIBUTE,
@@ -33,6 +30,7 @@ import {
   XIAOHEI_CHROME_STYLE_ID,
 } from '../lib/chrome.js'
 import { XIAOHEI_CHROME_ACCESSIBILITY_CSS } from '../lib/chrome/accessibility.js'
+import { SPIRIT_REALM_CSS } from '../lib/spirit-realm/styles.js'
 import { XIAOHEI_COMPOSER_CSS } from '../lib/chrome/composer.js'
 import { XIAOHEI_COMPOSER_AVATAR_CSS } from '../lib/chrome/composer-avatar.js'
 import { XIAOHEI_COMPOSER_SEND_HEIXIU_CSS } from '../lib/chrome/composer-send-heixiu.js'
@@ -454,9 +452,9 @@ test('Host bootstrap decorates the official loader before client plugins run', (
   }
   applyHostTheme(hostCtx)
   assert.deepEqual(calls[0], ['inject', ['webServer']])
-  assert.deepEqual(calls[1], ['effect', 'xiaohei-theme: inject first-frame Heixiu plugin loader'])
+  assert.deepEqual(calls[1], ['effect', 'rift: first-frame wallpaper without scripts or loading observers'])
   assert.equal(calls[2][0], 'transform')
-  assert.equal(calls[2][1], injectXiaoheiBootLoader)
+  assert.equal(calls[2][1], injectRiftBoot)
   assert.equal(calls[3][0], 'tap')
   assert.equal(calls[3][1], dispose)
 })
@@ -508,6 +506,10 @@ test('shades DSH native palettes without forcing a theme preference', () => {
 
   apply(ctx)
 
+  assert.deepEqual(calls.splice(2, 2), [
+    ['slotInject', 'sidebar.footer.action'],
+    ['slotRegister', { name: 'sidebar.footer.action', id: 'xiaohei-spirit-motion', order: 20 }],
+  ])
   assert.deepEqual(calls.splice(2, 2), [
     ['slotInject', 'conversation.input.dock'],
     ['slotRegister', { name: 'conversation.input.dock', id: 'xiaohei-draft-preview', order: 100 }],
@@ -687,6 +689,7 @@ test('control skin composes isolated responsibility layers in a stable order', (
     XIAOHEI_COMPOSER_SEND_HEIXIU_CSS,
     XIAOHEI_OVERLAY_CSS,
     XIAOHEI_CHROME_ACCESSIBILITY_CSS,
+    SPIRIT_REALM_CSS,
   ].join('\n'))
 })
 
@@ -1350,6 +1353,7 @@ test('selected session drives state, completion is transient, and switching neve
   }
   const doc = {
     documentElement: {
+      getAttribute: name => attributes.get(name) ?? null,
       setAttribute: (name, value) => attributes.set(name, value),
       removeAttribute: name => attributes.delete(name),
     },

@@ -69,15 +69,16 @@ test('companion is deferred, receives latest signals, and ignores results after 
   resolve({ installComposerBloub() { late++; return () => {} } })
   await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); assert.equal(late, 0)
 })
-test('companion uses a native self-contained chunk, not the startup bundle', () => {
+test('Rift uses a native scene chunk and does not request the previous companion', () => {
   const entry = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
-  assert.match(entry, /\.async\(["']\.\/client\.companion\.js/)
+  assert.match(entry, /\.async\(["']\.\/client\.decorations\.js/)
+  assert.doesNotMatch(entry, /client\.companion\.js/)
   assert.doesNotMatch(entry, /data-heixiu-body/)
   let registration
-  vm.runInNewContext(readFileSync(new URL('../lib/client.companion.js', import.meta.url), 'utf8'), {
+  vm.runInNewContext(readFileSync(new URL('../lib/client.decorations.js', import.meta.url), 'utf8'), {
     window: { __ModuleLoader__: { load(value) { registration = value } } },
   })
-  assert.equal(registration.chunk, 'client.companion.js')
+  assert.equal(registration.chunk, 'client.decorations.js')
   const exported = registration.factory(() => { throw Error('unexpected shared dependency') })
-  assert.equal(typeof exported.installComposerBloub, 'function')
+  assert.equal(typeof exported.installDecorations, 'function')
 })

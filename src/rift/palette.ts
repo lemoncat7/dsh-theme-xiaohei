@@ -1,0 +1,75 @@
+import type { ThemeTokenOverrides } from '@deepseek-ai/dsh-client-ui-theme/client'
+
+/** Paired graphite / porcelain tokens. No inherited green-glass palette. */
+export const RIFT_COLORS = {
+  dark: { base: '#101218', surface: '#20242D', raised: '#292E38', text: '#ECEBE7', secondary: '#BAC0CA', muted: '#A1A9B7', edge: '#424957', accent: '#D1DBE8', onAccent: '#151A23' },
+  light: { base: '#E9E9E6', surface: '#F6F5F2', raised: '#FFFFFF', text: '#242832', secondary: '#4F5867', muted: '#606B7A', edge: '#C6CAD1', accent: '#46556D', onAccent: '#FFFFFF' },
+} as const
+
+function palette(mode: keyof typeof RIFT_COLORS): Record<string, string> {
+  const p = RIFT_COLORS[mode], dark = mode === 'dark'
+  return {
+    '--dsw-alias-bg-base': 'transparent',
+    '--dsw-alias-bg-layer-1': p.surface,
+    '--dsw-alias-bg-layer-2': p.raised,
+    '--dsw-alias-bg-layer-3': p.raised,
+    '--dsw-alias-bg-overlay': p.surface,
+    '--dsw-alias-bg-module-platform': p.surface,
+    '--dsw-alias-bg-multi-select': p.raised,
+    '--dsw-alias-bg-skeleton': dark ? '#343A45' : '#DBDDE2',
+    ...Object.fromEntries(['inverted2', 'inverted', 'l1', 'l2-darkmode-thin', 'l2', 'l3', 'l4'].map(k => [`--dsw-alias-border-${k}`, p.edge])),
+    '--dsw-alias-brand-primary': p.accent,
+    '--dsw-alias-brand-primary-invert': p.onAccent,
+    '--dsw-alias-brand-primary-new-colorprimary-new-color': p.accent,
+    '--dsw-alias-brand-text': p.accent,
+    '--dsw-alias-button-primary-fill': p.accent,
+    '--dsw-alias-button-primary-hover': dark ? '#EDF2F8' : '#344157',
+    '--dsw-alias-button-primary-dimmed': dark ? '#687586' : '#ABB4C0',
+    '--dsw-alias-button-contrast-fill': p.accent,
+    '--dsw-alias-button-elevated-fill': p.raised,
+    '--dsw-alias-button-floating-fill': p.surface,
+    '--dsw-alias-button-floating-hover': p.raised,
+    '--dsw-alias-button-ghost-active-border': p.edge,
+    '--dsw-alias-button-ghost-active-fill': p.raised,
+    '--dsw-alias-button-ghost-active-hover': p.raised,
+    '--dsw-alias-button-info-fill': p.accent,
+    '--dsw-alias-button-info-hover': dark ? '#EDF2F8' : '#344157',
+    '--dsw-alias-interactive-bg-active': dark ? '#3A4352' : '#DCE0E6',
+    '--dsw-alias-interactive-bg-hover-accent': dark ? '#323A47' : '#E1E4E9',
+    '--dsw-alias-interactive-bg-hover-solid': p.raised,
+    '--dsw-alias-interactive-bg-hover': dark ? 'rgb(209 219 232 / 10%)' : 'rgb(70 85 109 / 8%)',
+    '--dsw-alias-label-primary': p.text,
+    '--dsw-alias-label-primary-bluish': p.text,
+    '--dsw-alias-label-primary-dimmed': p.secondary,
+    '--dsw-alias-label-primary-foreground': p.onAccent,
+    '--dsw-alias-label-primary-inverted': p.base,
+    '--dsw-alias-label-secondary': p.secondary,
+    '--dsw-alias-label-tertiary': p.muted,
+    '--dsw-alias-label-caption': p.muted,
+    '--dsw-alias-label-dimmed': p.muted,
+    ...Object.fromEntries(['citation', 'code-block-banner', 'code-segment-selected', 'inline-code', 'tag'].map(k => [`--dsw-alias-markdown-${k}`, p.raised])),
+    '--dsw-alias-markdown-code-block': dark ? '#141820' : '#ECEEF1',
+    '--dsw-alias-markdown-code-segment-unselected': p.surface,
+    '--dsw-alias-markdown-placeholder': p.surface,
+    '--dsw-alias-scrollbar-bg-l1': dark ? '#48505D' : '#B8BEC8',
+    '--dsw-alias-scrollbar-bg-l2': dark ? '#555E6C' : '#A5ADBA',
+    '--dsw-alias-scrollbar-hover-l1': dark ? '#738092' : '#7C8798',
+    '--dsw-alias-scrollbar-hover-l2': dark ? '#8997AA' : '#697688',
+    '--dsw-alias-toast-bg': p.surface,
+    '--dsw-alias-tooltip-bg': dark ? '#343C49' : '#242B37',
+    '--dsw-specific-bubble': dark ? '#2A303B' : '#E2E5EA',
+    '--dsw-specific-bubble-highlight': dark ? '#3C4554' : '#D5DBE3',
+    '--dsw-specific-input-major': p.surface,
+    '--dsw-specific-login-input': p.surface,
+    '--dsw-specific-menu': p.surface,
+    '--dsw-specific-selector': p.raised,
+    '--dsw-specific-sidebar-fill': 'transparent',
+    '--dsw-specific-sidebar-nav-item-active-accent': dark ? '#3A4352' : '#D5DBE4',
+    '--dsw-specific-sidebar-nav-item-active': dark ? '#303845' : '#DDE1E7',
+    '--dsw-specific-sidebar-nav-item-hover': dark ? '#262D38' : '#E4E7EC',
+    '--dsw-specific-tip': p.raised,
+  }
+}
+export const RIFT_DARK = palette('dark')
+export const RIFT_LIGHT = palette('light')
+export const RIFT_TOKENS = Object.fromEntries(Object.keys(RIFT_DARK).map(key => [key, { dark: RIFT_DARK[key], light: RIFT_LIGHT[key] }])) as ThemeTokenOverrides

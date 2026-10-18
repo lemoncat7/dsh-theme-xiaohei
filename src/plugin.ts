@@ -13,7 +13,9 @@ import { installXiaoheiSidebarGlass } from './sidebar-glass.js'
 import { installDeferredCompanion } from './deferred-companion.js'
 import { bindHeixiuSessions, createHeixiuSignals } from './bloub-heixiu/signals.js'
 import { XIAOHEI_THEME_TOKEN_OVERRIDES } from './theme.js'
-import { XiaoheiBrandName, XiaoheiMetallicBrandMark } from './metallic-brand-mark.js'
+import { XiaoheiMetallicBrandMark } from './metallic-brand-mark.js'
+import { SpiritRealmBrand, SpiritRealmMotion } from './spirit-realm/controls.js'
+import { bindXiaoheiSessionState } from './state.js'
 
 /** Boot decoration has no service dependency; the full theme waits below. */
 export const inject: string[] = []
@@ -22,6 +24,9 @@ export const inject: string[] = []
 export function apply(ctx: ClientContext): void {
   ctx.effect(installXiaoheiPluginLoading, 'xiaohei-theme: replace plugin spinner with hopping Heixiu')
   ctx.inject(['slots'], readyCtx => {
+    const disposeMotion = readyCtx.slots.inject('sidebar.footer.action', () => readyCtx.slots.register({
+      name: 'sidebar.footer.action', id: 'xiaohei-spirit-motion', order: 20,
+    }, SpiritRealmMotion))
     const disposeDraftPreview = readyCtx.slots.inject('conversation.input.dock', () => readyCtx.slots.register({
       name: 'conversation.input.dock',
       id: 'xiaohei-draft-preview',
@@ -34,7 +39,7 @@ export function apply(ctx: ClientContext): void {
     const disposeSidebarName = readyCtx.slots.inject('sidebar.brand.name', () => readyCtx.slots.register({
       name: 'sidebar.brand.name',
       priority: -20,
-    }, XiaoheiBrandName))
+    }, SpiritRealmBrand))
     const disposeHeroMark = readyCtx.slots.inject(
       'conversation.hero.brand.mark',
       () => readyCtx.slots.register({
@@ -43,6 +48,7 @@ export function apply(ctx: ClientContext): void {
       }, XiaoheiMetallicBrandMark),
     )
     return () => {
+      disposeMotion()
       disposeDraftPreview()
       disposeHeroMark()
       disposeSidebarName()
@@ -66,5 +72,9 @@ function installXiaoheiTheme(ctx: ClientContext): void {
   ctx.effect(installXiaoheiSidebarGlass, 'xiaohei-theme: install isolated sidebar glass')
   const heixiuSignals = createHeixiuSignals()
   ctx.effect(() => installDeferredCompanion(heixiuSignals), 'xiaohei-theme: mount Heixiu after conversation paint')
-  ctx.inject(['sessions'], ready => bindHeixiuSessions(ready.sessions, heixiuSignals))
+  ctx.inject(['sessions'], ready => {
+    const disposeHeixiu = bindHeixiuSessions(ready.sessions, heixiuSignals)
+    const disposeState = bindXiaoheiSessionState(ready.sessions)
+    return () => { disposeState(); disposeHeixiu() }
+  })
 }

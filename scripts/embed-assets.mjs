@@ -5,6 +5,8 @@ const identityTargetPath = new URL('../src/generated-identity.ts', import.meta.u
 const loadingTargetPath = new URL('../src/generated-loading-assets.ts', import.meta.url)
 const backgroundTargetPath = new URL('../src/generated-backgrounds.ts', import.meta.url)
 const characterAssets = [
+  ['XIAOHEI_REALM_REST', 'xiaohei-breakframe-idle-v1.webp', 'model'],
+  ['XIAOHEI_REALM_ACTIVE', 'xiaohei-breakframe-working-v1.webp', 'model'],
   ['XIAOHEI_AVATAR_STANDING_OPEN', 'xiaohei-avatar-open-v1.webp', 'model'],
   ['XIAOHEI_AVATAR_STANDING_BLINK', 'xiaohei-avatar-blink-v1.webp', 'model'],
   ['XIAOHEI_AVATAR_ACTION_CROUCH', 'xiaohei-avatar-jump-crouch-v2.webp', 'model'],
@@ -64,8 +66,8 @@ const embeddedIdentity = await Promise.all(identityAssets.map(async ([name, file
   return `export const ${name}: string = ${JSON.stringify(`data:image/webp;base64,${asset.toString('base64')}`)}`
 }))
 const backgroundAssets = [
-  ['XIAOHEI_WALLPAPER_LIGHT', 'xiaohei-sky-v7-light.webp'],
-  ['XIAOHEI_WALLPAPER_DARK', 'xiaohei-sky-v7-dark.webp'],
+  ['XIAOHEI_WALLPAPER_LIGHT', 'xiaohei-realm-light.webp'],
+  ['XIAOHEI_WALLPAPER_DARK', 'xiaohei-realm-dark.webp'],
   ['XIAOHEI_SEATED_LIGHT', 'xiaohei-seated-v7-light.webp'],
   ['XIAOHEI_SEATED_DARK', 'xiaohei-seated-v7-dark.webp'],
   ['XIAOHEI_PEEK_LIGHT', 'xiaohei-peek-v7-light.webp'],

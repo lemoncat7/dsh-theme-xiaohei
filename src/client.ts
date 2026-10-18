@@ -1,8 +1,8 @@
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-import { apply as applyTheme } from './plugin.js'
+import { apply as applyTheme } from './rift/plugin.js'
 
-export { inject } from './plugin.js'
+export { inject } from './rift/plugin.js'
 
 /** Renderer-free wallpaper and native DSH chrome, mounted through plugin lifecycle. */
 export function apply(ctx: ClientContext): void {

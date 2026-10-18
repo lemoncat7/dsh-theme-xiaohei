@@ -1,6 +1,6 @@
 {
   "name": "@lemoncat7/dsh-theme-xiaohei",
-  "version": "0.4.6",
+  "version": "0.5.0-rift.11",
   "description": "A Luo Xiaohei-inspired animated dark theme for DeepSeek Harness",
   "keywords": [
     "deepseek-harness",
@@ -26,13 +26,18 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "docs/rift-interaction.md",
+    "docs/rift-preview.md",
     "docs/releases/0.4.6.md",
     "docs/releases/0.4.5.md",
     "docs/startup-audit-20261013.md",
     "docs/releases/0.4.4.md",
     "docs/releases/0.4.3.md",
-    "lib/**/*.js",
-    "lib/**/*.d.ts",
+    "lib/index.js",
+    "lib/index.d.ts",
+    "lib/rift/boot.d.ts",
+    "lib/client.js",
+    "lib/client.decorations.js",
     "cordis.patch.yml",
     "README.md",
     "docs/releases/0.3.5.md",
@@ -60,7 +65,7 @@
     "node": "^22.19.0 || >=24.0.0"
   },
   "scripts": {
-    "build": "node scripts/validate-character-assets.mjs && node scripts/embed-assets.mjs && tsc -p tsconfig.json && node scripts/build-client.mjs",
+    "build": "node scripts/embed-rift.mjs && node scripts/embed-assets.mjs && tsc -p tsconfig.json && node scripts/build-rift.mjs",
     "clean": "node -e \"require('node:fs').rmSync('lib', { recursive: true, force: true })\"",
     "prepare": "npm run clean && npm run build",
     "test": "npm run build && node --test test/*.test.mjs",
@@ -76,7 +81,9 @@
     "@deepseek-ai/cordis": "~4.0.4",
     "@deepseek-ai/dsh-api-session-controller": "0.2.0-rc.2",
     "@deepseek-ai/dsh-client-ui-conversation": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-layout": "0.2.0-rc.2",
     "@deepseek-ai/dsh-client-ui-renderer": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-session": "0.2.0-rc.2",
     "@deepseek-ai/dsh-client-ui-sidebar": "0.2.0-rc.2",
     "@deepseek-ai/dsh-client-ui-slots": "0.2.0-rc.2",
     "@deepseek-ai/dsh-client-ui-theme": "0.2.0-rc.2",
@@ -85,8 +92,7 @@
     "@types/react": "^18.3.28",
     "esbuild": "^0.25.0",
     "react": "^18.3.1",
-    "typescript": "^5.9.3",
-    "@deepseek-ai/dsh-client-ui-session": "0.2.0-rc.2"
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"
