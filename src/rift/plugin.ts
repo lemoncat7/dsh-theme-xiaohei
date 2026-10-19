@@ -7,6 +7,8 @@ import { bindXiaoheiAppearance } from '../appearance.js'
 import { bindXiaoheiSessionState } from '../state.js'
 import { XiaoheiDraftPreview } from '../composer-draft-preview.js'
 import { installDeferredDecorations } from '../deferred-decorations.js'
+import { installDeferredCompanion } from '../deferred-companion.js'
+import { bindHeixiuSessions, createHeixiuSignals } from '../bloub-heixiu/signals.js'
 import { RiftBrand, RiftMark, RiftHeroMark, RiftMotion } from './controls.js'
 import { RIFT_TOKENS } from './palette.js'
 import { installRiftChrome } from './styles.js'
@@ -30,6 +32,12 @@ export function apply(ctx:ClientContext):void{
     ready.effect(()=>bindXiaoheiAppearance(ready),'rift: follow native appearance')
     ready.effect(installRiftChrome,'rift: native shell surfaces')
     ready.effect(installDeferredDecorations,'rift: deferred isolated scene')
-    ready.inject(['sessions'],sessions=>bindXiaoheiSessionState(sessions.sessions))
+    const heixiuSignals = createHeixiuSignals()
+    ready.effect(()=>installDeferredCompanion(heixiuSignals),'rift: deferred Heixiu companion')
+    ready.inject(['sessions'],sessions=>{
+      const state = bindXiaoheiSessionState(sessions.sessions)
+      const companion = bindHeixiuSessions(sessions.sessions,heixiuSignals)
+      return()=>{companion();state()}
+    })
   })
 }

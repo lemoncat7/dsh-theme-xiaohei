@@ -35,11 +35,13 @@ test('daylight bubbles fade the paint, not the text, with an increased-contrast 
  assert.match(RIFT_SCENE_CSS,/paint-order:stroke fill/)
  assert.doesNotMatch(RIFT_SCENE_CSS,/mask-image/)
 })
-test('float and sway are visibly stronger without changing the eye rig',()=>{
+test('only free cloth tips sway; torso, waist, legs and arms are pinned',()=>{
  assert.match(SCENE_MOTION_SHADER,/sin\(t\*\.52\)\*12\.0/)
  assert.doesNotMatch(SCENE_MOTION_SHADER,/float hand=|drift\+=hand/)
- assert.match(SCENE_MOTION_SHADER,/drift\*=1\.-arms/)
+ assert.match(SCENE_MOTION_SHADER,/drift\*=1\.-max\(arms,body\)/)
  assert.match(SCENE_MOTION_SHADER,/smoothstep\(548\.,572\.,p.y\)/)
- assert.match(SCENE_MOTION_SHADER,/sin\(t\*\.92\+p.y\*\.012\)\*8\.5/)
+ assert.match(SCENE_MOTION_SHADER,/vec2\(1178\.,712\.\),vec2\(40\.,34\.\)/)
+ assert.doesNotMatch(SCENE_MOTION_SHADER,/vec2\(190\.,97\.\)/)
+ assert.match(SCENE_MOTION_SHADER,/1\.-smoothstep\(1180\.,1220\.,p.x\)/)
  assert.match(CHARACTER_SHADER,/gaze\*\.65\*aperture/)
 })

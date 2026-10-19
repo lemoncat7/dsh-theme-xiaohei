@@ -1,5 +1,6 @@
 import { RIFT_UI_CSS } from './ui-styles.js'
 import { RIFT_SCENE_CSS } from './scene-styles.js'
+import { RIFT_SIDEBAR_CSS } from './sidebar-styles.js'
 export const RIFT_STYLE_ID = 'dsh-theme-xiaohei/rift-style'
 export const RIFT_CSS = `
 html[data-rift-theme] {
@@ -59,7 +60,7 @@ html[data-rift-theme][data-xiaohei-state='streaming'] #root [data-composer-card=
 html[data-rift-theme][data-xiaohei-state='tool'] #root [data-composer-card='true']::after { animation:rift-line 2.6s ease-in-out infinite; }
 html[data-rift-theme] #root [data-composer-card='true'] textarea { color:var(--rift-text); background:transparent !important; border:0; box-shadow:none; }
 html[data-rift-theme] #root [data-composer-card='true'] [data-input-backdrop='true'] { background:transparent !important; }
-html[data-rift-theme] #root [data-composer-card='true'] button { border-radius:8px; }
+html[data-rift-theme] #root [data-composer-card='true'] button:not(.xiaohei-bloub) { border-radius:8px; }
 html[data-rift-theme] #root [data-composer-card='true'] button:not(:disabled):hover { background-color:var(--rift-hover); }
 html[data-rift-theme] #root [data-xiaohei-draft-preview] { display:flex; flex-direction:column; align-items:flex-end; width:calc(100% - 80px); max-width:var(--dsh-chat-content-width,748px); margin:0 auto; gap:4px; padding:4px 0 8px; }
 html[data-rift-theme] .xiaohei-draft-label { font-size:11px; color:var(--rift-muted); }
@@ -84,7 +85,7 @@ html[data-rift-paused] #root [data-composer-card='true']::after { animation:none
 }
 @media (prefers-reduced-motion:reduce) { html[data-rift-theme] *,html[data-rift-theme] *::after { animation:none !important; transition:none !important; } }
 @media (forced-colors:active) { .rift-scene { display:none; } html[data-rift-theme] #root [data-slot='sidebar'] { background:Canvas; } }
-` + RIFT_UI_CSS + RIFT_SCENE_CSS
+` + RIFT_UI_CSS + RIFT_SCENE_CSS + RIFT_SIDEBAR_CSS
 
 export function installRiftChrome(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): () => void {
   if (!doc) return () => {}

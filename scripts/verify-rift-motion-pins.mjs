@@ -18,7 +18,9 @@ try{
   gl.useProgram(program);const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
   gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW)
   const p=gl.getAttribLocation(program,'p');gl.enableVertexAttribArray(p);gl.vertexAttribPointer(p,2,gl.FLOAT,false,0,0)
-  const points={thumb:[1138,434],fingers:[1082,480],palm:[1140,478],forearm:[1215,510],otherArm:[1475,674],cuff:[1210,585],hem:[1265,696],building:[1550,870]}
+  const points={thumb:[1138,434],fingers:[1082,480],palm:[1140,478],forearm:[1215,510],otherArm:[1475,674],chest:[1330,580],waist:[1300,670],pelvis:[1350,740],leftLeg:[1230,800],rightLeg:[1410,810],attachment:[1212,707],cuff:[1210,585],hem:[1170,714],building:[1550,870]}
+  // Sample a torso/waist grid, not just one anchor that could conceal twisting.
+  for(let x=1250;x<=1410;x+=20)for(let y=540;y<=680;y+=20)points[`body-${x}-${y}`]=[x,y]
   const rows=[]
   for(const t of [0,1,3,7,12]){
    gl.uniform1f(gl.getUniformLocation(program,'time'),t);gl.drawArrays(gl.TRIANGLES,0,6)
@@ -28,7 +30,7 @@ try{
   }
   gl.getExtension('WEBGL_lose_context')?.loseContext();return rows
  },SCENE_MOTION_SHADER)
- for(const row of result)for(const name of ['thumb','fingers','palm','forearm','otherArm'])assert.equal(row[name],0,`${name} moved at t=${row.time}`)
+ for(const row of result)for(const name of Object.keys(row).filter(name=>!['time','cuff','hem','building'].includes(name)))assert.equal(row[name],0,`${name} moved at t=${row.time}`)
  for(const name of ['cuff','hem','building'])assert.ok(result.some(row=>row[name]>5),`${name} should still move`)
- console.log('PASS: actual WebGL shader pins both arms and fingers; loose cuff, hem and buildings still move')
+ console.log('PASS: actual WebGL shader pins torso/waist grid, pelvis, legs, arms and cloth attachment; only free cuff/hem tips and buildings move')
 }finally{await browser.close()}

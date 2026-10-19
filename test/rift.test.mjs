@@ -14,12 +14,17 @@ import {RIFT_FRAGMENT} from '../lib/rift/renderer.js'
 test('Rift entry contains no previous theme visuals or background rig chunks',()=>{
  const entry=readFileSync(new URL('../lib/client.js',import.meta.url),'utf8')
  const scene=readFileSync(new URL('../lib/client.decorations.js',import.meta.url),'utf8')
+ const companion=readFileSync(new URL('../lib/client.companion.js',import.meta.url),'utf8')
  assert.ok(entry.length<55000);assert.ok(scene.length<500000)
+ assert.ok(companion.length<150000)
+ assert.match(entry,/client\.companion\.js/)
+ assert.match(companion,/逗逗嘿咻/)
+ assert.doesNotMatch(entry+scene,/xiaohei-bloub-float/)
  for(const image of[RIFT_DETAIL_IMAGE,RIFT_LIGHT_DETAIL_IMAGE]){
   assert.ok(scene.includes(image));assert.ok(!entry.includes(image))
   assert.ok(!injectRiftBoot('<head></head>').includes(image),'Detail image must not inflate first paint')
  }
- assert.doesNotMatch(entry+scene,/client\.pose-|client\.rig-|client\.companion|xh-realm__|xiaohei-heixiu|MetallicPaint|sidebar-glass/)
+ assert.doesNotMatch(entry+scene,/client\.pose-|client\.rig-|xh-realm__|xiaohei-heixiu|MetallicPaint|sidebar-glass/)
  assert.match(scene,/rift-scene/);assert.match(entry,/界隙/)
 })
 test('Rift first paint uses a small static style and never installs a boot observer or script',()=>{
