@@ -15,6 +15,13 @@ test('writeback notices do not acquire the generic light content surface',()=>{
  // Do not hide statuses, errors, or interactive retry/document controls.
  assert.doesNotMatch(RIFT_SCENE_CSS,/\.dsh-knowledge-writeback[^{}]*\{[^}]*display:none/)
 })
+test('admitted steering keeps the same bubble-only surface as user messages',()=>{
+ const selector=RIFT_SCENE_CSS.split('\n').find(line=>line.includes("> [data-slot='conversation.chat.node'] > :first-child {"))
+ assert.ok(selector)
+ for(const kind of ['user','steering','assistant-step','turn-tail']){
+  assert.ok(selector.includes(`:not([data-chat-flow-kind='${kind}'])`),`${kind} must not receive a generic row surface`)
+ }
+})
 test('small action metadata is plain text without a surface or inherited outline',()=>{
  assert.match(RIFT_SCENE_CSS,/\[data-chat-flow-kind\] \[class\*='_actions'\] \{[^}]*background:none[^}]*-webkit-text-stroke:0;/)
  assert.match(RIFT_SCENE_CSS,/\[data-chat-flow-kind\] \[role='tooltip'\] \{[^}]*background:none; border:0; border-radius:0; box-shadow:none;/)

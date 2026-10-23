@@ -87,8 +87,10 @@ html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kin
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind]:not([data-chat-flow-kind='user']):not([data-chat-flow-kind='assistant-step']):not(:has(> [data-slot='conversation.chat.node']:empty)) {
  background:transparent;
 }
-/* Only the content receives a local reading surface; the scroll area stays clear. */
-html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind]:not([data-chat-flow-kind='user']):not([data-chat-flow-kind='assistant-step']):not([data-chat-flow-kind='turn-tail']) > [data-slot='conversation.chat.node'] > :first-child {
+/* User and admitted steering share UserStyleBubble: its full-width row is
+   layout only. Keep the reading surface on the bubble, including after the
+   Host replaces the pending steering projection with a durable node. */
+html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind]:not([data-chat-flow-kind='user']):not([data-chat-flow-kind='steering']):not([data-chat-flow-kind='assistant-step']):not([data-chat-flow-kind='turn-tail']) > [data-slot='conversation.chat.node'] > :first-child {
  background:rgb(238 246 255 / 68%); border-radius:3px 10px 3px 10px;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind='assistant-step']:not(:has(> [data-slot='conversation.chat.node']:empty)) {

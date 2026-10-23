@@ -19,6 +19,9 @@ try{
    .native_bubble[role=tooltip] {position:fixed;background:var(--dsw-alias-tooltip-bg);color:var(--dsw-static-neutral-bluish-00);border-radius:8px;padding:3px 7px;display:none}
    .native_actions:hover [role=tooltip],.native_actions:focus-within [role=tooltip] {display:block}
    .native_timeStart,.native_action {color:var(--dsw-alias-label-tertiary)}
+   .native_userRow {display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+   .native_userStack {display:flex;flex-direction:column;align-items:flex-end;max-width:82%;min-width:0}
+   .native_bubble:not([role=tooltip]) {padding:10px 16px}
    ${RIFT_CSS}
   </style></head><body><div id="root">
    <div data-chat-flow-kind="user"><div data-slot="conversation.chat.node"><div><div>
@@ -53,6 +56,33 @@ try{
   assert.equal((await sample('#tail')).bg,'rgba(0, 0, 0, 0)')
   assert.notEqual((await sample('#tool')).border,'0px')
   assert.notEqual((await sample('#message')).image,'none')
+  // Host replaces the pending projection with a durable steering/user node.
+  // Both states use UserStyleBubble; its full-width row must never be painted.
+  for(const kind of ['steering','user']){
+   await page.evaluate(()=>{
+    const pending=document.createElement('div');pending.id='followup'
+    pending.innerHTML='<div id="followup-row" class="native_userRow" data-pending-steering="true" data-time-hover-root><div class="native_userStack"><div id="followup-bubble" class="native_bubble">第二条消息</div></div><div class="native_actions"><button id="followup-copy">复制</button></div></div>'
+    document.querySelector('#root').append(pending)
+   })
+   const pendingPaint=await sample('#followup-bubble')
+   assert.notEqual(pendingPaint.image,'none')
+   assert.equal((await sample('#followup-row')).bg,'rgba(0, 0, 0, 0)')
+   await page.evaluate(kind=>{
+    const flow=document.querySelector('#followup'),row=document.querySelector('#followup-row')
+    row.removeAttribute('data-pending-steering')
+    const outlet=document.createElement('div');outlet.dataset.slot='conversation.chat.node';outlet.style.display='contents'
+    flow.dataset.chatFlowKind=kind;flow.append(outlet);outlet.append(row)
+   },kind)
+   for(const selector of ['#followup','#followup-row']){
+    const paint=await sample(selector)
+    assert.equal(paint.bg,'rgba(0, 0, 0, 0)',`${mode}/${width}/${kind}: ${selector} must not paint a full-width strip`)
+    assert.equal(paint.image,'none');assert.equal(paint.shadow,'none')
+   }
+   assert.deepEqual(await sample('#followup-bubble'),pendingPaint,'admission must preserve the bubble appearance')
+   assert.ok((await page.locator('#followup-row').boundingBox()).width>(await page.locator('#followup-bubble').boundingBox()).width)
+   await page.locator('#followup-copy').click()
+   await page.locator('#followup').evaluate(el=>el.remove())
+  }
   const folded=page.locator('#folded')
   const checkFolded=async()=>{
    const paint=await sample('#folded')
@@ -71,5 +101,5 @@ try{
   await page.getByRole('tooltip').waitFor({state:'visible'})
   await page.locator('#retry').click()
  }
- console.log('PASS: light/dark × mobile/desktop; plain writeback, readable metadata and tooltips, hover/focus and tool cards preserved')
+ console.log('PASS: light/dark × mobile/desktop; pending → steering/user without full-width paint; writeback, tooltips, metadata and tool cards preserved')
 }finally{await browser.close()}
