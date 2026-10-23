@@ -8,10 +8,14 @@ export function stageBounds(width:number,height:number,box?:Pick<DOMRect,'left'|
 export function watchSpiritStage(doc:Document,changed:(stage:SpiritStage)=>void):{refresh():void;dispose():void} {
  const win=doc.defaultView
  let target:Element|null=null,disposed=false
+ let previous:SpiritStage|undefined
  const measure=()=>{
   if(!win||disposed)return
   const rect=target?.getBoundingClientRect()
-  changed(stageBounds(win.innerWidth,win.innerHeight,rect&&rect.right>rect.left?rect:undefined))
+  const next=stageBounds(win.innerWidth,win.innerHeight,rect&&rect.right>rect.left?rect:undefined)
+  if(previous&&next.every((value,index)=>value===previous![index]))return
+  previous=next
+  changed(next)
  }
  const observer=win&&typeof win.ResizeObserver==='function'?new win.ResizeObserver(measure):undefined
  const refresh=()=>{

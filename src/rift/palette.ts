@@ -2,12 +2,12 @@ import type { ThemeTokenOverrides } from '@deepseek-ai/dsh-client-ui-theme/clien
 
 /** Paired graphite / porcelain tokens. No inherited green-glass palette. */
 export const RIFT_COLORS = {
-  dark: { base: '#101218', surface: '#20242D', raised: '#292E38', text: '#ECEBE7', secondary: '#BAC0CA', muted: '#A1A9B7', edge: '#424957', accent: '#D1DBE8', onAccent: '#151A23' },
-  light: { base: '#E9E9E6', surface: '#F6F5F2', raised: '#FFFFFF', text: '#242832', secondary: '#4F5867', muted: '#606B7A', edge: '#C6CAD1', accent: '#46556D', onAccent: '#FFFFFF' },
+  dark: { base: '#101722', surface: '#202C3C', raised: '#29394E', text: '#EAF3FF', secondary: '#BAC0CA', muted: '#A1A9B7', edge: '#424957', accent: '#B2D7FF', onAccent: '#151A23' },
+  light: { base: '#E9EFF7', surface: '#F3F7FD', raised: '#FFFFFF', text: '#242832', secondary: '#4F5867', muted: '#606B7A', edge: '#C6CAD1', accent: '#315D8A', onAccent: '#FFFFFF' },
 } as const
 
-function palette(mode: keyof typeof RIFT_COLORS): Record<string, string> {
-  const p = RIFT_COLORS[mode], dark = mode === 'dark'
+export type PaletteColors = { [K in keyof typeof RIFT_COLORS.dark]: string }
+export function createPalette(p: PaletteColors, dark: boolean): Record<string, string> {
   return {
     '--dsw-alias-bg-base': 'transparent',
     '--dsw-alias-bg-layer-1': p.surface,
@@ -23,7 +23,7 @@ function palette(mode: keyof typeof RIFT_COLORS): Record<string, string> {
     '--dsw-alias-brand-primary-new-colorprimary-new-color': p.accent,
     '--dsw-alias-brand-text': p.accent,
     '--dsw-alias-button-primary-fill': p.accent,
-    '--dsw-alias-button-primary-hover': dark ? '#EDF2F8' : '#344157',
+    '--dsw-alias-button-primary-hover': dark ? '#EDF2F8' : '#294E79',
     '--dsw-alias-button-primary-dimmed': dark ? '#687586' : '#ABB4C0',
     '--dsw-alias-button-contrast-fill': p.accent,
     '--dsw-alias-button-elevated-fill': p.raised,
@@ -33,7 +33,7 @@ function palette(mode: keyof typeof RIFT_COLORS): Record<string, string> {
     '--dsw-alias-button-ghost-active-fill': p.raised,
     '--dsw-alias-button-ghost-active-hover': p.raised,
     '--dsw-alias-button-info-fill': p.accent,
-    '--dsw-alias-button-info-hover': dark ? '#EDF2F8' : '#344157',
+    '--dsw-alias-button-info-hover': dark ? '#EDF2F8' : '#294E79',
     '--dsw-alias-interactive-bg-active': dark ? '#3A4352' : '#DCE0E6',
     '--dsw-alias-interactive-bg-hover-accent': dark ? '#323A47' : '#E1E4E9',
     '--dsw-alias-interactive-bg-hover-solid': p.raised,
@@ -48,7 +48,7 @@ function palette(mode: keyof typeof RIFT_COLORS): Record<string, string> {
     '--dsw-alias-label-caption': p.muted,
     '--dsw-alias-label-dimmed': p.muted,
     ...Object.fromEntries(['citation', 'code-block-banner', 'code-segment-selected', 'inline-code', 'tag'].map(k => [`--dsw-alias-markdown-${k}`, p.raised])),
-    '--dsw-alias-markdown-code-block': dark ? '#141820' : '#ECEEF1',
+    '--dsw-alias-markdown-code-block': dark ? '#141820' : '#E8F0FC',
     '--dsw-alias-markdown-code-segment-unselected': p.surface,
     '--dsw-alias-markdown-placeholder': p.surface,
     '--dsw-alias-scrollbar-bg-l1': dark ? '#48505D' : '#B8BEC8',
@@ -57,8 +57,8 @@ function palette(mode: keyof typeof RIFT_COLORS): Record<string, string> {
     '--dsw-alias-scrollbar-hover-l2': dark ? '#8997AA' : '#697688',
     '--dsw-alias-toast-bg': p.surface,
     '--dsw-alias-tooltip-bg': dark ? '#343C49' : '#242B37',
-    '--dsw-specific-bubble': dark ? '#2A303B' : '#E2E5EA',
-    '--dsw-specific-bubble-highlight': dark ? '#3C4554' : '#D5DBE3',
+    '--dsw-specific-bubble': dark ? '#273A52' : '#E1EEFF',
+    '--dsw-specific-bubble-highlight': dark ? '#3A5577' : '#CADFFB',
     '--dsw-specific-input-major': p.surface,
     '--dsw-specific-login-input': p.surface,
     '--dsw-specific-menu': p.surface,
@@ -70,6 +70,6 @@ function palette(mode: keyof typeof RIFT_COLORS): Record<string, string> {
     '--dsw-specific-tip': p.raised,
   }
 }
-export const RIFT_DARK = palette('dark')
-export const RIFT_LIGHT = palette('light')
+export const RIFT_DARK = createPalette(RIFT_COLORS.dark, true)
+export const RIFT_LIGHT = createPalette(RIFT_COLORS.light, false)
 export const RIFT_TOKENS = Object.fromEntries(Object.keys(RIFT_DARK).map(key => [key, { dark: RIFT_DARK[key], light: RIFT_LIGHT[key] }])) as ThemeTokenOverrides

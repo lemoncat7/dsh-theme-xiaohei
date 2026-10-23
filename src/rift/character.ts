@@ -54,7 +54,7 @@ export class CharacterMotion {
   this.pose.tilt+=(clamp((target[0]-1360)/450,-1,1)*.008*weight-this.pose.tilt)*ease
   this.pose.blink=blinkEnvelope(this.clock-this.blinkStart)
   const ear=this.clock-this.earStart,nod=this.clock-this.nodStart
-  this.pose.ear=ear>=0&&ear<.9?Math.sin(ear/.9*Math.PI*2)*Math.exp(-ear*3)*.035:0
+  this.pose.ear=ear>=0&&ear<1.25?Math.sin(ear/1.25*Math.PI*2)*Math.exp(-ear*2)*.1:0
   this.pose.nod=nod>=0&&nod<.65?Math.sin(nod/.65*Math.PI)*2.4:0
  }
 }

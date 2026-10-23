@@ -10,12 +10,17 @@ import {RIFT_SCENE_CSS,RIFT_SCENE_SCRIM,RIFT_LIGHT_SCENE_SCRIM} from '../lib/rif
 import {RIFT_SCENE_IMAGE,RIFT_LIGHT_SCENE_IMAGE} from '../lib/rift/assets.js'
 import {RIFT_DETAIL_IMAGE,RIFT_LIGHT_DETAIL_IMAGE} from '../lib/rift/detail-assets.js'
 import {RIFT_FRAGMENT} from '../lib/rift/renderer.js'
+import {RIFT_MARK_IMAGE} from '../lib/rift/mark.js'
 
 test('Rift entry contains no previous theme visuals or background rig chunks',()=>{
  const entry=readFileSync(new URL('../lib/client.js',import.meta.url),'utf8')
  const scene=readFileSync(new URL('../lib/client.decorations.js',import.meta.url),'utf8')
  const companion=readFileSync(new URL('../lib/client.companion.js',import.meta.url),'utf8')
- assert.ok(entry.length<55000);assert.ok(scene.length<500000)
+ // Restored paired contour shards add <1 KB; keep the eager entry bounded.
+ // Paired header/sidebar glass and accessibility fallbacks add ~1.5 KB CSS.
+ // Original metallic finish is baked once (~12.4 KB); retain the code-only budget.
+ // Picker plus independent quiet chrome and four paired palettes; no new runtime dependency.
+ assert.ok(entry.length-RIFT_MARK_IMAGE.length<76000);assert.ok(scene.length<500000)
  assert.ok(companion.length<150000)
  assert.match(entry,/client\.companion\.js/)
  assert.match(companion,/逗逗嘿咻/)
@@ -27,11 +32,12 @@ test('Rift entry contains no previous theme visuals or background rig chunks',()
  assert.doesNotMatch(entry+scene,/client\.pose-|client\.rig-|xh-realm__|xiaohei-heixiu|MetallicPaint|sidebar-glass/)
  assert.match(scene,/rift-scene/);assert.match(entry,/界隙/)
 })
-test('Rift first paint uses a small static style and never installs a boot observer or script',()=>{
+test('Rift first paint uses static styles and a bounded local preference read, never polling',()=>{
  const html='<html><head></head><body><div id="root"></div></body></html>'
  const output=injectRiftBoot(html)
  assert.ok(output.indexOf(RIFT_BOOT_ID)<output.indexOf('</head>'));assert.equal(injectRiftBoot(output),output)
- assert.doesNotMatch(output,/<script|MutationObserver|setInterval/);assert.match(output,/data:image\/webp;base64/);assert.ok(output.length<250000)
+ assert.equal((output.match(/<script>/g)||[]).length,1)
+ assert.doesNotMatch(output,/MutationObserver|setInterval|fetch\(/);assert.match(output,/data:image\/webp;base64/);assert.ok(output.length<250000)
 })
 test('Rift motion gates foreground, focus, compact view and user preferences',()=>{
  assert.equal(canAnimate(true,false,false,true,false),true)
@@ -82,9 +88,9 @@ test('Rift uses separate daylight and night artwork with matching first-paint sc
  assert.match(RIFT_FRAGMENT,/faceShield/);assert.match(RIFT_FRAGMENT,/characterPaint\(uv/)
  assert.doesNotMatch(RIFT_FRAGMENT,/shardA|shardB|shardC|vec4 fragment/)
  assert.doesNotMatch(RIFT_SCENE_CSS,/243 247 244 \/ 97%/)
- assert.match(RIFT_SCENE_CSS,/background:linear-gradient\(90deg,rgb\(249 252 249 \/ 62%\)/)
+ assert.match(RIFT_SCENE_CSS,/background:linear-gradient\(90deg,rgb\(245 250 255 \/ 62%\)/)
  assert.doesNotMatch(RIFT_SCENE_CSS,/13 29 34 \/ 7[26]%/)
- assert.match(RIFT_SCENE_CSS,/conversation\.header'\] > header/)
+ assert.match(RIFT_SCENE_CSS,/conversation\.header'\]\) > header/)
  assert.match(RIFT_SCENE_CSS,/conversation\.composer'\]/)
 })
 function luminance(hex){const p=hex.slice(1).match(/../g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return p[0]*.2126+p[1]*.7152+p[2]*.0722}
@@ -98,7 +104,7 @@ test('Rift paired palettes preserve readable text and primary actions',()=>{
 })
 test('Rift styles retain native footer layout, focus and draft projection',()=>{
  assert.match(RIFT_CSS,/sidebar\.footer\.action/);assert.match(RIFT_CSS,/focus-visible/);assert.match(RIFT_CSS,/data-xiaohei-draft-preview/)
- assert.doesNotMatch(RIFT_CSS,/backdrop-filter|saturate\(|cursor:\s*none|pointer-events:\s*auto/)
+ assert.doesNotMatch(RIFT_CSS,/saturate\(|cursor:\s*none|pointer-events:\s*auto/)
 })
 test('Rift no-WebGL fallback cancels all observers/listeners on unmount',()=>{
  const attrs=new Map(),children=[],media=[],created=[];let observers=0,frames=0,timers=0,onAttributes
@@ -111,6 +117,7 @@ test('Rift no-WebGL fallback cancels all observers/listeners on unmount',()=>{
  function element(){return{...events(),dataset:{},setAttribute(){},append(){},getContext:()=>null,complete:true,naturalWidth:1672,naturalHeight:940,remove(){const i=children.indexOf(this);if(i>=0)children.splice(i,1)}}}
  const doc={...events(),defaultView:win,documentElement:root,hidden:false,hasFocus:()=>true,createElement:()=>{const el=element();created.push(el);return el},body:{prepend:el=>children.push(el)}}
  const dispose=installRiftScene(doc);assert.equal(children.length,1);assert.equal(children[0].dataset.renderer,'static');assert.equal(frames,0);assert.equal(timers,0)
+ assert.equal(attrs.has('data-rift-paused'),false,'WebGL fallback must retain lightweight UI interaction')
  assert.equal(created[1].src,RIFT_DETAIL_IMAGE)
  attrs.set('data-xiaohei-appearance','light');onAttributes();assert.equal(created[1].src,RIFT_LIGHT_DETAIL_IMAGE)
  assert.equal(children[0].dataset.appearance,'light');assert.equal(children.length,1)
@@ -119,6 +126,7 @@ test('Rift no-WebGL fallback cancels all observers/listeners on unmount',()=>{
  created[1].complete=true;created[1].naturalWidth=0;onAttributes();assert.equal(children[0].dataset.artwork,'loading')
  created[1].naturalWidth=1672;onAttributes();assert.equal(children[0].dataset.artwork,'ready')
  win.m.get(RIFT_MOTION_EVENT)({detail:false});assert.equal(children[0].dataset.motion,'paused')
+ assert.equal(attrs.has('data-rift-paused'),true,'explicit pause still disables feedback')
  dispose();assert.equal(children.length,0);assert.equal(observers,0);assert.equal(win.m.size,0);assert.equal(doc.m.size,0);for(const m of media)assert.equal(m.m.size,0)
 })
 test('scene sampling retains high precision when available with a WebGL 1 fallback',()=>{

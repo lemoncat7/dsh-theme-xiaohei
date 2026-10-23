@@ -13,18 +13,23 @@ export function installDeferredDecorations(
   if (!doc || !win) return () => {}
   let disposed = false
   let started = false
+  let loading = false
+  let attempts = 0
   let timer: number | undefined
   let idle: number | undefined
   let cleanup: (() => void) | undefined
   let unsubscribe = () => {}
-  const run = () => {
-    if (disposed) return
-    void load().then(module => {
+  const run = async () => {
+    if (disposed || loading || cleanup || attempts >= 3) return
+    loading = true
+    attempts++
+    try {
+      const module = await load()
       if (!disposed) cleanup = module.installDecorations(doc)
-    }).catch(() => {
-      // Decorative failure must never prevent reading or sending messages.
-      if (!disposed) console.warn('[xiaohei] Decorative resources unavailable; refresh to retry.')
-    })
+    } catch {
+      if (!disposed && attempts < 3) timer = win.setTimeout(run, attempts * 1500)
+      else if (!disposed) console.warn('[xiaohei] Decorative resources unavailable after 3 attempts; static background retained.')
+    } finally { loading = false }
   }
   const check = () => {
     if (disposed || started || !doc.querySelector(readySelector)) return

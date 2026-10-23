@@ -47,5 +47,5 @@ varying float alpha;
 void main(){
  float d=length(gl_PointCoord-.5)*2.;
  float light=exp(-d*d*4.)*(1.-smoothstep(.6,1.,d));
- gl_FragColor=vec4(mix(vec3(.65,.94,.83),vec3(.18,.45,.39),daylight),light*alpha);
+ gl_FragColor=vec4(mix(vec3(.65,.82,1.),vec3(.19,.36,.58),daylight),light*alpha);
 }`

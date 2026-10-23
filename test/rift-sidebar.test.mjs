@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs'
 import {RIFT_SIDEBAR_CSS} from '../lib/rift/sidebar-styles.js'
 import {RIFT_CSS} from '../lib/rift/styles.js'
 test('sidebar motion stays decorative and respects native selection and pause',()=>{
- assert.ok(RIFT_CSS.endsWith(RIFT_SIDEBAR_CSS))
+ assert.ok(RIFT_CSS.includes(RIFT_SIDEBAR_CSS))
  for(const s of ['aria-selected','aria-expanded','data-rift-paused','prefers-reduced-motion','forced-colors','focus-visible'])assert.ok(RIFT_SIDEBAR_CSS.includes(s))
  assert.doesNotMatch(RIFT_SIDEBAR_CSS,/backdrop-filter|setInterval|pointer-events:\s*auto|will-change|filter:/)
  assert.doesNotMatch(RIFT_SIDEBAR_CSS,/rift-sidebar-breath|earSeal|data:image\/svg|infinite/)
@@ -18,16 +18,18 @@ test('sidebar keyframes animate only transforms and opacity',()=>{
   assert.doesNotMatch(frames[0],/(?:width|height|left|right|padding|margin|background|filter|shadow):/)
  }
 })
-test('rejected moving outlines are removed while native focus feedback remains',()=>{
+test('transient contour is separate from controls; rejected persistent sidebar effects stay removed',()=>{
  const field=readFileSync(new URL('../src/rift/field.tsx',import.meta.url),'utf8')
  const deferred=readFileSync(new URL('../src/decorations-entry.ts',import.meta.url),'utf8')
  assert.doesNotMatch(deferred,/installSidebarMotion/)
- assert.doesNotMatch(field,/rift-impulse|setSignal|signal\.x/)
+ assert.match(field,/createRiftImpulse/)
  assert.match(field,/bindRiftInteractions/)
  assert.match(field,/return null/)
- assert.doesNotMatch(RIFT_CSS,/rift-impulse|rift-shard|rift-perimeter|rift-sidebar-follow/)
+ assert.match(RIFT_CSS,/@keyframes rift-impulse/)
+ assert.match(RIFT_CSS,/@keyframes rift-shard/)
+ assert.doesNotMatch(RIFT_CSS,/rift-perimeter|rift-sidebar-follow/)
  assert.match(RIFT_CSS,/\[data-composer-card='true'\]:focus-within/)
  for (const file of ['client.js','client.decorations.js']) {
-  assert.doesNotMatch(readFileSync(new URL('../lib/'+file,import.meta.url),'utf8'),/rift-impulse|rift-sidebar-follow|rift-perimeter|rift-sidebar-breath/)
+  assert.doesNotMatch(readFileSync(new URL('../lib/'+file,import.meta.url),'utf8'),/rift-sidebar-follow|rift-perimeter|rift-sidebar-breath/)
  }
 })

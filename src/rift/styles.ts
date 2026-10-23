@@ -1,21 +1,25 @@
 import { RIFT_UI_CSS } from './ui-styles.js'
 import { RIFT_SCENE_CSS } from './scene-styles.js'
 import { RIFT_SIDEBAR_CSS } from './sidebar-styles.js'
+import { RIFT_GLASS_CSS } from './glass-styles.js'
+import { RIFT_VIEW_CSS } from './view-styles.js'
+import { QUIET_CSS } from './quiet-styles.js'
+import { watchView } from './view.js'
 export const RIFT_STYLE_ID = 'dsh-theme-xiaohei/rift-style'
 export const RIFT_CSS = `
 html[data-rift-theme] {
-  --rift-base:#101218; --rift-surface:#20242d; --rift-panel:rgb(29 33 42 / 96%);
-  --rift-text:#ecebe7; --rift-muted:#bac0ca; --rift-edge:rgb(200 214 234 / 18%);
-  --rift-silver:#d1dbe8; --rift-hover:rgb(209 219 232 / 9%); --rift-input:rgb(28 33 43 / 96%);
-  --rift-read:rgb(16 18 24 / 81%); --rift-shadow:rgb(0 0 0 / 26%);
+  --rift-base:#101722; --rift-surface:#202c3c; --rift-panel:rgb(27 38 55 / 96%);
+  --rift-text:#eaf3ff; --rift-muted:#bac0ca; --rift-edge:rgb(200 214 234 / 18%);
+  --rift-silver:#d1dbe8; --rift-hover:rgb(209 219 232 / 9%); --rift-input:rgb(26 38 56 / 96%);
+  --rift-read:rgb(16 24 38 / 81%); --rift-shadow:rgb(0 0 0 / 26%);
   --rift-curve:cubic-bezier(.2,.75,.25,1); color-scheme:dark;
   background:var(--rift-base); color:var(--rift-text);
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] {
-  --rift-base:#e9e9e6; --rift-surface:#f6f5f2; --rift-panel:rgb(246 245 242 / 98%);
+  --rift-base:#e9eff7; --rift-surface:#f3f7fd; --rift-panel:rgb(239 246 255 / 98%);
   --rift-text:#242832; --rift-muted:#4f5867; --rift-edge:rgb(57 69 88 / 20%);
-  --rift-silver:#46556d; --rift-hover:rgb(70 85 109 / 8%); --rift-input:rgb(250 249 246 / 98%);
-  --rift-read:rgb(243 243 240 / 94%); --rift-shadow:rgb(25 32 46 / 12%); color-scheme:light;
+  --rift-silver:#46556d; --rift-hover:rgb(70 85 109 / 8%); --rift-input:rgb(244 249 255 / 98%);
+  --rift-read:rgb(237 245 255 / 94%); --rift-shadow:rgb(25 32 46 / 12%); color-scheme:light;
 }
 html[data-rift-theme] body { background:transparent !important; color:var(--rift-text); }
 html[data-rift-theme] body > #root { position:relative; z-index:1; background:transparent !important; }
@@ -47,7 +51,6 @@ html[data-rift-theme] #root [data-chat-flow-kind='assistant-step'] { border-left
 html[data-rift-theme] #root [data-chat-flow-kind='user'] { color:var(--rift-text); }
 html[data-rift-theme] #root [data-chat-flow-kind='user'] > div:first-child,
 html[data-rift-theme] #root div[data-submission-echo] { border-radius:16px 5px 16px 16px; }
-html[data-rift-theme] #root [data-slot='conversation.session.header'] { background:var(--rift-panel); border-bottom:1px solid var(--rift-edge); }
 html[data-rift-theme] #root [data-composer-card='true'] {
   position:relative; border:1px solid var(--rift-edge) !important; border-radius:16px 16px 6px 16px !important;
   background:var(--rift-input) !important; box-shadow:0 12px 40px -16px var(--rift-shadow),inset 0 1px rgb(255 255 255 / 8%) !important;
@@ -85,11 +88,14 @@ html[data-rift-paused] #root [data-composer-card='true']::after { animation:none
 }
 @media (prefers-reduced-motion:reduce) { html[data-rift-theme] *,html[data-rift-theme] *::after { animation:none !important; transition:none !important; } }
 @media (forced-colors:active) { .rift-scene { display:none; } html[data-rift-theme] #root [data-slot='sidebar'] { background:Canvas; } }
-` + RIFT_UI_CSS + RIFT_SCENE_CSS + RIFT_SIDEBAR_CSS
+` + RIFT_UI_CSS + RIFT_SCENE_CSS + RIFT_GLASS_CSS + RIFT_SIDEBAR_CSS + RIFT_VIEW_CSS
 
 export function installRiftChrome(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): () => void {
   if (!doc) return () => {}
-  const style = doc.createElement('style'); style.id = RIFT_STYLE_ID; style.textContent = RIFT_CSS
+  const style = doc.createElement('style'); style.id = RIFT_STYLE_ID
+  const update = (mode: string) => { style.textContent = mode === 'full' ? RIFT_CSS : QUIET_CSS }
+  const off = doc.defaultView ? watchView(doc.defaultView, update) : () => {}
+  if (!doc.defaultView) update('full')
   doc.documentElement.setAttribute('data-rift-theme', ''); doc.head.append(style)
-  return () => { style.remove(); doc.documentElement.removeAttribute('data-rift-theme') }
+  return () => { off(); style.remove(); doc.documentElement.removeAttribute('data-rift-theme') }
 }

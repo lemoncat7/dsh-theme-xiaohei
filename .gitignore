@@ -8,8 +8,10 @@ src/generated-loading-assets.ts
 src/generated-conversation.ts
 src/generated-character-motion.ts
 src/rift/assets.ts
+src/rift/mark-asset.ts
 src/rift/character-assets.ts
 src/rift/detail-assets.ts
+src/rift/wind-layer-assets.ts
 *.tgz
 .DS_Store
 tmp/

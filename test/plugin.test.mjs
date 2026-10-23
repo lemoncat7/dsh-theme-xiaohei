@@ -452,7 +452,7 @@ test('Host bootstrap decorates the official loader before client plugins run', (
   }
   applyHostTheme(hostCtx)
   assert.deepEqual(calls[0], ['inject', ['webServer']])
-  assert.deepEqual(calls[1], ['effect', 'rift: first-frame wallpaper without scripts or loading observers'])
+  assert.deepEqual(calls[1], ['effect', 'rift: first-frame appearance and local presentation preference'])
   assert.equal(calls[2][0], 'transform')
   assert.equal(calls[2][1], injectRiftBoot)
   assert.equal(calls[3][0], 'tap')

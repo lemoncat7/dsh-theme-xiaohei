@@ -40,6 +40,19 @@ test('unload cancels scheduling and ignores late downloads', async () => {
   resolve({ installDecorations() { mounts++; return () => {} } }); await Promise.resolve()
   assert.equal(mounts, 0)
 })
+test('transient chunk failures retry without duplicating mounts and stop after disposal', async () => {
+  const f=fixture();let loads=0,mounts=0
+  const stop=installDeferredDecorations(f.doc,async()=>{
+    if(++loads<3)throw Error('temporary download failure')
+    return {installDecorations(){mounts++;return()=>{}}}
+  })
+  await f.ready();await f.flush();await f.flush();await f.flush()
+  assert.equal(loads,3);assert.equal(mounts,1)
+  await f.flush();assert.equal(loads,3);stop()
+  const g=fixture();let failed=0
+  const dispose=installDeferredDecorations(g.doc,async()=>{failed++;throw Error('offline')})
+  await g.ready();await g.flush();dispose();await g.flush();assert.equal(failed,1)
+})
 test('native chunk registration is self-contained and startup excludes large scenery', () => {
   const entry = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
   assert.ok(Buffer.byteLength(entry) < 1500000, 'startup bundle size regression')

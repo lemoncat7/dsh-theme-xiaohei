@@ -52,3 +52,19 @@ test('Rift UI handles native rc.2 slots, empty flow nodes and motion fallback ex
  assert.doesNotMatch(RIFT_UI_CSS,/backdrop-filter|cursor:\s*none|pointer-events:\s*auto/)
  assert.equal(RIFT_SIGNAL,'xiaohei/rift-signal')
 })
+test('button-based rows emit contour signals without transforming controls; nested actions stay isolated',()=>{
+ const f=fixture(),calls=[]
+ f.row.links.set('button,input',f.row)
+ f.row.animate=(frames,options)=>{const animation={cancel(){animation.oncancel?.();animation.cancelled=true}};calls.push({frames,options,animation});return animation}
+ f.doc.dispatchEvent({type:'click',target:f.row})
+ f.doc.dispatchEvent({type:'click',target:f.row})
+ assert.equal(calls.length,0);assert.equal(f.signals.length,2)
+ f.row.links.set('button,input',{})
+ f.doc.dispatchEvent({type:'click',target:f.row});assert.equal(f.signals.length,2)
+ f.dispose()
+})
+test('native file-entry buttons outside the rightbar toolbar emit their own feedback',()=>{
+ const f=fixture();f.row.links.clear();f.row.links.set(RIFT_SELECTORS.file,f.row)
+ f.doc.dispatchEvent({type:'click',target:f.row});assert.equal(f.signals.at(-1).kind,'expand')
+ f.dispose()
+})

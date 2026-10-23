@@ -2,6 +2,8 @@ import { sceneUv, renderSize } from './motion.js'
 import { DUST_COUNT, DUST_VERTEX, DUST_FRAGMENT, type PointerDust } from './dust.js'
 import { CHARACTER_SHADER } from './character-shader.js'
 import { SCENE_MOTION_SHADER } from './scene-motion.js'
+import { WIND_LAYER_SHADER } from './wind-layer-shader.js'
+import { WindLayerMotion } from './wind-layer-motion.js'
 import type { CharacterMotion } from './character.js'
 const VERTEX = `attribute vec2 position; void main(){gl_Position=vec4(position,0.,1.);}`
 /** One artwork/character pass and optional short-lived dust, sharing one context. */
@@ -20,12 +22,15 @@ uniform float pulse;
 uniform float scroll;
 uniform float gather;
 uniform float daylight;
-${CHARACTER_SHADER}
 ${SCENE_MOTION_SHADER}
+${CHARACTER_SHADER}
+${WIND_LAYER_SHADER}
 float area(vec2 p,vec2 center,vec2 radius){return 1.-smoothstep(.3,1.,length((p-center)/radius));}
 void main(){
   vec2 uv=vec2(gl_FragCoord.x/resolution.x,1.-gl_FragCoord.y/resolution.y)*cover.xy+cover.zw;
   uv.y+=scroll;
+  // Scenery may float; the character stays in original source coordinates.
+  // Hair and fabric are independent alpha layers, never UV displacement.
   vec2 sampleUV=sceneMotion(uv,time);
   vec3 color=texture2D(scene,clamp(sampleUV,0.,1.)).rgb;
   float signedLine=uv.x-(.862-.435*uv.y);
@@ -38,20 +43,21 @@ void main(){
   float sweep=exp(-pow((uv.y-(1.-pulse)*1.4)*11.,2.))*pulse;
   float glow=fissure*(.035+wave*(.28+energy*.23)+sweep*.60)+halo*(.025+energy*.035+sweep*.08)+ribbon*wave*.16;
   float faceShield=1.-area(uv,vec2(.815,.39),vec2(.13,.19));
-  color+=vec3(.40,.92,.72)*glow*faceShield*mix(1.,.23,daylight);
-  color=characterPaint(uv,color,scroll*940.*.35);
+  color+=vec3(.45,.72,1.)*glow*faceShield*mix(1.,.23,daylight);
+  color=characterPaint(uv,color,0.);
+  color=windLayersPaint(uv,color);
   gl_FragColor=vec4(color,1.);
 }`
 export interface RiftEffects { character:CharacterMotion['pose']; dust:PointerDust }
 export interface RiftRenderer { resize(width:number,height:number):void; paint(time:number,energy:number,pulse:number,scroll?:number,gather?:number,effects?:RiftEffects):void; dispose():void }
-export function createRiftRenderer(canvas:HTMLCanvasElement,image:HTMLImageElement,light=false,atlas?:HTMLImageElement):RiftRenderer|undefined {
+export function createRiftRenderer(canvas:HTMLCanvasElement,image:HTMLImageElement,light=false,atlas?:HTMLImageElement,layers?:HTMLImageElement):RiftRenderer|undefined {
   if(!atlas?.naturalWidth)return undefined
   const gl=canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,powerPreference:'low-power',preserveDrawingBuffer:false})
   if (!gl) return undefined
   const shaders:WebGLShader[]=[]
   let program:WebGLProgram|null=null,buffer:WebGLBuffer|null=null,texture:WebGLTexture|null=null,rigTexture:WebGLTexture|null=null
-  let spiritProgram:WebGLProgram|null=null,spiritBuffer:WebGLBuffer|null=null
-  const release=()=>{for(const t of[texture,rigTexture])if(t)gl.deleteTexture(t);for(const b of[buffer,spiritBuffer])if(b)gl.deleteBuffer(b);for(const p of[program,spiritProgram])if(p)gl.deleteProgram(p);for(const shader of shaders)gl.deleteShader(shader)}
+  let spiritProgram:WebGLProgram|null=null,spiritBuffer:WebGLBuffer|null=null,layerTexture:WebGLTexture|null=null
+  const release=()=>{for(const t of[texture,rigTexture,layerTexture])if(t)gl.deleteTexture(t);for(const b of[buffer,spiritBuffer])if(b)gl.deleteBuffer(b);for(const p of[program,spiritProgram])if(p)gl.deleteProgram(p);for(const shader of shaders)gl.deleteShader(shader)}
   try {
     const compile=(type:number,source:string)=>{const shader=gl.createShader(type);if(!shader)throw Error('Shader unavailable');shaders.push(shader);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error('Shader compilation failed');return shader}
     program=gl.createProgram();if(!program)throw Error('Program unavailable')
@@ -68,7 +74,15 @@ export function createRiftRenderer(canvas:HTMLCanvasElement,image:HTMLImageEleme
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atlas);gl.uniform1i(gl.getUniformLocation(program,'characterAtlas'),1)
-    const uniforms=Object.fromEntries(['resolution','cover','time','energy','pulse','scroll','gather','pose','gaze'].map(key=>[key,gl.getUniformLocation(program!,key)]))
+    if(layers?.naturalWidth===640&&layers.naturalHeight===1280){
+      layerTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,layerTexture)
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR)
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,layers)
+      gl.uniform1i(gl.getUniformLocation(program,'windLayerAtlas'),2);gl.uniform1f(gl.getUniformLocation(program,'windLayersReady'),1)
+    }
+    const uniforms=Object.fromEntries(['resolution','cover','time','energy','pulse','scroll','gather','pose','gaze','windAngles','hemAngle'].map(key=>[key,gl.getUniformLocation(program!,key)]))
+    const layerMotion=new WindLayerMotion()
     gl.uniform1f(gl.getUniformLocation(program,'daylight'),light?1:0)
     spiritProgram=gl.createProgram();if(!spiritProgram)throw Error('Spirit program unavailable')
     gl.attachShader(spiritProgram,compile(gl.VERTEX_SHADER,DUST_VERTEX));gl.attachShader(spiritProgram,compile(gl.FRAGMENT_SHADER,DUST_FRAGMENT));gl.linkProgram(spiritProgram)
@@ -81,7 +95,11 @@ export function createRiftRenderer(canvas:HTMLCanvasElement,image:HTMLImageEleme
     let disposed=false
     return {
       resize(width,height){
-        if(disposed)return;const[w,h]=renderSize(width,height,canvas.ownerDocument.defaultView?.devicePixelRatio);canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h)
+        if(disposed)return;const[w,h]=renderSize(width,height,canvas.ownerDocument.defaultView?.devicePixelRatio)
+        // Reassigning even identical dimensions clears/reallocates the drawing buffer.
+        if(canvas.width!==w)canvas.width=w
+        if(canvas.height!==h)canvas.height=h
+        gl.viewport(0,0,w,h)
         const cover=sceneUv(width,height,image.naturalWidth,image.naturalHeight)
         gl.useProgram(program);gl.uniform2f(uniforms.resolution!,w,h);gl.uniform4fv(uniforms.cover!,cover)
         gl.useProgram(spiritProgram);gl.uniform2f(spiritUniforms.viewport!,width,height);gl.uniform1f(spiritUniforms.scale!,w/Math.max(1,width))
@@ -89,7 +107,10 @@ export function createRiftRenderer(canvas:HTMLCanvasElement,image:HTMLImageEleme
       paint(time,energy,pulse,scroll=0,gather=0,effects){
         if(disposed||gl.isContextLost())return
         gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0)
-        if(effects){const p=effects.character;gl.uniform4f(uniforms.pose!,p.tilt,p.blink,p.ear,p.nod);gl.uniform2fv(uniforms.gaze!,p.gaze)}
+        // Keep eye/ear reactions, but do not move the skull under separately
+        // hinged locks; shoulder/waist also remain fixed in the source art.
+        if(effects){const p=effects.character;gl.uniform4f(uniforms.pose!,0,p.blink,p.ear,0);gl.uniform2fv(uniforms.gaze!,p.gaze)}
+        if(layerTexture){layerMotion.advance(time);gl.uniform4fv(uniforms.windAngles!,layerMotion.firstFour);gl.uniform1f(uniforms.hemAngle!,layerMotion.angles[4]!)}
         gl.uniform1f(uniforms.time!,time);gl.uniform1f(uniforms.energy!,energy);gl.uniform1f(uniforms.pulse!,pulse);gl.uniform1f(uniforms.scroll!,scroll);gl.uniform1f(uniforms.gather!,gather);gl.drawArrays(gl.TRIANGLES,0,6)
         gl.disableVertexAttribArray(position)
         if(effects?.dust.active(time)){

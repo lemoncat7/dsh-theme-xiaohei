@@ -42,6 +42,15 @@ test('focus looks toward composer; response nod settles; reset does not resume a
  motion.reset();assert.deepEqual(motion.pose,{gaze:[0,0],tilt:0,blink:0,ear:0,nod:0})
  motion.step(.1,false);assert.equal(motion.pose.blink,0)
 })
+test('ear response has a visible peak and returns to rest after its dwell-triggered twitch',()=>{
+ const motion=new CharacterMotion();motion.pointer([1420,350]);let peak=0,negative=0
+ for(let i=0;i<180;i++){
+  motion.step(1/60,false);peak=Math.max(peak,motion.pose.ear);negative=Math.min(negative,motion.pose.ear)
+ }
+ assert.ok(peak>.05&&peak<.07,'visible but bounded ear tip travel')
+ assert.ok(negative<-.01,'soft return swing')
+ assert.equal(motion.pose.ear,0)
+})
 test('character atlas stays out of first-paint bundle; no old edge ribbon code is shipped',()=>{
  const server=readFileSync(new URL('../lib/index.js',import.meta.url),'utf8')
  const scene=readFileSync(new URL('../lib/client.decorations.js',import.meta.url),'utf8')

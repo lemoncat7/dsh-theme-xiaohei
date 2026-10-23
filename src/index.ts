@@ -10,7 +10,7 @@ export function apply(ctx: Context): void {
   ctx.inject(['webServer'], (webCtx) => {
     webCtx.effect(
       () => webCtx.webServer.tapIndex(injectRiftBoot),
-      'rift: first-frame wallpaper without scripts or loading observers',
+      'rift: first-frame appearance and local presentation preference',
     )
   })
 }

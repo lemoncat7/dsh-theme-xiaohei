@@ -1,28 +1,25 @@
 /** Native slot/ARIA selectors first; rc.2 class suffixes only for structural details without a public hook. */
 export const RIFT_UI_CSS = `
 html[data-rift-theme] {
- --rift-aura:#a9f3db; --rift-aura-rgb:169 243 219; --rift-glass:rgb(19 30 35 / 94%);
- --rift-plate:linear-gradient(115deg,rgb(169 243 219 / 13%),rgb(25 31 43 / 94%) 48%,rgb(17 23 31 / 97%));
- --rift-rim:rgb(169 243 219 / 40%); --rift-fast:180ms; --rift-open:420ms;
+ --rift-aura:#b2d7ff; --rift-aura-rgb:178 215 255; --rift-glass:rgb(22 32 48 / 94%);
+ --rift-plate:linear-gradient(115deg,rgb(178 215 255 / 13%),rgb(25 35 51 / 94%) 48%,rgb(18 27 42 / 97%));
+ --rift-rim:rgb(178 215 255 / 40%); --rift-fast:180ms; --rift-open:420ms;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] {
- --rift-aura:#246b60; --rift-aura-rgb:36 107 96; --rift-glass:rgb(237 246 240 / 97%);
- --rift-plate:linear-gradient(115deg,rgb(191 221 208 / 92%),rgb(246 248 244 / 98%) 62%,#e7eee8);
- --rift-rim:rgb(36 107 96 / 42%);
+ --rift-aura:#315d8a; --rift-aura-rgb:49 93 138; --rift-glass:rgb(235 244 255 / 97%);
+ --rift-plate:linear-gradient(115deg,rgb(211 231 255 / 92%),rgb(245 250 255 / 98%) 62%,#e7f0fc);
+ --rift-rim:rgb(49 93 138 / 42%);
 }
 /* Left boundary: etched silver planes, a spectral seam, and deeply separated project layers. */
 html[data-rift-theme] #root [data-slot='sidebar'] > div {
- background:linear-gradient(164deg,rgb(var(--rift-aura-rgb) / 12%),transparent 27%),repeating-linear-gradient(126deg,transparent 0 76px,rgb(var(--rift-aura-rgb) / 3%) 77px,transparent 78px 142px),var(--rift-panel) !important;
- box-shadow:inset -1px 0 var(--rift-rim),inset -5px 0 rgb(var(--rift-aura-rgb) / 5%) !important;
+ background:var(--rift-nav-pane,var(--rift-panel)) !important;
+ box-shadow:inset -1px 0 var(--rift-edge),inset 0 1px var(--rift-glass-highlight) !important;
 }
 html[data-rift-theme] #root [data-slot='sidebar.brand.mark'] .rift-mark { width:38px; height:38px; color:var(--rift-aura); }
 .rift-brand strong { font-family:'Noto Serif SC','Songti SC',serif; font-size:22px; letter-spacing:.24em; }
 .rift-brand small { color:var(--rift-aura); }
 .rift-hero-mark { color:var(--rift-aura); flex:none; overflow:visible; }
-.rift-hero-mark path { transition:transform 480ms var(--rift-curve),opacity 480ms; transform-origin:center; }
-html[data-rift-focus] .rift-hero-mark__left { transform:translate(-5px,-3px) rotate(-7deg); }
-html[data-rift-focus] .rift-hero-mark__right { transform:translate(5px,3px) rotate(7deg); }
-html[data-rift-focus] .rift-hero-mark__core { opacity:.55; }
+.rift-mark,.rift-hero-mark { object-fit:contain; filter:drop-shadow(0 2px 3px rgb(8 13 15 / 18%)); }
 html[data-rift-focus] #root [data-slot='sidebar.brand.mark'] .rift-mark { color:var(--rift-text); }
 html[data-rift-theme] #root [data-slot='sidebar'] button[class*='_newSession'] {
  position:relative; background:var(--rift-plate); border:1px solid var(--rift-rim); border-radius:3px 13px 3px 13px;
@@ -104,6 +101,14 @@ html[data-rift-theme] #root [data-chat-flow-kind='assistant-step']::before {
 }
 html[data-rift-theme] #root [data-chat-flow-kind='assistant-step']:has(> [data-slot='conversation.chat.node']:empty) { padding:0; border:0; background:none; }
 html[data-rift-theme] #root [data-chat-flow-kind='assistant-step']:has(> [data-slot='conversation.chat.node']:empty)::before { display:none; }
+/* rc.2 uses hidden=until-found for searchable collapsed steps. Its contents
+   are skipped but its own padding/border/background still paint. Keep native
+   hidden and beforematch behavior; do not replace it with display:none. */
+html[data-rift-theme] #root [data-chat-flow-kind][hidden='until-found'] {
+ padding:0!important; border:0!important; background:none!important; box-shadow:none!important; min-height:0!important;
+}
+html[data-rift-theme] #root [data-chat-flow-kind][hidden='until-found']::before,
+html[data-rift-theme] #root [data-chat-flow-kind][hidden='until-found']::after { content:none!important; }
 html[data-rift-theme] #root [data-chat-flow-kind='assistant-step'] > [data-slot='conversation.chat.node'] > div:first-child { background:transparent; }
 html[data-rift-theme] #root [data-chat-flow-kind] pre { border:1px solid var(--rift-edge); border-left:2px solid var(--rift-rim); border-radius:3px 12px 3px 12px; }
 html[data-rift-theme] #root [data-chat-flow-kind] blockquote { border-left:2px solid var(--rift-aura); background:rgb(var(--rift-aura-rgb) / 6%); }
@@ -121,7 +126,6 @@ html[data-rift-theme] #root [data-slot='rightbar'] > div {
  border-left:1px solid var(--rift-rim); box-shadow:inset 5px 0 rgb(var(--rift-aura-rgb) / 5%);
 }
 html[data-rift-theme] #root [data-slot='rightbar'] [role='tab'][aria-selected='true'] { color:var(--rift-aura); border-bottom:2px solid var(--rift-aura); background:rgb(var(--rift-aura-rgb) / 10%); }
-html[data-rift-theme] #root [data-slot='conversation.header'] { border-bottom:1px solid var(--rift-rim); background:linear-gradient(90deg,var(--rift-panel),transparent); }
 html[data-rift-theme] :is([role='dialog'],[role='menu'],[role='listbox']) {
  background-image:linear-gradient(125deg,rgb(var(--rift-aura-rgb) / 9%),transparent 40%); border-color:var(--rift-rim);
  border-radius:4px 20px 4px 20px; box-shadow:0 28px 90px -18px var(--rift-shadow),inset 0 2px var(--rift-rim);
@@ -129,6 +133,19 @@ html[data-rift-theme] :is([role='dialog'],[role='menu'],[role='listbox']) {
 html[data-rift-theme] :is([role='dialog'],[role='menu'],[role='listbox']) button { border-radius:4px 9px 4px 9px; }
 html[data-rift-theme] :is([role='menuitem'],[role='option']):hover { background:rgb(var(--rift-aura-rgb) / 14%); box-shadow:inset 2px 0 var(--rift-aura); }
 html[data-rift-theme] [role='dialog'] :is(input:not([type='checkbox']):not([type='radio']),select,textarea) { border:1px solid var(--rift-edge); border-radius:4px 10px 4px 10px; }
+/* Expand the outline, never bounce or resize the native input/session row. */
+.rift-impulse { position:fixed; pointer-events:none; z-index:30; color:var(--rift-aura); }
+.rift-impulse__edge { position:absolute; inset:-3px; border:1px solid currentColor; border-radius:3px 16px 3px 16px; animation:rift-impulse 900ms var(--rift-curve) both; }
+.rift-impulse__shard { position:absolute; width:4px; height:32px; background:currentColor; clip-path:polygon(0 20%,100% 0,100% 80%,0 100%); animation:rift-shard 850ms var(--rift-curve) both; }
+.rift-impulse__shard--a { left:-6px; top:10%; --rift-dx:-17px; --rift-dy:-22px; }
+.rift-impulse__shard--b { right:-6px; bottom:10%; --rift-dx:17px; --rift-dy:22px; }
+.rift-impulse[data-kind='focus'] .rift-impulse__edge,
+.rift-impulse[data-kind='release'] .rift-impulse__edge,
+.rift-impulse[data-kind='complete'] .rift-impulse__edge { border-radius:4px 24px 4px 24px; }
+@keyframes rift-impulse { from{opacity:.9;transform:scale(.98)} to{opacity:0;transform:scale(1.035)} }
+@keyframes rift-shard { from{opacity:.8;transform:translate(0,0)} to{opacity:0;transform:translate(var(--rift-dx),var(--rift-dy))} }
+html[data-rift-paused] .rift-impulse { display:none; }
+@media(prefers-reduced-motion:reduce),(forced-colors:active){.rift-impulse{display:none}}
 @keyframes rift-reveal { from{opacity:.25} to{opacity:1} }
 @keyframes rift-travel { 0%{transform:scaleX(.2);opacity:.4} 50%{transform:scaleX(1);opacity:1} 100%{transform:scaleX(.2);opacity:.4} }
 @media(prefers-reduced-motion:no-preference) {

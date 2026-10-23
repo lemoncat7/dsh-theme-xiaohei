@@ -31,6 +31,9 @@ try{
     <div class="dsh-knowledge-writeback-notice"><div role="status">知识库回写 @lemoncat7/dsh-knowledge 无需收录 <button id="retry">重试</button></div></div>
    </div></div></div></div>
    <div data-chat-flow-kind="tool-call"><div data-slot="conversation.chat.node"><div id="tool">工具结果</div></div></div>
+   <div id="process-header"><button id="process-toggle" aria-expanded="false" onclick="const row=document.getElementById('folded');row.toggleAttribute('hidden');if(row.hasAttribute('hidden'))row.setAttribute('hidden','until-found');this.setAttribute('aria-expanded',!row.hasAttribute('hidden'))">正在分析请求</button></div>
+   <div id="folded" data-chat-flow-kind="assistant-step" data-chat-group-part="response" data-turn-process-member="true" data-turn-process-hidden="true" hidden="until-found"><div data-slot="conversation.chat.node" style="display:contents"><div class="native_root"><div class="native_body"><div class="native_markdown"><p>过程中的说明</p></div></div></div></div></div>
+   <div id="answer" data-chat-flow-kind="assistant-step"><div data-slot="conversation.chat.node"><div><div><p>最终答复</p></div></div></div></div>
   </div></body></html>`)
   const sample=selector=>page.locator(selector).evaluate(el=>{
    const s=getComputedStyle(el);return{color:s.color,bg:s.backgroundColor,image:s.backgroundImage,stroke:s.webkitTextStrokeWidth,border:s.borderWidth,radius:s.borderRadius,shadow:s.boxShadow}
@@ -50,6 +53,20 @@ try{
   assert.equal((await sample('#tail')).bg,'rgba(0, 0, 0, 0)')
   assert.notEqual((await sample('#tool')).border,'0px')
   assert.notEqual((await sample('#message')).image,'none')
+  const folded=page.locator('#folded')
+  const checkFolded=async()=>{
+   const paint=await sample('#folded')
+   assert.equal(paint.image,'none');assert.equal(paint.bg,'rgba(0, 0, 0, 0)');assert.equal(paint.border,'0px')
+   assert.equal((await folded.boundingBox()).height,0,'collapsed until-found step must not leave a 24px bubble')
+   assert.notEqual(await folded.evaluate(e=>getComputedStyle(e).display),'none','preserve native find-in-page reveal')
+   assert.equal(await folded.evaluate(e=>getComputedStyle(e,'::before').content),'none')
+  }
+  await checkFolded()
+  assert.ok((await page.locator('#answer').boundingBox()).height>0)
+  await page.locator('#process-toggle').click()
+  assert.ok((await folded.boundingBox()).height>24,'disclosure must reveal process')
+  assert.notEqual((await sample('#folded')).image,'none')
+  await page.locator('#process-toggle').click();await checkFolded()
   await page.mouse.move(width-1,899);await page.locator('.native_action').focus()
   await page.getByRole('tooltip').waitFor({state:'visible'})
   await page.locator('#retry').click()

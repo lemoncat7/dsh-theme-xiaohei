@@ -1,4 +1,7 @@
 import {readFile,writeFile} from 'node:fs/promises'
+const originalMark=await readFile(new URL('../src/assets/identity/xiaohei-brand-metallic.webp',import.meta.url))
+if(originalMark.length>20_000)throw Error('Original metallic brand mark exceeds 20 KB budget')
+await writeFile(new URL('../src/rift/mark-asset.ts',import.meta.url),`// Original theme material, baked with render-original-brand.mjs; no runtime shader.\nexport const RIFT_MARK_IMAGE=${JSON.stringify('data:image/webp;base64,'+originalMark.toString('base64'))}\n`)
 const dark=await readFile(new URL('../src/assets/rift/scene.webp',import.meta.url))
 const light=await readFile(new URL('../src/assets/rift/scene-light.webp',import.meta.url))
 if(dark.length+light.length>180_000)throw Error('Paired Rift images exceed their combined 180 KB budget')
@@ -9,3 +12,9 @@ await writeFile(new URL('../src/rift/character-assets.ts',import.meta.url),`// G
 const detail=await Promise.all(['scene-detail','scene-light-detail'].map(name=>readFile(new URL(`../src/assets/rift/${name}.webp`,import.meta.url))))
 if(detail.reduce((sum,b)=>sum+b.length,0)>320_000)throw Error('Detail wallpapers exceed combined 320 KB deferred budget')
 await writeFile(new URL('../src/rift/detail-assets.ts',import.meta.url),`// Generated: high-quality original-source wallpapers, deferred with decorations.\nexport const RIFT_DETAIL_IMAGE=${JSON.stringify('data:image/webp;base64,'+detail[0].toString('base64'))}\nexport const RIFT_LIGHT_DETAIL_IMAGE=${JSON.stringify('data:image/webp;base64,'+detail[1].toString('base64'))}\n`)
+const cloth=await Promise.all(['dark','light'].map(mode=>readFile(new URL(`../src/assets/rift/cloth-${mode}.webp`,import.meta.url))))
+if(cloth.reduce((sum,b)=>sum+b.length,0)>32_000)throw Error('Cloth rig exceeds combined 32 KB deferred budget')
+await writeFile(new URL('../src/rift/cloth-assets.ts',import.meta.url),`// Generated: original-art cloth coverage/repair, decoration-only.\nexport const CLOTH_DARK=${JSON.stringify('data:image/webp;base64,'+cloth[0].toString('base64'))}\nexport const CLOTH_LIGHT=${JSON.stringify('data:image/webp;base64,'+cloth[1].toString('base64'))}\n`)
+const layers=await Promise.all(['dark','light'].map(mode=>readFile(new URL(`../src/assets/rift/wind-layers-${mode}.webp`,import.meta.url))))
+if(layers.reduce((sum,b)=>sum+b.length,0)>130_000)throw Error('Generated wind layer atlases exceed combined 130 KB deferred budget')
+await writeFile(new URL('../src/rift/wind-layer-assets.ts',import.meta.url),`// Generated: DSH-underpainted layers, deferred only.\nexport const WIND_LAYERS_DARK=${JSON.stringify('data:image/webp;base64,'+layers[0].toString('base64'))}\nexport const WIND_LAYERS_LIGHT=${JSON.stringify('data:image/webp;base64,'+layers[1].toString('base64'))}\n`)

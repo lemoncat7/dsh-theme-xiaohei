@@ -36,6 +36,8 @@ vec3 characterPaint(vec2 source,vec3 background,float parallax){
  vec3 base=characterLayer(raw,0.).rgb;
  // Outside the original head, keep the exact scene (including its restrained light).
  float oldMask=characterLayer(raw,1.).a;
- base=mix(background,base,oldMask);
+ // Repair only newly exposed coverage. At rest oldMask == open.a: blending
+ // a repair plate underneath the same translucent edge would leave a halo.
+ base=mix(background,base,max(oldMask-open.a,0.));
  return mix(base,head,open.a);
 }`

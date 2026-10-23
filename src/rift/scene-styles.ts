@@ -1,10 +1,10 @@
 /** The artwork is a separate scene, not a light-mode surface. Shared with first paint. */
 export const RIFT_SCENE_BASE = '#101820'
 export const RIFT_SCENE_SCRIM = 'linear-gradient(90deg,rgb(10 19 24 / 66%),rgb(10 19 24 / 28%) 36%,transparent 70%),linear-gradient(0deg,rgb(8 17 23 / 50%),transparent 24%)'
-export const RIFT_LIGHT_SCENE_BASE = '#e4ede9'
-export const RIFT_LIGHT_SCENE_SCRIM = 'linear-gradient(90deg,rgb(247 251 248 / 20%),transparent 66%),linear-gradient(0deg,rgb(238 246 242 / 12%),transparent 24%)'
-export const RIFT_LIGHT_BUBBLE = 'linear-gradient(90deg,rgb(249 252 249 / 62%) 0%,rgb(249 252 249 / 46%) 42%,rgb(249 252 249 / 16%) 76%,rgb(249 252 249 / 0%) 100%)'
-export const RIFT_LIGHT_USER_BUBBLE = 'linear-gradient(90deg,rgb(228 241 232 / 72%) 0%,rgb(246 251 247 / 50%) 42%,rgb(246 251 247 / 18%) 76%,rgb(246 251 247 / 0%) 100%)'
+export const RIFT_LIGHT_SCENE_BASE = '#e5edf7'
+export const RIFT_LIGHT_SCENE_SCRIM = 'linear-gradient(90deg,rgb(245 249 255 / 20%),transparent 66%),linear-gradient(0deg,rgb(235 243 255 / 12%),transparent 24%)'
+export const RIFT_LIGHT_BUBBLE = 'linear-gradient(90deg,rgb(245 250 255 / 62%) 0%,rgb(245 250 255 / 46%) 42%,rgb(245 250 255 / 16%) 76%,rgb(245 250 255 / 0%) 100%)'
+export const RIFT_LIGHT_USER_BUBBLE = 'linear-gradient(90deg,rgb(222 238 255 / 72%) 0%,rgb(240 247 255 / 50%) 42%,rgb(240 247 255 / 18%) 76%,rgb(240 247 255 / 0%) 100%)'
 export const RIFT_SCENE_CSS = `
 .rift-scene { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:${RIFT_SCENE_BASE}; }
 .rift-scene[data-artwork='loading'] { visibility:hidden; }
@@ -16,41 +16,53 @@ export const RIFT_SCENE_CSS = `
 .rift-signature strong { display:block; font-size:17px; font-weight:400; letter-spacing:.42em; }
 /* Only the freestanding home title sits directly on artwork; controls stay native light/dark. */
 html[data-rift-theme] #root [class*='_headline']:has([data-slot='conversation.hero.brand.mark']) {
- --dsw-alias-label-primary:#edf7f2; --dsw-alias-label-secondary:#d2e6df;
- color:#edf7f2; text-shadow:0 2px 12px #08181d;
+ --dsw-alias-label-primary:#edf5ff; --dsw-alias-label-secondary:#d3e5fa;
+ color:#edf5ff; text-shadow:0 2px 12px #08181d;
  background:radial-gradient(ellipse at center,rgb(9 22 28 / 78%),rgb(9 22 28 / 0%) 74%);
 }
-html[data-rift-theme] #root [data-slot='conversation.hero.brand.mark'] .rift-hero-mark { color:#a9f3db; }
+html[data-rift-theme] #root [data-slot='conversation.hero.brand.mark'] .rift-hero-mark { color:#b2d7ff; }
 html[data-rift-theme] #root [class*='_heroWorkspaceRow'] {
  align-self:flex-start; max-width:100%; box-sizing:border-box; padding:6px 10px;
  border:1px solid var(--rift-rim); border-radius:3px 10px 3px 10px; background:var(--rift-panel);
 }
-html[data-rift-theme] .xiaohei-draft-label { color:#dbece4; text-shadow:0 1px 5px #071519; }
-/* Slot wrappers use display:contents; paint the real header, not its slot. */
-html[data-rift-theme] #root [data-slot='conversation.header'] > header { background:var(--rift-panel); }
+html[data-rift-theme] .xiaohei-draft-label { color:#dceafb; text-shadow:0 1px 5px #071519; }
+/* Native header surface; glass decoration leaves fixed menus viewport-bound. */
+html[data-rift-theme] {
+ --rift-header:linear-gradient(105deg,rgb(25 35 52 / 78%),rgb(31 43 62 / 70%) 55%,rgb(22 34 51 / 68%));
+}
+html[data-rift-theme][data-xiaohei-appearance='light'] {
+ --rift-header:linear-gradient(105deg,rgb(233 244 255 / 80%),rgb(242 248 255 / 72%) 55%,rgb(225 239 255 / 68%));
+}
+html[data-rift-theme] #root :is([data-slot='conversation.header'],[data-slot='conversation.session.header']) { background:none; border:0; }
+html[data-rift-theme] #root :is([data-slot='conversation.header'],[data-chain-overlay-fallback='conversation.header']) > header {
+ background:var(--rift-header) !important;
+ box-shadow:inset 0 -1px var(--rift-edge),inset 0 1px var(--rift-glass-highlight); color:var(--rift-text);
+ --dsw-alias-label-primary:var(--rift-text); --dsw-alias-label-secondary:var(--rift-muted); --dsw-alias-label-tertiary:var(--rift-muted);
+ --dsw-alias-interactive-bg-hover:var(--rift-hover);
+}
 /* A separate daylight illustration, not a dark scene bleached by an overlay. */
 html[data-xiaohei-appearance='light'] .rift-scene { background:${RIFT_LIGHT_SCENE_BASE}; }
 html[data-xiaohei-appearance='light'] .rift-scene::after { background:${RIFT_LIGHT_SCENE_SCRIM}; }
-html[data-xiaohei-appearance='light'] .rift-signature { color:#315b54; text-shadow:0 1px 8px rgb(255 255 255 / 60%); }
+html[data-xiaohei-appearance='light'] .rift-signature { color:#365878; text-shadow:0 1px 8px rgb(255 255 255 / 60%); }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [class*='_headline']:has([data-slot='conversation.hero.brand.mark']) {
- --dsw-alias-label-primary:#253e40; --dsw-alias-label-secondary:#3c4e50;
- color:#253e40; text-shadow:0 1px 12px rgb(255 255 255 / 65%); background:none;
+ --dsw-alias-label-primary:#293e5a; --dsw-alias-label-secondary:#3c4d65;
+ color:#293e5a; text-shadow:0 1px 12px rgb(255 255 255 / 65%); background:none;
 }
-html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-slot='conversation.hero.brand.mark'] .rift-hero-mark { color:#246b60; }
-html[data-rift-theme][data-xiaohei-appearance='light'] .xiaohei-draft-label { color:#3c4e50; text-shadow:none; }
+html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-slot='conversation.hero.brand.mark'] .rift-hero-mark { color:#315d8a; }
+html[data-rift-theme][data-xiaohei-appearance='light'] .xiaohei-draft-label { color:#3c4d65; text-shadow:none; }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-conversation-scroll]:has([data-chat-flow-kind]) {
- background:transparent; color:#242832; --dsw-alias-label-primary:#242832; --dsw-alias-label-secondary:#3c4e50; --dsw-alias-label-tertiary:#3c4e50;
+ background:transparent; color:#242832; --dsw-alias-label-primary:#242832; --dsw-alias-label-secondary:#3c4d65; --dsw-alias-label-tertiary:#3c4d65;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind] {
- --rift-muted:#24342e;
- --rift-glass:rgb(244 250 246 / 68%); --rift-plate:${RIFT_LIGHT_USER_BUBBLE};
+ --rift-muted:#243247;
+ --rift-glass:rgb(238 246 255 / 68%); --rift-plate:${RIFT_LIGHT_USER_BUBBLE};
  color:var(--rift-text); --dsw-alias-label-primary:var(--rift-text); --dsw-alias-label-secondary:var(--rift-muted); --dsw-alias-label-tertiary:var(--rift-muted);
  --dsw-alias-label-primary-bluish:var(--rift-text); --dsw-alias-label-primary-dimmed:var(--rift-muted);
  --dsw-alias-label-caption:var(--rift-muted); --dsw-alias-label-dimmed:var(--rift-muted);
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind] .dsh-knowledge-writeback-notice {
- --knowledge-text-primary:#242832; --knowledge-text-secondary:#24342e; --knowledge-text-tertiary:#24342e;
- --knowledge-border:rgb(36 107 96 / 30%); --knowledge-control:rgb(244 250 246 / 85%);
+ --knowledge-text-primary:#242832; --knowledge-text-secondary:#243247; --knowledge-text-tertiary:#243247;
+ --knowledge-border:rgb(49 93 138 / 30%); --knowledge-control:rgb(238 246 255 / 85%);
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-slot='conversation.composer'] {
  color:var(--rift-text); --dsw-alias-label-primary:var(--rift-text); --dsw-alias-label-secondary:var(--rift-muted); --dsw-alias-label-tertiary:#606b7a;
@@ -58,8 +70,8 @@ html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-slot='convers
 /* Scope the clearer glass to conversation surfaces; menus and sidebar keep
    their solid reading palette. No screen-sized blur or milky overlay. */
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-composer-card='true'] {
- --rift-plate:linear-gradient(115deg,rgb(228 241 232 / 72%),rgb(248 252 249 / 66%));
- --rift-muted:#24342e; --dsw-alias-label-secondary:#24342e; --dsw-alias-label-tertiary:#24342e;
+ --rift-plate:linear-gradient(115deg,rgb(222 238 255 / 72%),rgb(243 249 255 / 66%));
+ --rift-muted:#243247; --dsw-alias-label-secondary:#243247; --dsw-alias-label-tertiary:#243247;
  box-shadow:0 12px 32px -24px var(--rift-shadow),inset 0 0 0 1px rgb(255 255 255 / 20%) !important;
 }
 /* Small metadata must not inherit the message's wallpaper text outline. */
@@ -77,17 +89,17 @@ html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kin
 }
 /* Only the content receives a local reading surface; the scroll area stays clear. */
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind]:not([data-chat-flow-kind='user']):not([data-chat-flow-kind='assistant-step']):not([data-chat-flow-kind='turn-tail']) > [data-slot='conversation.chat.node'] > :first-child {
- background:rgb(244 250 246 / 68%); border-radius:3px 10px 3px 10px;
+ background:rgb(238 246 255 / 68%); border-radius:3px 10px 3px 10px;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind='assistant-step']:not(:has(> [data-slot='conversation.chat.node']:empty)) {
  background:${RIFT_LIGHT_BUBBLE}; box-shadow:none;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind] :is(pre,code) {
- color:#242832; background-color:rgb(232 240 235 / 72%);
+ color:#242832; background-color:rgb(226 238 253 / 72%);
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] :is([data-submission-echo],[data-pending-steering],.xiaohei-draft-bubble) {
  --rift-plate:${RIFT_LIGHT_USER_BUBBLE};
- color:#242832; --dsw-alias-label-primary:#242832; --dsw-alias-label-secondary:#3c4e50;
+ color:#242832; --dsw-alias-label-primary:#242832; --dsw-alias-label-secondary:#3c4d65;
 }
 /* Fade paint only, never the bubble element: text, links and selection remain
    fully opaque. Remove the outgoing bubble's hard right rim and cast shadow. */
@@ -97,7 +109,7 @@ html[data-rift-theme][data-xiaohei-appearance='light'] .xiaohei-draft-bubble {
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root :is([data-chat-flow-kind='assistant-step'],[data-chat-flow-kind='user'],[data-chat-flow-kind='steering'],[data-submission-echo],[data-pending-steering]),
 html[data-rift-theme][data-xiaohei-appearance='light'] .xiaohei-draft-bubble {
- -webkit-text-stroke:2px rgb(249 252 249 / 90%); paint-order:stroke fill; text-shadow:none;
+ -webkit-text-stroke:2px rgb(245 250 255 / 90%); paint-order:stroke fill; text-shadow:none;
 }
 html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind] :is(pre,code,button) { -webkit-text-stroke:0; text-shadow:none; }
 /* Native Tooltip lives inside the message DOM and also names its class
@@ -111,9 +123,9 @@ html[data-rift-theme] #root [data-chat-flow-kind] [role='tooltip'] {
 /* A fully transparent right edge cannot guarantee contrast over all artwork.
    Honor the explicit increased-contrast preference with the solid fallback. */
 @media(prefers-contrast:more){
- html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind='assistant-step']:not(:has(> [data-slot='conversation.chat.node']:empty)) { background:rgb(249 252 249 / 94%); -webkit-text-stroke:0; text-shadow:none; }
+ html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind='assistant-step']:not(:has(> [data-slot='conversation.chat.node']:empty)) { background:rgb(245 250 255 / 94%); -webkit-text-stroke:0; text-shadow:none; }
  html[data-rift-theme][data-xiaohei-appearance='light'] #root [data-chat-flow-kind],
- html[data-rift-theme][data-xiaohei-appearance='light'] :is([data-submission-echo],[data-pending-steering],.xiaohei-draft-bubble) { --rift-plate:rgb(246 251 247 / 94%); -webkit-text-stroke:0; text-shadow:none; }
+ html[data-rift-theme][data-xiaohei-appearance='light'] :is([data-submission-echo],[data-pending-steering],.xiaohei-draft-bubble) { --rift-plate:rgb(240 247 255 / 94%); -webkit-text-stroke:0; text-shadow:none; }
 }
 @media(max-width:760px){
  .rift-signature { display:none; }

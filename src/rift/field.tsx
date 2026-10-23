@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { bindRiftInteractions } from './interaction.js'
+import { createRiftImpulse } from './impulse.js'
+import { bindRiftPresentation } from './view.js'
 
-/** Keep wallpaper/hover signals, without snapshot outlines in shell.overlay.
- * Focus feedback belongs to the real composer (:focus-within), whose geometry
- * may change after navigation, autofocus or an expanding draft.
- */
+/** React owns the lifetime; the contour follows the actual control in body,
+ * not the potentially transformed shell.overlay coordinate system. */
 export function RiftField() {
-  useEffect(() => bindRiftInteractions(document, () => {}), [])
+  useEffect(() => bindRiftPresentation(document, () => {
+    const impulse = createRiftImpulse(document)
+    const unbind = bindRiftInteractions(document, (signal, target) => impulse.show(signal, target))
+    return () => { unbind(); impulse.dispose() }
+  }), [])
   return null
 }
 
