@@ -1,6 +1,6 @@
 # 界隙 / RIFT · Xiaohei for DSH
 
-基于 DeepSeek Harness 官方主题接口的非官方粉丝主题。当前版本 **0.5.0**，适配 **DSH 0.2.1-rc.2**：白发人形小黑、淡蓝玻璃材质与空间裂隙场景，联动侧栏、会话、输入与执行状态。保留耳朵和呆毛动态及嘿咻，身体、手臂、衣服与建筑保持静止。支持完整界隙、柔和渐变和纯色专注三种整体外观；高清装饰延迟加载，后台自动暂停。
+基于 DeepSeek Harness 官方主题接口的非官方粉丝主题。当前版本 **0.5.1**，支持 **DSH 0.2.1-rc.2 至 rc.5**：白发人形小黑、淡蓝玻璃材质与空间裂隙场景，联动侧栏、会话、输入与执行状态。保留耳朵和呆毛动态及嘿咻，身体、手臂、衣服与建筑保持静止。支持完整界隙、柔和渐变和纯色专注三种整体外观；高清装饰延迟加载，后台自动暂停。
 
 [![npm](https://img.shields.io/npm/v/%40lemoncat7%2Fdsh-theme-xiaohei)](https://www.npmjs.com/package/@lemoncat7/dsh-theme-xiaohei)
 
@@ -16,7 +16,7 @@
 
 ## 安装
 
-适配 DeepSeek Harness **0.2.1-rc.2**（宿主仍为 RC），需要 Node.js **^22.19.0 或 >=24.0.0**。其他宿主版本请先查阅[兼容说明](docs/dsh-021-compatibility.md)和对应版本的发布说明。
+最低支持 DeepSeek Harness **0.2.1-rc.2**，已通过 **0.2.1-rc.5** 构建与回归测试（宿主仍为 RC），需要 Node.js **^22.19.0 或 >=24.0.0**。其他宿主版本请先查阅[兼容说明](docs/dsh-021-compatibility.md)和对应版本的发布说明。
 
 ```bash
 dsh plugin --profile web add @lemoncat7/dsh-theme-xiaohei@latest
