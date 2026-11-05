@@ -39,3 +39,8 @@ dsh plugin --profile web add @lemoncat7/dsh-theme-xiaohei@latest
 - [第三方许可](THIRD_PARTY_NOTICES.md)
 - [版本与发布说明](https://github.com/lemoncat7/dsh-theme-xiaohei/releases)
 - [发布维护约定](docs/releases/README.md)
+
+
+## DSH 0.2.2-rc.1
+
+0.5.3 支持 DSH 0.2.2-rc.1，要求 Node.js >=24.9.0。[兼容说明](docs/compatibility-0.2.2-rc.1.md)。
