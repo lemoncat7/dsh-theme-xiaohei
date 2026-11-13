@@ -1,6 +1,6 @@
 {
   "name": "@lemoncat7/dsh-theme-xiaohei",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A Luo Xiaohei-inspired animated dark theme for DeepSeek Harness",
   "keywords": [
     "deepseek-harness",
@@ -50,7 +50,9 @@
     "docs/dsh-021-compatibility.md",
     "docs/compatibility-0.2.2-rc.1.md",
     "docs/compatibility-0.2.2-rc.2.md",
-    "docs/releases/0.5.4.md"
+    "docs/releases/0.5.4.md",
+    "docs/host-compatibility-policy.md",
+    "docs/releases/0.5.5.md"
   ],
   "dsh": {
     "bundle": {
@@ -68,8 +70,7 @@
     }
   },
   "engines": {
-    "node": ">=24.9.0",
-    "dsh": "=0.2.2-rc.1 || =0.2.2-rc.2"
+    "node": ">=24.9.0"
   },
   "scripts": {
     "build": "node scripts/embed-rift.mjs && node scripts/embed-assets.mjs && tsc -p tsconfig.json && node scripts/build-rift.mjs",
@@ -81,8 +82,8 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.1.0",
-    "@deepseek-ai/dsh-client-ui-renderer": "^0.2.2-rc.1",
-    "@deepseek-ai/dsh-client-ui-theme": "^0.2.2-rc.1"
+    "@deepseek-ai/dsh-client-ui-renderer": "*",
+    "@deepseek-ai/dsh-client-ui-theme": "*"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "~4.1.0",
